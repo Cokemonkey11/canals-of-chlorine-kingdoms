@@ -1,18 +1,10 @@
 package ChooseClassicType
 
 import ClosureForGroups
-import StandardTextTags
 
+import StaticTextTag
 import UnitIds
 import WhenClose
-
-
-function staticTextTag(string text, vec2 pos) returns texttag
-    return standardTextTag()
-    ..setText(text)
-    ..setPermanent(true)
-    ..setVelocity(ZERO2)
-    ..setPos(pos.withZ(0.))
 
 
 vec2 priestPos = ZERO2

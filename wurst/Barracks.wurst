@@ -2,19 +2,33 @@ package Barracks
 
 import ClosureTimers
 import ClosureForGroups
+import LinkedList
 import UnitIds
 
 import Footman
 import Teams
 
 
+public constant siegeQueue = new LinkedList<int>()
+
+
 init
     forUnitsAll() u ->
+        let raxes = CreateGroup()
         if u.getTypeId() == UnitIds.footman
-            let rax = ReplaceUnitBJ(u, UnitIds.arcanesanctum, bj_UNIT_STATE_METHOD_DEFAULTS)
+            raxes.add(ReplaceUnitBJ(u, UnitIds.arcanesanctum, bj_UNIT_STATE_METHOD_DEFAULTS))
 
-            doPeriodically(30.) _cb ->
+        doPeriodically(30.) _cb ->
+            for rax in raxes
+                let directionMultiplier = forceWest.containsPlayer(rax.getOwner()) ? 1. : -1.
                 for i = 0 to 4
-                    let directionMultiplier = forceWest.containsPlayer(rax.getOwner()) ? 1. : -1.
                     createUnit(rax.getOwner(), ID_FOOTMAN, rax.getPos())
+                    ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
+                for i = 0 to 2
+                    createUnit(rax.getOwner(), ID_ARCHER, rax.getPos())
+                    ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
+
+                if siegeQueue.size() > 0
+                    let typ = siegeQueue.pop()
+                    createUnit(rax.getOwner(), typ, rax.getPos())
                     ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))

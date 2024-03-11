@@ -1,10 +1,17 @@
 package Teams
 
+
 public constant forceWest = CreateForce()
 public constant forceEast = CreateForce()
 
-public function player.getTeam() returns force
+
+public function player.getForce() returns force
     return this.getId() % 2 == 0 ? forceWest : forceEast
+
+
+public function force.opposingForce() returns force
+    return this == forceWest ? forceEast : forceWest
+
 
 init
     for i = 0 to 9

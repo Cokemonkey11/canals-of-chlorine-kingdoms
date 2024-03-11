@@ -1,5 +1,8 @@
 package Castles
 
+import ClosureTimers
+import Time
+
 import Teams
 
 
@@ -12,15 +15,20 @@ init
         createUnit(players[i], 'hcas')
         ..setPos(players[i].getStartLocation())
         ..registerDeath() ->
-            if GetDyingUnit().getOwner().getId() == 0
-                for pl in forceWest
-                    RemovePlayer(pl, PLAYER_GAME_RESULT_DEFEAT)
-                for pl in forceEast
-                    RemovePlayer(pl, PLAYER_GAME_RESULT_VICTORY)
-            else
-                for pl in forceWest
-                    RemovePlayer(pl, PLAYER_GAME_RESULT_VICTORY)
-                for pl in forceEast
-                    RemovePlayer(pl, PLAYER_GAME_RESULT_DEFEAT)
+            let dyingUnitOwnerId = GetDyingUnit().getOwner().getId()
+            print("The game ended after " + instantNow().displayVerbose())
+            PauseGame(true)
 
-            EndGame(true)
+            doAfter(10.) ->
+                if dyingUnitOwnerId == 0
+                    for pl in forceWest
+                        RemovePlayer(pl, PLAYER_GAME_RESULT_DEFEAT)
+                    for pl in forceEast
+                        RemovePlayer(pl, PLAYER_GAME_RESULT_VICTORY)
+                else
+                    for pl in forceWest
+                        RemovePlayer(pl, PLAYER_GAME_RESULT_VICTORY)
+                    for pl in forceEast
+                        RemovePlayer(pl, PLAYER_GAME_RESULT_DEFEAT)
+
+                EndGame(true)

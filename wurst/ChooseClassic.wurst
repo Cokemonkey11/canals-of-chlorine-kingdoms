@@ -2,11 +2,13 @@ package ChooseClassic
 
 import ClosureForGroups
 
+import StaticTextTag
 import UnitIds
 import WhenClose
 
 
 vec2 mortarPos = ZERO2
+
 
 init
     forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
@@ -16,8 +18,10 @@ init
 
     forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
         if u.getTypeId() == UnitIds.peasant
-            ReplaceUnitBJ(u, UnitIds.circleofpower, bj_UNIT_STATE_METHOD_DEFAULTS)
+            let cop = ReplaceUnitBJ(u, UnitIds.circleofpower, bj_UNIT_STATE_METHOD_DEFAULTS)
             ..whenCloseStatic() close ->
                 close.setPos(mortarPos)
                 close.getOwner().panCameraToTimed(mortarPos, 0.)
                 close.issueImmediateOrder("stop")
+
+            staticTextTag("Classic heroes", cop.getPos())

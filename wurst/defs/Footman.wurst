@@ -6,9 +6,34 @@ import UnitObjEditing
 
 
 public constant ID_FOOTMAN = UNIT_ID_GEN.next()
+public constant ID_ARCHER = UNIT_ID_GEN.next()
+public constant ID_MORTAR_TEAM = UNIT_ID_GEN.next()
+public constant ID_CANNON_TOWER = UNIT_ID_GEN.next()
+
 
 @compiletime function genFootman()
     new UnitDefinition(ID_FOOTMAN, UnitIds.footman)
     ..setAttack1DamageBase(24)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)
+
+
+@compiletime function genArcher()
+    new UnitDefinition(ID_ARCHER, UnitIds.highelvenarcher)
+    ..setAttack1DamageBase(24)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)
+
+
+@compiletime function genMortarTeam()
+    new UnitDefinition(ID_MORTAR_TEAM, UnitIds.mortarteam)
+    ..setAttack1DamageBase(99)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)
+
+
+@compiletime function genCannonTower()
+    new UnitDefinition(ID_CANNON_TOWER, UnitIds.cannontower)
+    ..setAttack1DamageBase(149)
     ..setAttack1DamageNumberofDice(1)
     ..setAttack1DamageSidesperDie(1)

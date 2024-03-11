@@ -1,10 +1,80 @@
 package Towers
 
 import ClosureForGroups
+import DamageEvent
+import HashMap
+import Reference
+import SoundUtils
+import Time
 import UnitIds
 
+import Footman
+
+
+constant aggroLevels = new IterableMap<unit, instant>()
+
+constant WARNING_SOUND = new SoundDefinition(Sounds.warning)
+
+
+function unit.isAggressiveTower() returns bool
+    return aggroLevels.get(this).durationSince().greaterThan(duration(5.0))
+
+
+function unit.tryToAcquireHeroTarget()
+    let res = new Reference<unit>(null)
+    forUnitsInRange(this.getPos(), 800) u ->
+        if u.isAlive() and u.isEnemyOf(this.getOwner()) and u.isType(UNIT_TYPE_HERO)
+            res.val = u
+
+    if res.val != null
+        this.issueTargetOrder("attack", res.val)
+        WARNING_SOUND.playForPlayer(res.val.getOwner())
+
+    destroy res
+
+
+function unit.tryToAcquireNonHeroTarget()
+    let res = new Reference<unit>(null)
+    forUnitsInRange(this.getPos(), 800) u ->
+        if u.isAlive() and u.isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_HERO)
+            res.val = u
+
+    if res.val != null
+        this.issueTargetOrder("attack", res.val)
+
+    destroy res
+
+
+function unit.towerAi()
+    aggroLevels.put(this, instantNow())
+
+    CreateTrigger()
+    ..registerUnitEvent(this, EVENT_UNIT_ACQUIRED_TARGET)
+    ..addAction() ->
+        let target = GetEventTargetUnit()
+        let tower = GetTriggerUnit()
+
+        let isAggressive = tower.isAggressiveTower()
+
+        if isAggressive and not target.isType(UNIT_TYPE_HERO)
+            tower.tryToAcquireHeroTarget()
+        else if not isAggressive and target.isType(UNIT_TYPE_HERO)
+            tower.tryToAcquireNonHeroTarget()
 
 init
     forUnitsAll() u ->
         if u.getTypeId() == UnitIds.waterelemental1
-            ReplaceUnitBJ(u, UnitIds.cannontower, bj_UNIT_STATE_METHOD_DEFAULTS)
+            ReplaceUnitBJ(u, ID_CANNON_TOWER, bj_UNIT_STATE_METHOD_DEFAULTS)
+            ..towerAi()
+
+    DamageEvent.addListener() ->
+        let target = DamageEvent.getTarget()
+        let source = DamageEvent.getSource()
+
+        if source.isEnemyOf(target) and target.isType(UNIT_TYPE_HERO) and source.isType(UNIT_TYPE_HERO)
+            aggroLevels.forEach() (unit key, instant _) ->
+                if key.isAlive() and key.getPos().distanceToSq(source.getPos()) < 800 * 800
+                    if not key.isAggressiveTower()
+                        // Tower just became aggressive.
+                        key.tryToAcquireHeroTarget()
+                    aggroLevels.put(key, instantNow())

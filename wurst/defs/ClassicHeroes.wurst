@@ -18,7 +18,7 @@ public constant CLASSIC_HERO_IDS = asList(
     UnitIds.lich,
     UnitIds.priestessofthemoon,
     UnitIds.darkranger,
-    UnitIds.seawitch,
+    UnitIds.shadowhunter,
     UnitIds.firelord
 )
 public constant CLASSIC_HERO_ID_MAP = new HashMap<int, int>()
