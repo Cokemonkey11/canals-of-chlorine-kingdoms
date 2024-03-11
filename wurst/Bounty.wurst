@@ -1,0 +1,39 @@
+package Bounty
+
+import HashMap
+import StandardTextTags
+
+import ChooseHero
+import Footman
+
+
+constant bounties = new HashMap<int, int>()
+..put(ID_FOOTMAN, 1)
+
+constant HERO_BOUNTY = 10
+
+constant UNIT_EXPO_BOUNTY = 1
+
+
+init
+    CreateTrigger()
+    ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
+    ..addAction() ->
+        let dying_unit = GetDyingUnit()
+        let killing_player = GetKillingUnit().getOwner()
+        let dying_unit_type = dying_unit.getTypeId()
+        let dying_player = dying_unit.getOwner()
+
+        // If the unit gives bounty, give its killer the bounty.
+        if bounties.has(dying_unit_type) and player_heroes.has(killing_player)
+            if dying_player.isEnemyOf(killing_player)
+                player_heroes.get(killing_player).addXp(bounties.get(dying_unit_type), true)
+                killing_player.addGold(UNIT_EXPO_BOUNTY)
+                createGoldBountyTextTag(dying_unit, bounties.get(dying_unit_type), killing_player)
+            else
+                standardTextTag(dying_unit.getPos(), "!")
+
+        if dying_unit.isType(UNIT_TYPE_HERO)
+            if dying_player.isEnemyOf(killing_player)
+                killing_player.addGold(HERO_BOUNTY)
+                createGoldBountyTextTag(dying_unit, HERO_BOUNTY, killing_player)

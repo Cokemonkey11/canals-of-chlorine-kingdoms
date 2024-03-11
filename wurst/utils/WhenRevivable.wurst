@@ -1,0 +1,22 @@
+package WhenRevivable
+
+import HashMap
+
+
+constant triggerToOnRevivableFns = new HashMap<trigger, OnRevivableFn>()
+constant triggerToUnits = new HashMap<trigger, unit>()
+
+
+public interface OnRevivableFn
+    function run(unit which)
+
+
+public function unit.onRevivable(OnRevivableFn fn)
+    let t = CreateTrigger()..registerUnitEvent(this, EVENT_UNIT_HERO_REVIVABLE)
+    ..addAction() ->
+        let u = triggerToUnits.get(GetTriggeringTrigger())
+        let innerFn = triggerToOnRevivableFns.get(GetTriggeringTrigger())
+        innerFn.run(u)
+
+    triggerToUnits.put(t, this)
+    triggerToOnRevivableFns.put(t, fn)

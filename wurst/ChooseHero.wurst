@@ -1,9 +1,15 @@
 package ChooseHero
 
 import ClosureForGroups
+import HashMap
+import ItemIds
 
 import Teams
 import WhenClose
+import WhenRevivable
+
+
+public constant player_heroes = new HashMap<player, unit>()
 
 
 init
@@ -14,4 +20,11 @@ init
                 let where = forceWest.containsPlayer(close.getOwner()) ? players[0].getStartLocation() : players[1].getStartLocation()
                 close.setPos(where)
                 close.getOwner().panCameraToTimed(where, 0.)
-                ReplaceUnitBJ(close, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)
+                let hero = ReplaceUnitBJ(close, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)
+                ..onRevivable() which ->
+                    which.revive(where, true)
+                    which.getOwner().panCameraToTimed(where, 0.)
+
+                player_heroes.put(hero.getOwner(), hero)
+
+                hero.addItemById(ItemIds.circletofNobility)

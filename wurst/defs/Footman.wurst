@@ -1,0 +1,14 @@
+package Footman
+
+import ObjectIdGenerator
+import UnitIds
+import UnitObjEditing
+
+
+public constant ID_FOOTMAN = UNIT_ID_GEN.next()
+
+@compiletime function genFootman()
+    new UnitDefinition(ID_FOOTMAN, UnitIds.footman)
+    ..setAttack1DamageBase(24)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)

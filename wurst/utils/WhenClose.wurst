@@ -2,6 +2,7 @@ package WhenClose
 
 import HashMap
 
+
 constant triggerToActions = new HashMap<trigger, UnitAction>()
 constant triggerToUnitUnitActions = new HashMap<trigger, UnitUnitAction>()
 constant triggerToUnitUnitActionSources = new HashMap<trigger, unit>()

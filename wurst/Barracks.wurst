@@ -4,6 +4,7 @@ import ClosureTimers
 import ClosureForGroups
 import UnitIds
 
+import Footman
 import Teams
 
 
@@ -13,7 +14,7 @@ init
             let rax = ReplaceUnitBJ(u, UnitIds.arcanesanctum, bj_UNIT_STATE_METHOD_DEFAULTS)
 
             doPeriodically(30.) _cb ->
-                for i = 0 to 5
+                for i = 0 to 4
                     let directionMultiplier = forceWest.containsPlayer(rax.getOwner()) ? 1. : -1.
-                    createUnit(rax.getOwner(), UnitIds.footman, rax.getPos())
-                    ..issuePointOrder("attack", rax.getPos() + vec2(10000 * directionMultiplier, 0))
+                    createUnit(rax.getOwner(), ID_FOOTMAN, rax.getPos())
+                    ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
