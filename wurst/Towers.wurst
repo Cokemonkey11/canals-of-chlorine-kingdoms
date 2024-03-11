@@ -1,0 +1,10 @@
+package Towers
+
+import ClosureForGroups
+import UnitIds
+
+
+init
+    forUnitsAll() u ->
+        if u.getTypeId() == UnitIds.waterelemental1
+            ReplaceUnitBJ(u, UnitIds.cannontower, bj_UNIT_STATE_METHOD_DEFAULTS)

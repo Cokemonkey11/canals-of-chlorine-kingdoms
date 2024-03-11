@@ -1,3 +1,4 @@
 .vscode
 _build/
 wurst.dependencies
+wurst/war3map.j

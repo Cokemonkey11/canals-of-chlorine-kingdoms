@@ -1,30 +1,41 @@
 package ChooseHero
 
 import ClosureForGroups
+import ErrorHandling
 import HashMap
 import ItemIds
 
+import ClassicHeroes
+import ClosureTimers
 import Teams
 import WhenClose
 import WhenRevivable
 
 
 public constant player_heroes = new HashMap<player, unit>()
+public constant all_heroes = CreateGroup()
 
 
 init
+    UnitUnitAction whenCloseStaticFn = (close, source) ->
+        let where = forceWest.containsPlayer(close.getOwner()) ? players[0].getStartLocation() : players[1].getStartLocation()
+        close.setPos(where)
+        close.getOwner().panCameraToTimed(where, 0.)
+        let hero = ReplaceUnitBJ(close, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)
+        ..onRevivable() which ->
+            which.revive(where, true)
+            which.getOwner().panCameraToTimed(where, 0.)
+
+        player_heroes.put(hero.getOwner(), hero)
+        all_heroes.add(hero)
+
+        hero.addItemById(ItemIds.circletofNobility)
+
     forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
         if u.isType(UNIT_TYPE_HERO)
-            u
-            ..whenCloseStatic() (close, source) ->
-                let where = forceWest.containsPlayer(close.getOwner()) ? players[0].getStartLocation() : players[1].getStartLocation()
-                close.setPos(where)
-                close.getOwner().panCameraToTimed(where, 0.)
-                let hero = ReplaceUnitBJ(close, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)
-                ..onRevivable() which ->
-                    which.revive(where, true)
-                    which.getOwner().panCameraToTimed(where, 0.)
-
-                player_heroes.put(hero.getOwner(), hero)
-
-                hero.addItemById(ItemIds.circletofNobility)
+            if CLASSIC_HERO_ID_MAP.has(u.getTypeId())
+                ReplaceUnitBJ(u, CLASSIC_HERO_ID_MAP.get(u.getTypeId()), bj_UNIT_STATE_METHOD_DEFAULTS)
+                ..whenCloseStatic(whenCloseStaticFn)
+            else
+                doAfter(1) ->
+                    error("Encountered a hero that doesn't appear in classic hero IDs" + u.getTypeId().toString())

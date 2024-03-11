@@ -14,6 +14,8 @@ constant HERO_BOUNTY = 10
 
 constant UNIT_EXPO_BOUNTY = 1
 
+constant BOUNTY_DIST = 1500.
+
 
 init
     CreateTrigger()
@@ -27,9 +29,12 @@ init
         // If the unit gives bounty, give its killer the bounty.
         if bounties.has(dying_unit_type) and player_heroes.has(killing_player)
             if dying_player.isEnemyOf(killing_player)
-                player_heroes.get(killing_player).addXp(bounties.get(dying_unit_type), true)
                 killing_player.addGold(UNIT_EXPO_BOUNTY)
                 createGoldBountyTextTag(dying_unit, bounties.get(dying_unit_type), killing_player)
+
+                for hr in all_heroes
+                    if hr.isEnemyOf(dying_player) and hr.isAlive() and hr.getPos().distanceToSq(dying_unit.getPos()) < BOUNTY_DIST * BOUNTY_DIST
+                        hr.addXp(bounties.get(dying_unit_type), true)
             else
                 standardTextTag(dying_unit.getPos(), "!")
 
