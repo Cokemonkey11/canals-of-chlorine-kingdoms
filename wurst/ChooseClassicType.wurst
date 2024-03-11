@@ -1,0 +1,47 @@
+package ChooseClassicType
+
+import ClosureForGroups
+import StandardTextTags
+
+import UnitIds
+import WhenClose
+
+
+function staticTextTag(string text, vec2 pos) returns texttag
+    return standardTextTag()
+    ..setText(text)
+    ..setPermanent(true)
+    ..setVelocity(ZERO2)
+    ..setPos(pos.withZ(0.))
+
+
+vec2 priestPos = ZERO2
+vec2 sorceressPos = ZERO2
+vec2 spellBreakerPos = ZERO2
+
+int ctr = 0
+
+init
+    forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
+        if u.getTypeId() == UnitIds.priest
+            priestPos = u.getPos()
+            u.remove()
+        else if u.getTypeId() == UnitIds.sorceress
+            sorceressPos = u.getPos()
+            u.remove()
+        else if u.getTypeId() == UnitIds.spellbreaker
+            spellBreakerPos = u.getPos()
+            u.remove()
+
+    forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
+        if u.getTypeId() == UnitIds.rifleman
+            let ctrCopy = ctr // 0 str, 1 int, 2 agi
+            ctr += 1
+
+            staticTextTag(ctrCopy == 0 ? "str" : (ctrCopy == 1 ? "int" : "agi"), u.getPos())
+            let pos = ctrCopy == 0 ? priestPos : (ctrCopy == 1 ? sorceressPos : spellBreakerPos)
+            ReplaceUnitBJ(u, UnitIds.circleofpower, bj_UNIT_STATE_METHOD_DEFAULTS)
+            ..whenCloseStatic() close ->
+                close.setPos(pos)
+                close.getOwner().panCameraToTimed(pos, 0.)
+                close.issueImmediateOrder("stop")

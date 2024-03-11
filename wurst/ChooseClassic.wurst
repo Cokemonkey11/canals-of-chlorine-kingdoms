@@ -1,0 +1,23 @@
+package ChooseClassic
+
+import ClosureForGroups
+
+import UnitIds
+import WhenClose
+
+
+vec2 mortarPos = ZERO2
+
+init
+    forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
+        if u.getTypeId() == UnitIds.mortarteam
+            mortarPos = u.getPos()
+            u.remove()
+
+    forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
+        if u.getTypeId() == UnitIds.peasant
+            ReplaceUnitBJ(u, UnitIds.circleofpower, bj_UNIT_STATE_METHOD_DEFAULTS)
+            ..whenCloseStatic() close ->
+                close.setPos(mortarPos)
+                close.getOwner().panCameraToTimed(mortarPos, 0.)
+                close.issueImmediateOrder("stop")

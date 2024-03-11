@@ -1,0 +1,9 @@
+package Shades
+
+import UnitIds
+
+
+init
+    for i = 2 to 9
+        if players[i].isIngame()
+            createUnit(players[i], UnitIds.shade, players[i].getStartLocation())

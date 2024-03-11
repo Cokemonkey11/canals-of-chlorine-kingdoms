@@ -1,0 +1,26 @@
+package Castles
+
+import Teams
+
+
+function unit.registerDeath(code func)
+    CreateTrigger()..registerUnitEvent(this, EVENT_UNIT_DEATH)..addAction(func)
+
+
+init
+    for i = 0 to 1
+        createUnit(players[i], 'hcas')
+        ..setPos(players[i].getStartLocation())
+        ..registerDeath() ->
+            if GetDyingUnit().getOwner().getId() == 0
+                for pl in forceWest
+                    RemovePlayer(pl, PLAYER_GAME_RESULT_DEFEAT)
+                for pl in forceEast
+                    RemovePlayer(pl, PLAYER_GAME_RESULT_VICTORY)
+            else
+                for pl in forceWest
+                    RemovePlayer(pl, PLAYER_GAME_RESULT_VICTORY)
+                for pl in forceEast
+                    RemovePlayer(pl, PLAYER_GAME_RESULT_DEFEAT)
+
+            EndGame(true)

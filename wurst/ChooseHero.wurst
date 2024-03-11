@@ -1,0 +1,17 @@
+package ChooseHero
+
+import ClosureForGroups
+
+import Teams
+import WhenClose
+
+
+init
+    forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
+        if u.isType(UNIT_TYPE_HERO)
+            u
+            ..whenCloseStatic() (close, source) ->
+                let where = forceWest.containsPlayer(close.getOwner()) ? players[0].getStartLocation() : players[1].getStartLocation()
+                close.setPos(where)
+                close.getOwner().panCameraToTimed(where, 0.)
+                ReplaceUnitBJ(close, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)

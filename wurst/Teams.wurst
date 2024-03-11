@@ -1,0 +1,12 @@
+package Teams
+
+public constant forceWest = CreateForce()
+public constant forceEast = CreateForce()
+
+public function player.getTeam() returns force
+    return this.getId() % 2 == 0 ? forceWest : forceEast
+
+init
+    for i = 0 to 9
+        let whichForce = i % 2 == 0 ? forceWest : forceEast
+        whichForce.addPlayer(players[i])

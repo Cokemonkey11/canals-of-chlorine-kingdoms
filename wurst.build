@@ -1,0 +1,8 @@
+---
+projectName: Canals of Chlorine Kingdoms
+dependencies:
+- https://github.com/wurstscript/wurstStdlib2
+buildMapData:
+  name: Canals of Chlorine Kingdoms 0.0.0
+  fileName: (8)canals.of.chlorine.kingdoms.0.0.0
+  author: Cokemonkey11

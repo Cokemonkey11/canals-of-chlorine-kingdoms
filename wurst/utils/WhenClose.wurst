@@ -1,0 +1,30 @@
+package WhenClose
+
+import HashMap
+
+constant triggerToActions = new HashMap<trigger, UnitAction>()
+constant triggerToUnitUnitActions = new HashMap<trigger, UnitUnitAction>()
+constant triggerToUnitUnitActionSources = new HashMap<trigger, unit>()
+
+
+public interface UnitAction
+    function run(unit which)
+
+
+public interface UnitUnitAction
+    function run(unit which, unit source)
+
+
+public function unit.whenCloseStatic(UnitAction action)
+    let t = CreateTrigger()..registerUnitInRange(this, 100., null)
+    triggerToActions.put(t, action)
+    t.addAction() ->
+        triggerToActions.get(GetTriggeringTrigger()).run(GetTriggerUnit())
+
+
+public function unit.whenCloseStatic(UnitUnitAction action)
+    let t = CreateTrigger()..registerUnitInRange(this, 100., null)
+    triggerToUnitUnitActions.put(t, action)
+    triggerToUnitUnitActionSources.put(t, this)
+    t.addAction() ->
+        triggerToUnitUnitActions.get(GetTriggeringTrigger()).run(GetTriggerUnit(), triggerToUnitUnitActionSources.get(GetTriggeringTrigger()))
