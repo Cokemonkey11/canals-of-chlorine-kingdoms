@@ -1,0 +1,39 @@
+package ChooseCustomType
+
+import ClosureForGroups
+
+import StaticTextTag
+import UnitIds
+import WhenClose
+
+
+vec2 witchDoctorPos = ZERO2
+vec2 shamanPos = ZERO2
+vec2 spiritWalkerPos = ZERO2
+
+int ctr = 0
+
+init
+    forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
+        if u.getTypeId() == UnitIds.witchdoctor
+            witchDoctorPos = u.getPos()
+            u.remove()
+        else if u.getTypeId() == UnitIds.shaman
+            shamanPos = u.getPos()
+            u.remove()
+        else if u.getTypeId() == UnitIds.spiritwalker
+            spiritWalkerPos = u.getPos()
+            u.remove()
+
+    forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
+        if u.getTypeId() == UnitIds.headhunter
+            let ctrCopy = ctr // 0 str, 1 int, 2 agi
+            ctr += 1
+
+            staticTextTag(ctrCopy == 0 ? "str" : (ctrCopy == 1 ? "int" : "agi"), u.getPos())
+            let pos = ctrCopy == 0 ? witchDoctorPos : (ctrCopy == 1 ? shamanPos : spiritWalkerPos)
+            ReplaceUnitBJ(u, UnitIds.circleofpower, bj_UNIT_STATE_METHOD_DEFAULTS)
+            ..whenCloseStatic() close ->
+                close.setPos(pos)
+                close.getOwner().panCameraToTimed(pos, 0.)
+                close.issueImmediateOrder("stop")

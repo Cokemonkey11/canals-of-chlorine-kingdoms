@@ -1,0 +1,25 @@
+package VoidAnnihilator
+
+import Assets
+import ObjectIdGenerator
+import ObjectIds
+import UnitObjEditing
+
+
+public constant ID_VOID_ANNIHILATOR = HERO_ID_GEN.next()
+
+
+@compiletime function genVoidAnnihilator()
+    new HeroDefinition(ID_VOID_ANNIHILATOR, UnitIds.bloodmage)
+    ..setAttack1DamageBase(34)
+    ..setName("Void Annihilator")
+    ..setProperNames(commaList("Void", "Annihilator", "Darkness"))
+    ..setProperNamesUsed(3)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)
+    ..setAttack1WeaponType(WeaponType.Missile)
+    ..setAttack1ProjectileArt(Abilities.avengerMissile)
+    ..setModelFile("FacelessOneSorcerer.mdl")
+    ..setUnitSoundSet(Soundsets.facelessOne)
+    ..setHeroAbilities(commaList(AbilityIds.entanglingRoots1, AbilityIds.rainofFire, AbilityIds.siphonMana, AbilityIds.massTeleport))
+    ..setIconGameInterface(Icons.bTNFacelessOne)

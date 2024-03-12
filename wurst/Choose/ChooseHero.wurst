@@ -4,14 +4,20 @@ import ClosureForGroups
 import ErrorHandling
 import HashMap
 import ItemIds
+import ObjectIds
 import SoundUtils
 import UnitIds
 
 import ClassicHeroes
 import ClosureTimers
+import Recall
 import Teams
 import WhenClose
 import WhenRevivable
+
+import SpaceCadet
+import SteelElemental
+import VoidAnnihilator
 
 
 public constant player_heroes = new HashMap<player, unit>()
@@ -31,6 +37,16 @@ public constant hero_sounds = new HashMap<int, SoundDefinition>()
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.shadowhunter), new SoundDefinition(Sounds.shadowHunterPissed9))
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.firelord), new SoundDefinition(Sounds.heroFirelordPissed11))
 
+..put(ID_SPACE_CADET, new SoundDefinition(Sounds.peasantPissed5))
+..put(ID_STEEL_ELEMENTAL, new SoundDefinition(Sounds.rockGolemPissed2))
+..put(ID_VOID_ANNIHILATOR, new SoundDefinition(Sounds.acolytePissed8))
+
+
+constant CUSTOM_HERO_ID_MAP = new HashMap<int, int>()
+..put(UnitIds.sentryward, ID_STEEL_ELEMENTAL)
+..put(UnitIds.stasistraptotem, ID_VOID_ANNIHILATOR)
+..put(UnitIds.healingward, ID_SPACE_CADET)
+
 
 init
     UnitUnitAction whenCloseStaticFn = (close, source) ->
@@ -39,13 +55,15 @@ init
         close.getOwner().panCameraToTimed(where, 0.)
         let hero = ReplaceUnitBJ(close, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)
         ..onRevivable() which ->
-            which.revive(where, true)
-            which.getOwner().panCameraToTimed(where, 0.)
+            printTimedToPlayer("You'll be revived in " + (1 + which.getLevel()).toString() + " seconds.", 10., which.getOwner())
+            doAfter(1. + which.getLevel()) ->
+                which.revive(where, true)
+                which.getOwner().panCameraToTimed(where, 0.)
 
         player_heroes.put(hero.getOwner(), hero)
         all_heroes.add(hero)
 
-        hero.addItemById(ItemIds.circletofNobility)
+        hero..addItemById(ItemIds.circletofNobility)..addAbility(ID_RECALL)
         if hero_sounds.has(hero.getTypeId())
             hero_sounds.get(hero.getTypeId()).playForPlayer(hero.getOwner())
 
@@ -55,5 +73,8 @@ init
                 ReplaceUnitBJ(u, CLASSIC_HERO_ID_MAP.get(u.getTypeId()), bj_UNIT_STATE_METHOD_DEFAULTS)
                 ..whenCloseStatic(whenCloseStaticFn)
             else
-                doAfter(1) ->
-                    error("Encountered a hero that doesn't appear in classic hero IDs" + u.getTypeId().toString())
+                nullTimer() ->
+                    error("Encountered a hero that isn't initialized" + u.getTypeId().toRawCode())
+        else if CUSTOM_HERO_ID_MAP.has(u.getTypeId())
+            ReplaceUnitBJ(u, CUSTOM_HERO_ID_MAP.get(u.getTypeId()), bj_UNIT_STATE_METHOD_DEFAULTS)
+            ..whenCloseStatic(whenCloseStaticFn)

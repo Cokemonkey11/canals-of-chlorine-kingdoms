@@ -1,0 +1,27 @@
+package SpaceCadet
+
+import Assets
+import ObjectIdGenerator
+import ObjectIds
+import UnitObjEditing
+
+
+public constant ID_SPACE_CADET = HERO_ID_GEN.next()
+
+
+@compiletime function genSpaceCadet()
+    new HeroDefinition(ID_SPACE_CADET, UnitIds.darkranger)
+    ..setName("Space Cadet")
+    ..setProperNames(commaList("Richie", "Jared", "Felix"))
+    ..setProperNamesUsed(3)
+    ..setAttack1DamageBase(34)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)
+    ..setAttack1WeaponType(WeaponType.Instant)
+    ..setAttack1ProjectileArt(Abilities.rifleImpact)
+    ..setModelFile(Units.marine)
+    ..setAttack1AnimationBackswingPoint(0.35)
+    ..setAttack1AnimationDamagePoint(.1)
+    ..setUnitSoundSet("Marine")
+    ..setHeroAbilities(commaList(AbilityIds.stormBolt, AbilityIds.enduranceAura1, AbilityIds.wardenBlink, AbilityIds.divineShield))
+    ..setIconGameInterface(Icons.bTNMarine)

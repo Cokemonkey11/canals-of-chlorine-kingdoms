@@ -1,4 +1,4 @@
-package Footman
+package Creeps
 
 import ObjectIdGenerator
 import UnitIds
@@ -16,6 +16,7 @@ public constant ID_CANNON_TOWER = UNIT_ID_GEN.next()
     ..setAttack1DamageBase(24)
     ..setAttack1DamageNumberofDice(1)
     ..setAttack1DamageSidesperDie(1)
+    ..setHitPointsMaximumBase(400)
 
 
 @compiletime function genArcher()
@@ -23,6 +24,7 @@ public constant ID_CANNON_TOWER = UNIT_ID_GEN.next()
     ..setAttack1DamageBase(24)
     ..setAttack1DamageNumberofDice(1)
     ..setAttack1DamageSidesperDie(1)
+    ..setHitPointsMaximumBase(200)
 
 
 @compiletime function genMortarTeam()
@@ -37,3 +39,5 @@ public constant ID_CANNON_TOWER = UNIT_ID_GEN.next()
     ..setAttack1DamageBase(149)
     ..setAttack1DamageNumberofDice(1)
     ..setAttack1DamageSidesperDie(1)
+    ..setHitPointsMaximumBase(1000)
+    ..setArmorType(ArmorType.Fortified)

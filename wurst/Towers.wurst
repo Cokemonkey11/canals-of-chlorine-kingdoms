@@ -8,7 +8,7 @@ import SoundUtils
 import Time
 import UnitIds
 
-import Footman
+import Creeps
 
 
 constant aggroLevels = new IterableMap<unit, instant>()
@@ -17,7 +17,7 @@ constant WARNING_SOUND = new SoundDefinition(Sounds.warning)
 
 
 function unit.isAggressiveTower() returns bool
-    return aggroLevels.get(this).durationSince().greaterThan(duration(5.0))
+    return aggroLevels.get(this).durationSince().lessThan(duration(5.0))
 
 
 function unit.tryToAcquireHeroTarget()
@@ -45,6 +45,15 @@ function unit.tryToAcquireNonHeroTarget()
     destroy res
 
 
+function unit.reevaluateAi(unit target)
+    let isAggressive = this.isAggressiveTower()
+
+    if isAggressive and not target.isType(UNIT_TYPE_HERO)
+        this.tryToAcquireHeroTarget()
+    else if not isAggressive and target.isType(UNIT_TYPE_HERO)
+        this.tryToAcquireNonHeroTarget()
+
+
 function unit.towerAi()
     aggroLevels.put(this, instantNow())
 
@@ -54,12 +63,16 @@ function unit.towerAi()
         let target = GetEventTargetUnit()
         let tower = GetTriggerUnit()
 
-        let isAggressive = tower.isAggressiveTower()
+        tower.reevaluateAi(target)
 
-        if isAggressive and not target.isType(UNIT_TYPE_HERO)
-            tower.tryToAcquireHeroTarget()
-        else if not isAggressive and target.isType(UNIT_TYPE_HERO)
-            tower.tryToAcquireNonHeroTarget()
+    CreateTrigger()
+    ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_ATTACKED)
+    ..addAction() ->
+        let target = GetTriggerUnit()
+        let tower = GetAttacker()
+
+        if tower.getTypeId() == ID_CANNON_TOWER
+            tower.reevaluateAi(target)
 
 init
     forUnitsAll() u ->

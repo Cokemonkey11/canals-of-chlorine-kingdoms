@@ -1,0 +1,26 @@
+package Recall
+
+import AbilityTooltipGenerator
+
+
+public constant ID_RECALL = ABIL_ID_GEN.next()
+
+
+@compiletime function genRecall()
+    let tgen = new AbilityTooltipGenerator("After channeling for a few seconds, the caster teleports back to home base.")
+    new ChannelAbilityPreset(ID_RECALL, 1, true, tgen)
+    ..setHeroAbility(false)
+    ..presetButtonPosNormal(2, 1)
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetHotkey("B")
+
+    ..presetIcon(Icons.bTNDevourMagic)
+    ..presetManaCost(_ -> 0)
+    ..setIconNormal(Icons.bTNDevourMagic)
+
+    ..tooltipStartListen()
+    ..setName("Recall")
+    ..presetCooldown(_ -> 1.)
+    ..setFollowThroughTime(1, 7.5)
+    ..addTooltipProperty("Channel Duration", _ -> 7.)
+    ..tooltipStopListen()

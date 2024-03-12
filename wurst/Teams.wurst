@@ -13,6 +13,10 @@ public function force.opposingForce() returns force
     return this == forceWest ? forceEast : forceWest
 
 
+public function force.getHomePos() returns vec2
+    return this == forceWest ? players[0].getStartLocation() : players[1].getStartLocation()
+
+
 init
     for i = 0 to 9
         let whichForce = i % 2 == 0 ? forceWest : forceEast

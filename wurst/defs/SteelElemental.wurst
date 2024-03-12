@@ -1,0 +1,24 @@
+package SteelElemental
+
+import Assets
+import ObjectIdGenerator
+import ObjectIds
+import UnitObjEditing
+
+
+public constant ID_STEEL_ELEMENTAL = HERO_ID_GEN.next()
+
+
+@compiletime function genSteelElemental()
+    new HeroDefinition(ID_STEEL_ELEMENTAL, UnitIds.taurenchieftain)
+    ..setName("Steel Elemental")
+    ..setProperNames(commaList("Sharpy", "Pointy", "Rough Edges"))
+    ..setProperNamesUsed(3)
+    ..setAttack1DamageBase(34)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)
+    ..setAttack1WeaponType(WeaponType.Normal)
+    ..setModelFile(Units.golemStatue1)
+    ..setUnitSoundSet(Soundsets.rockGolem)
+    ..setHeroAbilities(commaList(AbilityIds.thunderClap, AbilityIds.devotionAura, AbilityIds.warStomp1, AbilityIds.wardenBlink))
+    ..setIconGameInterface(Icons.bTNArmorGolem)

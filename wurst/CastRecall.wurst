@@ -1,0 +1,26 @@
+package CastRecall
+
+import Abilities
+import ClosureEvents
+import ClosureTimers
+
+import Recall
+import Teams
+
+
+init
+    EventListener.onCast(ID_RECALL) (unit caster) ->
+        let order = caster.getCurrentOrder()
+        let fx1 = addEffect(Abilities.starfallCaster, caster.getPos())
+        let fx2 = addEffect(Abilities.starfallTarget, caster.getPos())..setTimeScale(0.125)
+        doPeriodicallyTimed(ANIMATION_PERIOD, 7.) (CallbackCounted cb) ->
+            if caster.getCurrentOrder() != order
+                fx1.destr()
+                fx2.destr()
+                cb.stop()
+            else if cb.isLast()
+                fx1.destr()
+                fx2.destr()
+                caster.setPos(caster.getOwner().getForce().getHomePos())
+                caster.getOwner().panCameraToTimed(caster.getOwner().getForce().getHomePos(), 0.)
+                caster.issueImmediateOrder("stop")

@@ -6,7 +6,7 @@ import StandardTextTags
 
 import Barracks
 import ChooseHero
-import Footman
+import Creeps
 import Teams
 
 
@@ -19,7 +19,7 @@ constant HERO_BOUNTY = 10
 
 constant TOWER_BOUNTY = 10
 
-constant UNIT_EXPERIENCE_BOUNTY = 4
+constant UNIT_EXPERIENCE_BOUNTY = 16
 
 constant BOUNTY_DIST = 1500.
 
@@ -54,7 +54,7 @@ init
                 killing_player.addGold(HERO_BOUNTY)
                 createGoldBountyTextTag(dying_unit, HERO_BOUNTY, killing_player)
 
-        if dying_unit.getTypeId() == ID_CANNON_TOWER
+        if dying_unit_type == ID_CANNON_TOWER
             siegeQueue.add(ID_MORTAR_TEAM)
             for pl in dying_player.getForce().opposingForce()
                 createGoldBountyTextTag(dying_unit, TOWER_BOUNTY, pl)

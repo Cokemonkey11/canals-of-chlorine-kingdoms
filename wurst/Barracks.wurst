@@ -5,7 +5,7 @@ import ClosureForGroups
 import LinkedList
 import UnitIds
 
-import Footman
+import Creeps
 import Teams
 
 
@@ -13,22 +13,22 @@ public constant siegeQueue = new LinkedList<int>()
 
 
 init
+    let raxes = CreateGroup()
     forUnitsAll() u ->
-        let raxes = CreateGroup()
         if u.getTypeId() == UnitIds.footman
             raxes.add(ReplaceUnitBJ(u, UnitIds.arcanesanctum, bj_UNIT_STATE_METHOD_DEFAULTS))
 
-        doPeriodically(30.) _cb ->
-            for rax in raxes
-                let directionMultiplier = forceWest.containsPlayer(rax.getOwner()) ? 1. : -1.
-                for i = 0 to 4
-                    createUnit(rax.getOwner(), ID_FOOTMAN, rax.getPos())
-                    ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
-                for i = 0 to 2
-                    createUnit(rax.getOwner(), ID_ARCHER, rax.getPos())
-                    ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
+    doPeriodically(30.) _cb ->
+        let typOrNull = siegeQueue.pop()
+        for rax in raxes
+            let directionMultiplier = forceWest.containsPlayer(rax.getOwner()) ? 1. : -1.
+            for i = 0 to 4
+                createUnit(rax.getOwner(), ID_FOOTMAN, rax.getPos() + vec2(500. * directionMultiplier, 0))
+                ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
+            for i = 0 to 2
+                createUnit(rax.getOwner(), ID_ARCHER, rax.getPos())
+                ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
 
-                if siegeQueue.size() > 0
-                    let typ = siegeQueue.pop()
-                    createUnit(rax.getOwner(), typ, rax.getPos())
-                    ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
+            if typOrNull != 0
+                createUnit(rax.getOwner(), typOrNull, rax.getPos() + vec2(-500. * directionMultiplier, 0))
+                ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
