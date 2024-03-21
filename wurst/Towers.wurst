@@ -23,7 +23,7 @@ function unit.isAggressiveTower() returns bool
 function unit.tryToAcquireHeroTarget()
     let res = new Reference<unit>(null)
     forUnitsInRange(this.getPos(), 800) u ->
-        if u.isAlive() and u.isEnemyOf(this.getOwner()) and u.isType(UNIT_TYPE_HERO)
+        if u.isAlive() and u.isEnemyOf(this.getOwner()) and u.isType(UNIT_TYPE_HERO) and not u.isInvulnerable()
             res.val = u
 
     if res.val != null
@@ -86,7 +86,7 @@ init
 
         if source.isEnemyOf(target) and target.isType(UNIT_TYPE_HERO) and source.isType(UNIT_TYPE_HERO)
             aggroLevels.forEach() (unit key, instant _) ->
-                if key.isAlive() and key.getPos().distanceToSq(source.getPos()) < 800 * 800
+                if key.isAlive() and key.getPos().distanceToSq(source.getPos()) < 800 * 800 and key.isEnemyOf(source)
                     if not key.isAggressiveTower()
                         // Tower just became aggressive.
                         key.tryToAcquireHeroTarget()

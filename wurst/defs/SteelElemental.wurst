@@ -10,6 +10,7 @@ import Assets
 
 import AbilityTooltipGenerator
 
+import Blastoff
 import ClassicHeroes
 import HeroGlow
 
@@ -17,8 +18,6 @@ import HeroGlow
 constant x = IMPORT_ORDER_DUMMY
 
 public constant ID_STEEL_ELEMENTAL = compiletime(HERO_ID_GEN.next())
-
-public constant ID_BLASTOFF = compiletime(ABIL_ID_GEN.next())
 
 
 @compiletime function genSteelElemental()
@@ -35,9 +34,11 @@ public constant ID_BLASTOFF = compiletime(ABIL_ID_GEN.next())
     ..tooltipStartListen()
     ..presetTargetTypes(Targettype.POINT)
     ..presetManaCost(_ -> 90)
+    ..presetCastRange((int lvl) -> 700. + 100 * lvl)
     ..setName("Blastoff")
     ..presetCooldown(lvl -> 120. - (10. * lvl))
     ..addTooltipProperty("Damage", lvl -> 100. + 50. * lvl)
+    ..addTooltipProperty("Area of Effect", lvl -> BLASTOFF_AREA_OF_EFFECT)
     ..tooltipStopListen()
 
     new HeroDefinition(ID_STEEL_ELEMENTAL, UnitIds.taurenchieftain)

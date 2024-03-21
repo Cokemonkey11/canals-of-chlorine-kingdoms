@@ -8,6 +8,8 @@ public constant ID_HERO_GLOW = compiletime(ABIL_ID_GEN.next())
 
 
 @compiletime function genHeroGlow()
-    new AbilityDefinitionMaxLifeBonusLeast(ID_HERO_GLOW)
-    ..setMaxLifeGained(1, 0)
+    new AbilityDefinitionAuraSlow(ID_HERO_GLOW)
+    ..setMovementSpeedFactor(1, 0)
+    ..setAreaofEffect(1, 1)
+    ..setBuffs(1, "")
     ..setArtTarget("GeneralHeroGlow.mdl")

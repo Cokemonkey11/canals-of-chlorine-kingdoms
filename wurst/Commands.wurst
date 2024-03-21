@@ -1,0 +1,15 @@
+package Commands
+
+import ClosureForGroups
+
+import WurstCommand
+
+import Teams
+
+
+init
+    if isSinglePlayer()
+        addCommand("level") (p, _cmd, _args) ->
+            forUnitsOfPlayer(p) (unit u) ->
+                if u.isType(UNIT_TYPE_HERO)
+                    u.setLevel(u.getLevel() + 1, true)

@@ -1,6 +1,6 @@
 package Castles
 
-import AbilityIds
+import AbilityObjEditing
 import ClosureTimers
 import Icons
 import ItemIds
@@ -9,10 +9,13 @@ import Time
 import ObjectIds
 import ObjectIdGenerator
 import UnitIds
-import UnitObjEditing
 
 import Teams
 
+
+constant ID_100_INT = compiletime(ABIL_ID_GEN.next())
+constant ID_100_AGI = compiletime(ABIL_ID_GEN.next())
+constant ID_100_STR = compiletime(ABIL_ID_GEN.next())
 
 constant ID_CASTLE = compiletime(UNIT_ID_GEN.next())
 
@@ -22,6 +25,10 @@ constant ID_PIG = compiletime(ITEM_ID_GEN.next()) // Strength
 constant ID_GEM = compiletime(ITEM_ID_GEN.next()) // Mana
 constant ID_AMULET = compiletime(ITEM_ID_GEN.next()) // Mana regen
 constant ID_HAT = compiletime(ITEM_ID_GEN.next()) // Armor
+
+constant ID_GLOBE = compiletime(ITEM_ID_GEN.next()) // Intelligence
+constant ID_SHOES = compiletime(ITEM_ID_GEN.next()) // Agility
+constant ID_HELMET = compiletime(ITEM_ID_GEN.next()) // Strength
 
 
 class BaseItem extends ItemDefinition
@@ -41,7 +48,20 @@ class BaseItem extends ItemDefinition
         setStockReplenishInterval(0)
 
 
+class ExpensiveItem extends BaseItem
+    construct(int id, int buttonPosX, int buttonPosY, string icon, string name, string description)
+        super(id, buttonPosX, buttonPosY, icon, name, description)
+        setGoldCost(100)
+
+
 @compiletime function genCastleAndItems()
+    new AbilityDefinitionIntelligenceBonusPlus1(ID_100_INT)
+    ..setIntelligenceBonus(1, 100)
+    new AbilityDefinitionAgilityBonusPlus1(ID_100_AGI)
+    ..setAgilityBonus(1, 100)
+    new AbilityDefinitionAgilityBonusPlus1(ID_100_STR)
+    ..setStrengthBonus(1, 100)
+
     new BaseItem(ID_RING, 0, 0, Icons.bTNGoldRing, "Ring", "Provides 3 bonus int")
     ..setAbilities(commaList(AbilityIds.intelligenceBonusPlus3))
 
@@ -60,9 +80,18 @@ class BaseItem extends ItemDefinition
     new BaseItem(ID_HAT, 1, 2, Icons.bTNHelmutPurple, "Hat", "Provides bonus armor")
     ..setAbilities(commaList(AbilityIds.defenseBonusPlus3))
 
+    new ExpensiveItem(ID_GLOBE, 2, 0, Icons.bTNCrystalBall, "Globe", "Provides 100 bonus int")
+    ..setAbilities(commaList(ID_100_INT))
+
+    new ExpensiveItem(ID_SHOES, 2, 1, Icons.bTNBoots, "Shoes", "Provides 100 bonus agi")
+    ..setAbilities(commaList(ID_100_AGI))
+
+    new ExpensiveItem(ID_HELMET, 2, 2, Icons.bTNHelmOfValor, "Helmet", "Provides 100 bonus str")
+    ..setAbilities(commaList(ID_100_STR))
+
     new BuildingDefinition(ID_CASTLE, UnitIds.castle)
     ..setNormalAbilities(commaList(AbilityIds.shopSharingAlliedBldg, AbilityIds.shopPurchaseItem))
-    ..setItemsMade(commaList(ID_RING, ID_SOCKS, ID_PIG, ID_GEM, ID_AMULET, ID_HAT))
+    ..setItemsMade(commaList(ID_RING, ID_SOCKS, ID_PIG, ID_GEM, ID_AMULET, ID_HAT, ID_GLOBE, ID_SHOES, ID_HELMET))
 
 function unit.registerDeath(code func)
     CreateTrigger()..registerUnitEvent(this, EVENT_UNIT_DEATH)..addAction(func)

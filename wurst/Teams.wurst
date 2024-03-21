@@ -4,6 +4,8 @@ package Teams
 public constant forceWest = CreateForce()
 public constant forceEast = CreateForce()
 
+public int playerCount = 0
+
 
 public function player.getForce() returns force
     return this.getId() % 2 == 0 ? forceWest : forceEast
@@ -17,7 +19,14 @@ public function force.getHomePos() returns vec2
     return this == forceWest ? players[0].getStartLocation() : players[1].getStartLocation()
 
 
+public function isSinglePlayer() returns bool
+    return playerCount == 1
+
+
 init
     for i = 0 to 9
         let whichForce = i % 2 == 0 ? forceWest : forceEast
         whichForce.addPlayer(players[i])
+
+        if players[i].isIngame()
+            playerCount += 1

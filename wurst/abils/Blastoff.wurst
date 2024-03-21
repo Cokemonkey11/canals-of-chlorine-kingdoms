@@ -1,14 +1,18 @@
 package Blastoff
 
+import ObjectIdGenerator
 import ClosureEvents
 import ClosureForGroups
 import ClosureTimers
 import Knockback3
 import LinkedListModule
+import SoundUtils
 
-import SteelElemental
 
-constant BLASTOFF_SPEED = 1100.
+constant BLASTOFF_SPEED = 1300.
+public constant BLASTOFF_AREA_OF_EFFECT = 325.
+public constant ID_BLASTOFF = compiletime(ABIL_ID_GEN.next())
+constant GO_SOUND = new SoundDefinition(Sounds.flameStrikeBirth1)
 
 
 class Blastoff
@@ -26,6 +30,8 @@ class Blastoff
         this.vel = ZERO2.polarOffset(caster.getPos().angleTo(target), BLASTOFF_SPEED * ANIMATION_PERIOD)
         this.distLeft = caster.getPos().distanceTo(target)
 
+        GO_SOUND.playOnPoint(this.caster.getPos3Real()).snd.setVolume(127)
+
         if size == 1
             doPeriodically(ANIMATION_PERIOD) cb ->
                 for blastoff from staticItr()
@@ -33,10 +39,10 @@ class Blastoff
                     blastoff.distLeft -= (BLASTOFF_SPEED * ANIMATION_PERIOD)
 
                     if blastoff.distLeft <= 0.
-                        forUnitsInRange(blastoff.caster.getPos(), 350.) u ->
+                        forUnitsInRange(blastoff.caster.getPos(), BLASTOFF_AREA_OF_EFFECT) u ->
                             if u.isEnemyOf(blastoff.caster) and u.isAlive() and not u.isInvulnerable()
-                                blastoff.caster.damageTarget(u, damageFn(blastoff.caster.getLevel()))
-                                Knockback3.setVel(u, 500., angle(0.), angle(PI / 2.))
+                                blastoff.caster.damageTarget(u, damageFn(blastoff.caster.getAbilityLevel(ID_BLASTOFF)))
+                                Knockback3.setVel(u, 700., angle(0.), angle(0.))
 
                     if blastoff.distLeft <= 0. or not blastoff.caster.isAlive()
                         destroy blastoff

@@ -1,11 +1,12 @@
 # TODO
 
-28. [x] hero glow on void annihilator, steel golem, and space cadet
-32. [ ] debounce warning sound on tower attack
-33. [ ] tower hero select should ignore invuln
-34. [ ] tower aggro should react to enemy attacking but not ally
-35. [ ] creep waves are slow-pushing too strong still, all the way to rax
-36. [ ] prevent shades from seeing other shades
+32. [x] debounce warning sound on tower attack
+33. [x] tower hero select should ignore invuln
+34. [x] tower aggro should react to enemy attacking but not ally
+36. [x] prevent shades from seeing other shades
+37. [ ] 2 more items
+38. [ ] second custom abil for each custom hero
+39. [ ] second set of custom heroes
 
 
 ## Credits

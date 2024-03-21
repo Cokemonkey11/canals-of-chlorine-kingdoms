@@ -3,6 +3,7 @@ projectName: Canals of Chlorine Kingdoms
 dependencies:
 - https://github.com/wurstscript/wurstStdlib2
 - https://github.com/Frotty/Ability-Tooltip-Generator
+- https://github.com/Cokemonkey11/WurstCommand
 buildMapData:
   name: Canals of Chlorine Kingdoms 0.0.1
   fileName: (8)canals.of.chlorine.kingdoms.0.0.1

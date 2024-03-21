@@ -17,14 +17,18 @@ public constant ID_CANNON_TOWER = compiletime(UNIT_ID_GEN.next())
     ..setAttack1DamageNumberofDice(1)
     ..setAttack1DamageSidesperDie(1)
     ..setHitPointsMaximumBase(400)
+    ..setCollisionSize(16.)
 
 
 @compiletime function genArcher()
     new UnitDefinition(ID_ARCHER, UnitIds.highelvenarcher)
-    ..setAttack1DamageBase(24)
+    ..setAttack1DamageBase(34)
     ..setAttack1DamageNumberofDice(1)
     ..setAttack1DamageSidesperDie(1)
     ..setHitPointsMaximumBase(200)
+    ..setAttack1CooldownTime(2.)
+    ..setAttack1ProjectileSpeed(600)
+    ..setCollisionSize(16.)
 
 
 @compiletime function genMortarTeam()

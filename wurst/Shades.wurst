@@ -1,9 +1,21 @@
 package Shades
 
+import AbilityIds
+import ObjectIds
+import ObjectIdGenerator
 import UnitIds
+import UnitObjEditing
+
+
+constant ID_SHADE = compiletime(UNIT_ID_GEN.next())
+
+
+@compiletime function genShade()
+    new UnitDefinition(ID_SHADE, UnitIds.shade)
+    ..setNormalAbilities(commaList(AbilityIds.ghost))
 
 
 init
     for i = 2 to 9
         if players[i].isIngame()
-            createUnit(players[i], UnitIds.shade, players[i].getStartLocation())
+            createUnit(players[i], ID_SHADE, players[i].getStartLocation())
