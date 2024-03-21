@@ -1,39 +1,31 @@
 package ClassicHeroes
 
 import HashMap
-import LinkedList
 import ObjectIdGenerator
 import UnitIds
 import UnitObjEditing
 
+public constant IMPORT_ORDER_DUMMY = '!!!!'
 
-public constant CLASSIC_HERO_IDS = asList(
-    UnitIds.paladin,
-    UnitIds.taurenchieftain,
-    UnitIds.cryptlord,
-    UnitIds.alchemist,
-    UnitIds.bloodmage,
-    UnitIds.farseer,
-    UnitIds.keeperofthegrove,
-    UnitIds.lich,
-    UnitIds.priestessofthemoon,
-    UnitIds.darkranger,
-    UnitIds.shadowhunter,
-    UnitIds.firelord
-)
-public constant CLASSIC_HERO_ID_MAP = new HashMap<int, int>()
+
+public constant CLASSIC_HERO_ID_MAP = new IterableMap<int, int>()
+..put(UnitIds.paladin, compiletime(HERO_ID_GEN.next()))
+..put(UnitIds.taurenchieftain, compiletime(HERO_ID_GEN.next()))
+..put(UnitIds.cryptlord, compiletime(HERO_ID_GEN.next()))
+..put(UnitIds.alchemist, compiletime(HERO_ID_GEN.next()))
+..put(UnitIds.bloodmage, compiletime(HERO_ID_GEN.next()))
+..put(UnitIds.farseer, compiletime(HERO_ID_GEN.next()))
+..put(UnitIds.keeperofthegrove, compiletime(HERO_ID_GEN.next()))
+..put(UnitIds.lich, compiletime(HERO_ID_GEN.next()))
+..put(UnitIds.priestessofthemoon, compiletime(HERO_ID_GEN.next()))
+..put(UnitIds.darkranger, compiletime(HERO_ID_GEN.next()))
+..put(UnitIds.shadowhunter, compiletime(HERO_ID_GEN.next()))
+..put(UnitIds.firelord, compiletime(HERO_ID_GEN.next()))
 
 
 @compiletime function genClassicHeroes()
-    for classicHeroId in CLASSIC_HERO_IDS
-        let newId = HERO_ID_GEN.next()
-        CLASSIC_HERO_ID_MAP.put(classicHeroId, newId)
-
-        if compiletime
-            new HeroDefinition(newId, classicHeroId)
-            ..setAttack1DamageBase(34)
-            ..setAttack1DamageNumberofDice(1)
-            ..setAttack1DamageSidesperDie(1)
-
-init
-    genClassicHeroes()
+    for classicHeroId in CLASSIC_HERO_ID_MAP
+        new HeroDefinition(CLASSIC_HERO_ID_MAP.get(classicHeroId), classicHeroId)
+        ..setAttack1DamageBase(34)
+        ..setAttack1DamageNumberofDice(1)
+        ..setAttack1DamageSidesperDie(1)

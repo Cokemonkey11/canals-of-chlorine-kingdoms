@@ -5,10 +5,10 @@ import UnitIds
 import UnitObjEditing
 
 
-public constant ID_FOOTMAN = UNIT_ID_GEN.next()
-public constant ID_ARCHER = UNIT_ID_GEN.next()
-public constant ID_MORTAR_TEAM = UNIT_ID_GEN.next()
-public constant ID_CANNON_TOWER = UNIT_ID_GEN.next()
+public constant ID_FOOTMAN = compiletime(UNIT_ID_GEN.next())
+public constant ID_ARCHER = compiletime(UNIT_ID_GEN.next())
+public constant ID_MORTAR_TEAM = compiletime(UNIT_ID_GEN.next())
+public constant ID_CANNON_TOWER = compiletime(UNIT_ID_GEN.next())
 
 
 @compiletime function genFootman()

@@ -1,0 +1,13 @@
+package HeroGlow
+
+import AbilityObjEditing
+import ObjectIdGenerator
+
+
+public constant ID_HERO_GLOW = compiletime(ABIL_ID_GEN.next())
+
+
+@compiletime function genHeroGlow()
+    new AbilityDefinitionMaxLifeBonusLeast(ID_HERO_GLOW)
+    ..setMaxLifeGained(1, 0)
+    ..setArtTarget("GeneralHeroGlow.mdl")

@@ -1,0 +1,52 @@
+package CallingVoid
+
+import Abilities
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import LinkedListModule
+
+import VoidAnnihilator
+
+constant DAMAGE_DELAY = 2.
+
+
+class CallingVoid
+    use LinkedListModule
+
+    vec2 target
+    unit caster
+    real timeLeft
+
+    static function damageFn(int level) returns real
+        return 100. + 50 * level
+
+    construct(unit caster, vec2 target)
+        this.caster = caster
+        this.target = target
+        this.timeLeft = DAMAGE_DELAY
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for blastoff from staticItr()
+                    blastoff.timeLeft -= ANIMATION_PERIOD
+
+                    flashEffect(Abilities.glaiveMissileTarget, blastoff.target.polarOffset(angle(GetRandomReal(0., 2. * PI)), 350.))
+
+                    if blastoff.timeLeft <= 0.
+                        forUnitsInRange(blastoff.target, 350.) u ->
+                            if u.isEnemyOf(blastoff.caster) and u.isAlive() and not u.isInvulnerable()
+                                blastoff.caster.damageTarget(u, damageFn(blastoff.caster.getLevel()))
+
+                        destroy blastoff
+
+                if size == 0
+                    destroy cb
+
+
+init
+    EventListener.add(EVENT_PLAYER_UNIT_SPELL_EFFECT) ->
+        if EventData.getSpellAbilityId() == ID_CALLING_VOID
+            let caster = EventData.getTriggerUnit()
+            let target = EventData.getAbilityTargetPos()
+            new CallingVoid(caster, target)

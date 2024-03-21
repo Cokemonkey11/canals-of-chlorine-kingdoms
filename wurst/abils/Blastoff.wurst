@@ -1,0 +1,53 @@
+package Blastoff
+
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import Knockback3
+import LinkedListModule
+
+import SteelElemental
+
+constant BLASTOFF_SPEED = 1100.
+
+
+class Blastoff
+    use LinkedListModule
+
+    vec2 vel
+    unit caster
+    real distLeft
+
+    static function damageFn(int level) returns real
+        return 100. + 50 * level
+
+    construct(unit caster, vec2 target)
+        this.caster = caster
+        this.vel = ZERO2.polarOffset(caster.getPos().angleTo(target), BLASTOFF_SPEED * ANIMATION_PERIOD)
+        this.distLeft = caster.getPos().distanceTo(target)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for blastoff from staticItr()
+                    blastoff.caster.setXY(blastoff.caster.getPos() + blastoff.vel)
+                    blastoff.distLeft -= (BLASTOFF_SPEED * ANIMATION_PERIOD)
+
+                    if blastoff.distLeft <= 0.
+                        forUnitsInRange(blastoff.caster.getPos(), 350.) u ->
+                            if u.isEnemyOf(blastoff.caster) and u.isAlive() and not u.isInvulnerable()
+                                blastoff.caster.damageTarget(u, damageFn(blastoff.caster.getLevel()))
+                                Knockback3.setVel(u, 500., angle(0.), angle(PI / 2.))
+
+                    if blastoff.distLeft <= 0. or not blastoff.caster.isAlive()
+                        destroy blastoff
+
+                if size == 0
+                    destroy cb
+
+
+init
+    EventListener.add(EVENT_PLAYER_UNIT_SPELL_EFFECT) ->
+        if EventData.getSpellAbilityId() == ID_BLASTOFF
+            let caster = EventData.getTriggerUnit()
+            let target = EventData.getAbilityTargetPos()
+            new Blastoff(caster, target)

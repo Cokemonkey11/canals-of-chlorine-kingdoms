@@ -3,7 +3,7 @@ package Recall
 import AbilityTooltipGenerator
 
 
-public constant ID_RECALL = ABIL_ID_GEN.next()
+public constant ID_RECALL = compiletime(ABIL_ID_GEN.next())
 
 
 @compiletime function genRecall()
@@ -13,10 +13,11 @@ public constant ID_RECALL = ABIL_ID_GEN.next()
     ..presetButtonPosNormal(2, 1)
     ..presetTargetTypes(Targettype.NONE)
     ..presetHotkey("B")
-
     ..presetIcon(Icons.bTNDevourMagic)
     ..presetManaCost(_ -> 0)
     ..setIconNormal(Icons.bTNDevourMagic)
+    ..setOrderStringActivate("devour")
+    ..presetBaseOrderID(_ -> "devour")
 
     ..tooltipStartListen()
     ..setName("Recall")

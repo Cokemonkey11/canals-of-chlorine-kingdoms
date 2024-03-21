@@ -4,31 +4,42 @@ import ClosureTimers
 import ClosureForGroups
 import LinkedList
 import UnitIds
-
 import Creeps
 import Teams
 
-
-public constant siegeQueue = new LinkedList<int>()
-
+public constant siegeQueue = new LinkedList<int>
+public constant westFootmanRegion = CreateRegion()
+public constant eastFootmanRegion = CreateRegion()
 
 init
     let raxes = CreateGroup()
-    forUnitsAll() u ->
+    forUnitsAll((u) -> begin
         if u.getTypeId() == UnitIds.footman
+            (u.getOwner() == players[0] ? westFootmanRegion : eastFootmanRegion).addRect(u.getPos().withRadiusRect(500.))
             raxes.add(ReplaceUnitBJ(u, UnitIds.arcanesanctum, bj_UNIT_STATE_METHOD_DEFAULTS))
+    end)
 
-    doPeriodically(30.) _cb ->
+    CreateTrigger()
+    ..registerEnterRegion(westFootmanRegion, null)
+    ..registerEnterRegion(eastFootmanRegion, null)
+    ..addAction() ->
+        let tu = GetEnteringUnit()
+        if tu.getOwner() == players[0] and tu.getPos().x > 0.
+            tu.issuePointOrder("attack", players[1].getStartLocation())
+        else if tu.getOwner() == players[1] and tu.getPos().x < 0.
+            tu.issuePointOrder("attack", players[0].getStartLocation())
+
+    doPeriodically(30., (_cb) -> begin
         let typOrNull = siegeQueue.pop()
         for rax in raxes
-            let directionMultiplier = forceWest.containsPlayer(rax.getOwner()) ? 1. : -1.
+            let directionMultiplier = forceWest.containsPlayer(rax.getOwner()) ? 1.: -1.
             for i = 0 to 4
-                createUnit(rax.getOwner(), ID_FOOTMAN, rax.getPos() + vec2(500. * directionMultiplier, 0))
-                ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
+                createUnit(rax.getOwner(), ID_FOOTMAN, rax.getPos() + vec2(500.* directionMultiplier, 0))
+                    ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
             for i = 0 to 2
                 createUnit(rax.getOwner(), ID_ARCHER, rax.getPos())
-                ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
-
+                    ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
             if typOrNull != 0
-                createUnit(rax.getOwner(), typOrNull, rax.getPos() + vec2(-500. * directionMultiplier, 0))
-                ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
+                createUnit(rax.getOwner(), typOrNull, rax.getPos() + vec2(-500.* directionMultiplier, 0))
+                    ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
+    end)

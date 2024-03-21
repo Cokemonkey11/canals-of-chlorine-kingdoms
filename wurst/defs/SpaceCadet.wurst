@@ -1,15 +1,46 @@
 package SpaceCadet
 
+// Space Marine
+// - executor 5, 10, 15, 20
+// - berserk 35, 55, 75, 95
+// - flash 60, 45, 30, 15
+// - divine shield 3, 5, 7
+
 import Assets
-import ObjectIdGenerator
-import ObjectIds
-import UnitObjEditing
+
+import AbilityTooltipGenerator
+
+import ClassicHeroes
+import HeroGlow
 
 
-public constant ID_SPACE_CADET = HERO_ID_GEN.next()
+constant x = IMPORT_ORDER_DUMMY
+
+public constant ID_SPACE_CADET = compiletime(HERO_ID_GEN.next())
+
+public constant ID_DIVINE_SHIELD = compiletime(ABIL_ID_GEN.next())
 
 
 @compiletime function genSpaceCadet()
+    let tgen = new AbilityTooltipGenerator("Grants invulnerability for a short duration.")
+    new AbilityDefinitionPaladinDivineShield(ID_DIVINE_SHIELD)
+    ..presetCanDeactivate(int lvl -> false)
+    ..presetManaCost(int lvl -> 0)
+    ..setButtonPositionNormalX(3)
+    ..setButtonPositionNormalY(2)
+    ..setButtonPositionResearchX(3)
+    ..registerTooltipGenerator(tgen)
+    ..presetHotkey("R")
+    ..setRequiredLevel(6)
+    ..setLevelSkipRequirement(2)
+
+    ..tooltipStartListen()
+    ..setLevels(3)
+    ..presetDurationHero((int lvl) -> 3.0 + 2.0 * (lvl - 1.0))
+    ..setName("Divine Shield")
+    ..presetCooldown((int lvl) -> 60. - (10 * (lvl - 1)))
+    ..tooltipStopListen(true)
+
     new HeroDefinition(ID_SPACE_CADET, UnitIds.darkranger)
     ..setName("Space Cadet")
     ..setProperNames(commaList("Richie", "Jared", "Felix"))
@@ -20,8 +51,9 @@ public constant ID_SPACE_CADET = HERO_ID_GEN.next()
     ..setAttack1WeaponType(WeaponType.Instant)
     ..setAttack1ProjectileArt(Abilities.rifleImpact)
     ..setModelFile(Units.marine)
+    ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
     ..setAttack1AnimationBackswingPoint(0.35)
     ..setAttack1AnimationDamagePoint(.1)
     ..setUnitSoundSet("Marine")
-    ..setHeroAbilities(commaList(AbilityIds.stormBolt, AbilityIds.enduranceAura1, AbilityIds.wardenBlink, AbilityIds.divineShield))
+    ..setHeroAbilities(commaList(AbilityIds.stormBolt, AbilityIds.enduranceAura1, AbilityIds.wardenBlink, ID_DIVINE_SHIELD))
     ..setIconGameInterface(Icons.bTNMarine)

@@ -1,15 +1,46 @@
 package VoidAnnihilator
 
+// Void Annihilator (faceless adjacent)
+// - dark binding 1, 2, 3, 4
+// - calling void aoe skillshot 3, 9, 27, 162
+// - mana regenerator 1, 2, 3, 4
+// - presence of mind (pre-setup teleport)
+
 import Assets
-import ObjectIdGenerator
-import ObjectIds
-import UnitObjEditing
+
+import AbilityTooltipGenerator
+
+import ClassicHeroes
+import HeroGlow
 
 
-public constant ID_VOID_ANNIHILATOR = HERO_ID_GEN.next()
+constant x = IMPORT_ORDER_DUMMY
+
+public constant ID_VOID_ANNIHILATOR = compiletime(HERO_ID_GEN.next())
+
+public constant ID_CALLING_VOID = compiletime(ABIL_ID_GEN.next())
 
 
 @compiletime function genVoidAnnihilator()
+    let tgen = new AbilityTooltipGenerator("Damages units in the target area after a short time.")
+    new ChannelAbilityPreset(ID_CALLING_VOID, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(1, 2)
+    ..presetButtonPosResearch(1, 0)
+    ..presetHotkey("W")
+    ..presetIcon(Icons.bTNBlackMarket)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.POINT)
+    ..presetManaCost(lvl -> 70 - 10 * lvl)
+    ..setName("Calling Void")
+    ..presetCastRange(_ -> 600.)
+    ..addTooltipProperty("Area of Effect", _ -> 350.)
+    ..addTooltipProperty("Cast Duration", _ -> 2.)
+    ..presetCooldown(lvl -> 10. - (1. * lvl))
+    ..addTooltipProperty("Damage", lvl -> 100. + 50. * lvl)
+    ..tooltipStopListen()
+
     new HeroDefinition(ID_VOID_ANNIHILATOR, UnitIds.bloodmage)
     ..setAttack1DamageBase(34)
     ..setName("Void Annihilator")
@@ -20,6 +51,7 @@ public constant ID_VOID_ANNIHILATOR = HERO_ID_GEN.next()
     ..setAttack1WeaponType(WeaponType.Missile)
     ..setAttack1ProjectileArt(Abilities.avengerMissile)
     ..setModelFile("FacelessOneSorcerer.mdl")
+    ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
     ..setUnitSoundSet(Soundsets.facelessOne)
-    ..setHeroAbilities(commaList(AbilityIds.entanglingRoots1, AbilityIds.rainofFire, AbilityIds.siphonMana, AbilityIds.massTeleport))
+    ..setHeroAbilities(commaList(AbilityIds.entanglingRoots1, ID_CALLING_VOID, AbilityIds.siphonMana, AbilityIds.massTeleport))
     ..setIconGameInterface(Icons.bTNFacelessOne)
