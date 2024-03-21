@@ -1,10 +1,6 @@
 # TODO
 
-8. [x] make footman walk all the way
 28. [x] hero glow on void annihilator, steel golem, and space cadet
-29. [x] custom ability for each custom hero
-30. [ ] items
-31. [ ] divine shield way too OP
 32. [ ] debounce warning sound on tower attack
 33. [ ] tower hero select should ignore invuln
 34. [ ] tower aggro should react to enemy attacking but not ally
@@ -36,15 +32,6 @@
 
 - looking for alternatives to neutral creeps for create team fights
 - would like to have some way for new players to be relevant. For now, that means classic wc3 heroes are supported
-- first item power spike is significant
-- Start with a free item:
-    Ring - intelligence
-    Circlet - agility
-    Amulet - strength
-    Flask - mana
-    Socks - mana regen
-    Hat - armor
-
 - First power spike item at 1000g is significant:
     Essence reaver
     Giant slayer

@@ -1,10 +1,13 @@
 package ChooseHero
 
+import AbilityIds
 import ClosureForGroups
 import ErrorHandling
 import HashMap
 import ItemIds
+import ItemObjEditing
 import ObjectIds
+import ObjectIdGenerator
 import SoundUtils
 import UnitIds
 
@@ -18,6 +21,19 @@ import WhenRevivable
 import SpaceCadet
 import SteelElemental
 import VoidAnnihilator
+
+
+constant ID_STARTER_CIRCLET = compiletime(ITEM_ID_GEN.next())
+
+
+@compiletime function genStarterCirclet()
+    new ItemDefinition(ID_STARTER_CIRCLET, ItemIds.circletofNobility)
+    ..setName("Starter Circlet")
+    ..setGoldCost(20)
+    ..setLumberCost(0)
+    ..setAbilities(commaList(AbilityIds.allPlus1))
+    ..setTooltipBasic("Starter Circlet")
+    ..setTooltipExtended("Sell this item for a better one at the castle")
 
 
 public constant player_heroes = new HashMap<player, unit>()
@@ -63,7 +79,7 @@ init
         player_heroes.put(hero.getOwner(), hero)
         all_heroes.add(hero)
 
-        hero..addItemById(ItemIds.circletofNobility)..addAbility(ID_RECALL)
+        hero..addItemById(ID_STARTER_CIRCLET)..addAbility(ID_RECALL)
         if hero_sounds.has(hero.getTypeId())
             hero_sounds.get(hero.getTypeId()).playForPlayer(hero.getOwner())
 

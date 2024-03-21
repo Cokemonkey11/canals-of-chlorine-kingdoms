@@ -1,10 +1,68 @@
 package Castles
 
+import AbilityIds
 import ClosureTimers
+import Icons
+import ItemIds
+import ItemObjEditing
 import Time
+import ObjectIds
+import ObjectIdGenerator
+import UnitIds
+import UnitObjEditing
 
 import Teams
 
+
+constant ID_CASTLE = compiletime(UNIT_ID_GEN.next())
+
+constant ID_RING = compiletime(ITEM_ID_GEN.next()) // Intelligence
+constant ID_SOCKS = compiletime(ITEM_ID_GEN.next()) // Agility
+constant ID_PIG = compiletime(ITEM_ID_GEN.next()) // Strength
+constant ID_GEM = compiletime(ITEM_ID_GEN.next()) // Mana
+constant ID_AMULET = compiletime(ITEM_ID_GEN.next()) // Mana regen
+constant ID_HAT = compiletime(ITEM_ID_GEN.next()) // Armor
+
+
+class BaseItem extends ItemDefinition
+    construct(int id, int buttonPosX, int buttonPosY, string icon, string name, string description)
+        super(id, ItemIds.lionsRing)
+        setGoldCost(10)
+        setLumberCost(0)
+        setAbilities("")
+        setButtonPositionX(buttonPosX)
+        setButtonPositionY(buttonPosY)
+        setInterfaceIcon(icon)
+        setName(name)
+        setDescription(description)
+        setTooltipBasic(name)
+        setTooltipExtended(description)
+        setStockMaximum(1)
+        setStockReplenishInterval(0)
+
+
+@compiletime function genCastleAndItems()
+    new BaseItem(ID_RING, 0, 0, Icons.bTNGoldRing, "Ring", "Provides 3 bonus int")
+    ..setAbilities(commaList(AbilityIds.intelligenceBonusPlus3))
+
+    new BaseItem(ID_SOCKS, 0, 1, Icons.bTNSlippersOfAgility, "Socks", "Provides 3 bonus agi")
+    ..setAbilities(commaList(AbilityIds.agilityBonusPlus3))
+
+    new BaseItem(ID_PIG, 0, 2, Icons.bTNPig, "Pig", "Provides 3 bonus str")
+    ..setAbilities(commaList(AbilityIds.strengthBonusPlus3))
+
+    new BaseItem(ID_GEM, 1, 0, Icons.bTNGem, "Gem", "Provides bonus mana")
+    ..setAbilities(commaList(AbilityIds.maxManaBonusMost))
+
+    new BaseItem(ID_AMULET, 1, 1, Icons.bTNAmulet, "Amulet", "Provides bonus mana regen")
+    ..setAbilities(commaList(AbilityIds.itemManaRegeneration))
+
+    new BaseItem(ID_HAT, 1, 2, Icons.bTNHelmutPurple, "Hat", "Provides bonus armor")
+    ..setAbilities(commaList(AbilityIds.defenseBonusPlus3))
+
+    new BuildingDefinition(ID_CASTLE, UnitIds.castle)
+    ..setNormalAbilities(commaList(AbilityIds.shopSharingAlliedBldg, AbilityIds.shopPurchaseItem))
+    ..setItemsMade(commaList(ID_RING, ID_SOCKS, ID_PIG, ID_GEM, ID_AMULET, ID_HAT))
 
 function unit.registerDeath(code func)
     CreateTrigger()..registerUnitEvent(this, EVENT_UNIT_DEATH)..addAction(func)
@@ -12,7 +70,7 @@ function unit.registerDeath(code func)
 
 init
     for i = 0 to 1
-        createUnit(players[i], 'hcas')
+        createUnit(players[i], ID_CASTLE)
         ..setPos(players[i].getStartLocation())
         ..registerDeath() ->
             let dyingUnitOwnerId = GetDyingUnit().getOwner().getId()
