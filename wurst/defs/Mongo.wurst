@@ -1,0 +1,35 @@
+package Mongo
+
+// Berzerk -> Hook
+// Amnesia (forget damage)
+// Lifesteal (grants temporary high lifesteal)
+// Avatar (Tinker tank?)
+
+import Assets
+
+import AbilityTooltipGenerator
+
+import HeroGlow
+
+
+public constant ID_MONGO = compiletime(HERO_ID_GEN.next())
+
+
+@compiletime function genMongo()
+    new HeroDefinition(ID_MONGO, UnitIds.pitlord)
+    ..setName("Mongo")
+    ..setProperNames(commaList("Grunty", "Gloomy", "Thoughtful"))
+    ..setProperNamesUsed(3)
+    ..setAttack1DamageBase(34)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)
+    ..setAttack1WeaponType(WeaponType.Normal)
+    ..setModelFile(Units.heroTinker1)
+    ..setRequiredAnimationNames("Alternate")
+    ..setRequiredAnimationNamesAttachments("large")
+    ..setRequiredAttachmentLinkNames("alternate")
+    ..setRequiredBoneNames("alternate")
+    ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
+    ..setUnitSoundSet("HeroTinker")
+    ..setHeroAbilities(commaList(AbilityIds.stormBolt, AbilityIds.alchemistHealingSpray, AbilityIds.darkRangerDrain, AbilityIds.avatar))
+    ..setIconGameInterface(Icons.bTNROBOGOBLIN)

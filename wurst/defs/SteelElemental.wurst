@@ -1,21 +1,15 @@
 package SteelElemental
 
-// Steel elemental (granite elemental)
 // - Thunderclap 1, 10, 100, 1000
-// - Armor up 10, 20, 30, 40
 // - Haunt (nocturne)
-// - power thrust (malphite)
 
 import Assets
 
 import AbilityTooltipGenerator
 
 import Blastoff
-import ClassicHeroes
 import HeroGlow
 
-
-constant x = IMPORT_ORDER_DUMMY
 
 public constant ID_STEEL_ELEMENTAL = compiletime(HERO_ID_GEN.next())
 

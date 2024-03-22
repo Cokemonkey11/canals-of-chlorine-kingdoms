@@ -1,7 +1,5 @@
 package VoidAnnihilator
 
-// Void Annihilator (faceless adjacent)
-// - dark binding 1, 2, 3, 4
 // - calling void aoe skillshot 3, 9, 27, 162
 // - mana regenerator 1, 2, 3, 4
 // - presence of mind (pre-setup teleport)
@@ -10,11 +8,8 @@ import Assets
 
 import AbilityTooltipGenerator
 
-import ClassicHeroes
 import HeroGlow
 
-
-constant x = IMPORT_ORDER_DUMMY
 
 public constant ID_VOID_ANNIHILATOR = compiletime(HERO_ID_GEN.next())
 

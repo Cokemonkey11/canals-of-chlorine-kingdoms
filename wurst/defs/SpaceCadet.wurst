@@ -1,20 +1,14 @@
 package SpaceCadet
 
-// Space Marine
 // - executor 5, 10, 15, 20
 // - berserk 35, 55, 75, 95
-// - flash 60, 45, 30, 15
-// - divine shield 3, 5, 7
 
 import Assets
 
 import AbilityTooltipGenerator
 
-import ClassicHeroes
 import HeroGlow
 
-
-constant x = IMPORT_ORDER_DUMMY
 
 public constant ID_SPACE_CADET = compiletime(HERO_ID_GEN.next())
 

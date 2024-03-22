@@ -5,8 +5,6 @@ import ObjectIdGenerator
 import UnitIds
 import UnitObjEditing
 
-public constant IMPORT_ORDER_DUMMY = '!!!!'
-
 
 public constant CLASSIC_HERO_ID_MAP = new IterableMap<int, int>()
 ..put(UnitIds.paladin, compiletime(HERO_ID_GEN.next()))
