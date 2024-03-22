@@ -4,8 +4,8 @@
 33. [x] tower hero select should ignore invuln
 34. [x] tower aggro should react to enemy attacking but not ally
 36. [x] prevent shades from seeing other shades
-37. [ ] 2 more items
-38. [ ] second custom abil for each custom hero
+37. [x] 2 more items
+38. [x] second custom abil for each custom hero
 39. [ ] second set of custom heroes
 
 

@@ -19,6 +19,8 @@ constant x = IMPORT_ORDER_DUMMY
 
 public constant ID_STEEL_ELEMENTAL = compiletime(HERO_ID_GEN.next())
 
+public constant ID_ARMOR_UP = compiletime(ABIL_ID_GEN.next())
+
 
 @compiletime function genSteelElemental()
     let tgen = new AbilityTooltipGenerator("Dashes to the target area, knocking up enemies upon arrival.")
@@ -41,6 +43,25 @@ public constant ID_STEEL_ELEMENTAL = compiletime(HERO_ID_GEN.next())
     ..addTooltipProperty("Area of Effect", lvl -> BLASTOFF_AREA_OF_EFFECT)
     ..tooltipStopListen()
 
+    let tgen2 = new AbilityTooltipGenerator("Provides a temporary armor boost.")
+    new AbilityDefinitionBerserk(ID_ARMOR_UP)
+    ..registerTooltipGenerator(tgen2)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(1, 2)
+    ..presetButtonPosResearch(1, 0)
+    ..presetHotkey("W")
+    ..presetIcon(Icons.bTNArmorGolem)
+    ..presetDurationHero((int lvl) -> 0.1)
+
+    ..tooltipStartListen()
+    ..setLevels(3)
+    ..presetManaCost(_ -> 60)
+    ..setName("Armor Up")
+    ..presetCooldown(lvl -> 20.)
+    ..addTooltipProperty("Duration", lvl -> 10.)
+    ..addTooltipProperty("Armor Bonus", lvl -> 10 * lvl)
+    ..tooltipStopListen()
+
     new HeroDefinition(ID_STEEL_ELEMENTAL, UnitIds.taurenchieftain)
     ..setName("Steel Elemental")
     ..setProperNames(commaList("Sharpy", "Pointy", "Rough Edges"))
@@ -52,5 +73,5 @@ public constant ID_STEEL_ELEMENTAL = compiletime(HERO_ID_GEN.next())
     ..setModelFile(Units.golemStatue1)
     ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
     ..setUnitSoundSet(Soundsets.rockGolem)
-    ..setHeroAbilities(commaList(AbilityIds.thunderClap, AbilityIds.devotionAura, AbilityIds.warStomp1, ID_BLASTOFF))
+    ..setHeroAbilities(commaList(AbilityIds.thunderClap, ID_ARMOR_UP, AbilityIds.warStomp1, ID_BLASTOFF))
     ..setIconGameInterface(Icons.bTNArmorGolem)

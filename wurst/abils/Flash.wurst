@@ -1,0 +1,29 @@
+package Flash
+
+import ClosureEvents
+import ClosureTimers
+import HashMap
+import OrderIds
+import TerrainUtils
+
+import SpaceCadet
+
+
+constant lastSmarts = new HashMap<unit, tile>()
+
+
+init
+    EventListener.add(EVENT_PLAYER_UNIT_ISSUED_POINT_ORDER) ->
+        let orderer = EventData.getTriggerUnit()
+        let isSmart = EventData.getIssuedOrderId() == OrderIds.smart
+        let target = EventData.getOrderPos()
+
+        if isSmart and orderer.getTypeId() == ID_SPACE_CADET
+            lastSmarts.put(orderer, target.getTile())
+
+    EventListener.onCast(ID_FLASH) (unit caster) ->
+        let whereTo = lastSmarts.has(caster) ? lastSmarts.get(caster) : ZERO2.getTile()
+
+        caster.setXY(caster.getPos().polarOffset(caster.getPos().angleTo(whereTo.toVec2()), FLASH_DISTANCE))
+        nullTimer() ->
+            caster.issueImmediateOrderById(OrderIds.unimmolation)

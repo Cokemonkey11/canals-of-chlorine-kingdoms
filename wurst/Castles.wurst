@@ -16,6 +16,7 @@ import Teams
 constant ID_100_INT = compiletime(ABIL_ID_GEN.next())
 constant ID_100_AGI = compiletime(ABIL_ID_GEN.next())
 constant ID_100_STR = compiletime(ABIL_ID_GEN.next())
+constant ID_100_DMG = compiletime(ABIL_ID_GEN.next())
 
 constant ID_CASTLE = compiletime(UNIT_ID_GEN.next())
 
@@ -29,6 +30,8 @@ constant ID_HAT = compiletime(ITEM_ID_GEN.next()) // Armor
 constant ID_GLOBE = compiletime(ITEM_ID_GEN.next()) // Intelligence
 constant ID_SHOES = compiletime(ITEM_ID_GEN.next()) // Agility
 constant ID_HELMET = compiletime(ITEM_ID_GEN.next()) // Strength
+constant ID_GRINDCORE = compiletime(ITEM_ID_GEN.next()) // AD + lifesteal
+constant ID_EXASPERATION = compiletime(ITEM_ID_GEN.next()) // AD + spell shield
 
 
 class BaseItem extends ItemDefinition
@@ -61,6 +64,8 @@ class ExpensiveItem extends BaseItem
     ..setAgilityBonus(1, 100)
     new AbilityDefinitionAgilityBonusPlus1(ID_100_STR)
     ..setStrengthBonus(1, 100)
+    new AbilityDefinitionAttackBonusPlus1(ID_100_DMG)
+    ..setAttackBonus(1, 100)
 
     new BaseItem(ID_RING, 0, 0, Icons.bTNGoldRing, "Ring", "Provides 3 bonus int")
     ..setAbilities(commaList(AbilityIds.intelligenceBonusPlus3))
@@ -89,9 +94,36 @@ class ExpensiveItem extends BaseItem
     new ExpensiveItem(ID_HELMET, 2, 2, Icons.bTNHelmOfValor, "Helmet", "Provides 100 bonus str")
     ..setAbilities(commaList(ID_100_STR))
 
+    new ExpensiveItem(ID_GRINDCORE, 3, 0, Icons.bTNOrcMeleeUpThree, "Grindcore", "Provides 100 attack damage and 50% lifesteal")
+    ..setAbilities(commaList(AbilityIds.itemLifeSteal, ID_100_DMG))
+
+    new ExpensiveItem(
+        ID_EXASPERATION,
+        3,
+        1,
+        Icons.bTNArcaniteRanged,
+        "Exasperation",
+        "Provides 100 attack damage and a spell shield every <ANss,Cool1> seconds"
+    )
+    ..setAbilities(commaList('ANss', ID_100_DMG))
+
     new BuildingDefinition(ID_CASTLE, UnitIds.castle)
     ..setNormalAbilities(commaList(AbilityIds.shopSharingAlliedBldg, AbilityIds.shopPurchaseItem))
-    ..setItemsMade(commaList(ID_RING, ID_SOCKS, ID_PIG, ID_GEM, ID_AMULET, ID_HAT, ID_GLOBE, ID_SHOES, ID_HELMET))
+    ..setItemsMade(
+        commaList(
+            ID_RING,
+            ID_SOCKS,
+            ID_PIG,
+            ID_GEM,
+            ID_AMULET,
+            ID_HAT,
+            ID_GLOBE,
+            ID_SHOES,
+            ID_HELMET,
+            ID_GRINDCORE,
+            ID_EXASPERATION
+        )
+    )
 
 function unit.registerDeath(code func)
     CreateTrigger()..registerUnitEvent(this, EVENT_UNIT_DEATH)..addAction(func)

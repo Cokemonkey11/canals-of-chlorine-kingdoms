@@ -36,7 +36,7 @@ class CallingVoid
                     if blastoff.timeLeft <= 0.
                         forUnitsInRange(blastoff.target, 350.) u ->
                             if u.isEnemyOf(blastoff.caster) and u.isAlive() and not u.isInvulnerable()
-                                blastoff.caster.damageTarget(u, damageFn(blastoff.caster.getLevel()))
+                                blastoff.caster.damageTarget(u, damageFn(blastoff.caster.getAbilityLevel(ID_CALLING_VOID)))
 
                         destroy blastoff
 

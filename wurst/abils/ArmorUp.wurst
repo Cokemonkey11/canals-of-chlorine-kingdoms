@@ -1,0 +1,25 @@
+package ArmorUp
+
+import AbilityObjEditing
+import ClosureEvents
+import ClosureTimers
+import ObjectIdGenerator
+
+import SteelElemental
+
+
+constant ID_ARMOR_BONUS = compiletime(ABIL_ID_GEN.next())
+
+
+@compiletime function genArmorBonus()
+    new AbilityDefinitionDefenseBonusPlus1(ID_ARMOR_BONUS)
+    ..setLevels(3)
+    ..presetDefenseBonus((int lvl) -> 10 * lvl)
+
+init
+    EventListener.onCast(ID_ARMOR_UP) (unit caster) ->
+        caster..addAbility(ID_ARMOR_BONUS)
+        ..setAbilityLevel(ID_ARMOR_BONUS, caster.getAbilityLevel(ID_ARMOR_UP))
+
+        doAfter(10.) ->
+            caster.removeAbility(ID_ARMOR_BONUS)

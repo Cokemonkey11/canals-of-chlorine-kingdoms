@@ -1,0 +1,72 @@
+package BlackBinding
+
+import Abilities
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import LinkedListModule
+
+import VoidAnnihilator
+
+
+constant MISSILE_SPEED = 700.
+constant MAX_DISTANCE = 700.
+
+
+class BlackBinding
+    use LinkedListModule
+
+    vec2 vel
+    unit caster
+    real timeLeft
+    effect fx
+
+    static function damageFn(int level) returns real
+        return 100. + 50 * level
+
+    function tick()
+        this.timeLeft -= ANIMATION_PERIOD
+
+        if this.timeLeft <= 0.
+            destroy this
+        else
+            this.fx.setPos(this.fx.getPos() + this.vel)
+
+            forUnitsInRange(this.fx.getPos(), 50.) u ->
+                if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE)
+                    this.caster.damageTarget(u, damageFn(this.caster.getAbilityLevel(ID_BLACK_BINDING)))
+                    u..setMoveSpeed(0.)..setPropWindow(angle(0.))
+                    let fx = this.fx
+                    this.fx = null
+                    doAfter(4.) ->
+                        u..setMoveSpeed(u.getDefaultMovespeed())..setPropWindow(u.getDefaultPropWindow())
+                        fx..setTimeScale(1.)..destr()
+
+                    destroy this
+
+    construct(unit caster, vec2 target)
+        let angl = caster.getPos().angleTo(target)
+        this.caster = caster
+        this.vel = ZERO2.polarOffset(angl, MISSILE_SPEED * ANIMATION_PERIOD)
+        this.timeLeft = MAX_DISTANCE / MISSILE_SPEED
+        this.fx = addEffect(Abilities.carrionSwarmMissile, this.caster.getPos())..setYaw(angl)..setTime(0.15)..setTimeScale(0.)..setScale(0.8)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for binding from staticItr()
+                    binding.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        if this.fx != null
+            this.fx..setTimeScale(1.)..destr()
+
+
+init
+    EventListener.add(EVENT_PLAYER_UNIT_SPELL_EFFECT) ->
+        if EventData.getSpellAbilityId() == ID_BLACK_BINDING
+            let caster = EventData.getTriggerUnit()
+            let target = EventData.getAbilityTargetPos()
+            new BlackBinding(caster, target)
