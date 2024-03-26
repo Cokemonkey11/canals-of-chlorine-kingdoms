@@ -1,16 +1,15 @@
 package Sorcerer
 
-// (lightning attack)
-// Fireball + lux passive
 // Lightning shield boomerang (can miss)
 // Channeling, controllable rain of fire
-// Finales Funkeln
 
 import Assets
 
 import AbilityTooltipGenerator
 
+import FinalesFunkeln
 import HeroGlow
+import Ignition
 
 
 public constant ID_SORCERER = compiletime(HERO_ID_GEN.next())
@@ -27,5 +26,5 @@ public constant ID_SORCERER = compiletime(HERO_ID_GEN.next())
     ..setModelFile(Units.humanMage1)
     ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW, AbilityIds.lightningAttack))
     ..setUnitSoundSet("ElfWizard")
-    ..setHeroAbilities(commaList(AbilityIds.acidBomb, AbilityIds.frostArmor1, AbilityIds.blizzard, AbilityIds.rainofFire))
+    ..setHeroAbilities(commaList(ID_IGNITION, AbilityIds.frostArmor1, AbilityIds.blizzard, ID_FINALES_FUNKELN))
     ..setIconGameInterface(Icons.bTNBanditMage)

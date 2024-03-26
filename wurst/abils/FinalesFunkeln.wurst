@@ -1,0 +1,129 @@
+package FinalesFunkeln
+
+import ClosureEvents
+import ClosureTimers
+import HashSet
+import LinkedListModule
+import SoundUtils
+
+import AbilityTooltipGenerator
+import WurstTempLightning
+
+import CodeDamage
+
+
+public constant ID_FINALES_FUNKELN = compiletime(ABIL_ID_GEN.next())
+
+constant RADIUS =  250. / 2.
+constant RANGE  = 1200.
+constant IntLevelClosure DAMAGE_FUNCTION = (int lvl) -> 200 + lvl * 50
+constant CHANNEL_DURATION = 1.
+
+constant tempSet = new HashSet<unit>()
+constant grp = CreateGroup()
+
+constant snd = new SoundDefinition(Sounds.zigguratMissileLaunch2, false, true)
+constant snd2 = new SoundDefinition(Sounds.zigguratMissileHit3, false, true)
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Channels briefly before loosing a powerful energy beam in the target direction. If the channel is interrupted, the cooldown of Finales Funkeln is reset."
+    )
+    new ChannelAbilityPreset(ID_FINALES_FUNKELN, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(3, 2)
+    ..presetButtonPosResearch(3, 0)
+    ..presetHotkey("R")
+    ..presetIcon(Icons.bTNEnergyTower)
+    ..setLevelSkipRequirement(2)
+    ..setRequiredLevel(6)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.POINT)
+    ..presetManaCost(_ -> 110)
+    ..presetCastRange((int lvl) -> RANGE)
+    ..setName("Finales Funkeln")
+    ..presetCooldown(lvl -> 60. - (10. * lvl))
+    ..addTooltipProperty("Damage", DAMAGE_FUNCTION)
+    ..addTooltipProperty("Channel Duration", lvl -> CHANNEL_DURATION)
+    ..presetFollowThroughTime(lvl -> 1.1)
+    ..tooltipStopListen()
+
+
+class FinalesFunkeln
+    use LinkedListModule
+
+    int order
+    vec2 target
+    unit caster
+    real timeLeft
+    real damage
+
+    construct(unit caster, vec2 target)
+        this.order = caster.getCurrentOrder()
+        this.caster = caster
+        this.target = target
+        this.timeLeft = CHANNEL_DURATION
+        this.damage = DAMAGE_FUNCTION.run(this.caster.getAbilityLevel(ID_FINALES_FUNKELN)).toReal()
+
+        let castPos = caster.getPos3Real()
+        let facing = castPos.toVec2().angleTo(target)
+
+        let start1 = castPos.offset2d(facing + angle(PI / 2.), RADIUS) + vec3(0., 0., 50.)
+        let start2 = castPos.offset2d(facing + angle(PI / 2.), -RADIUS) + vec3(0., 0., 50.)
+
+        new TempLightning(start1, start1.offset2d(facing, RANGE), 1., "SPLK")
+        new TempLightning(start2, start2.offset2d(facing, RANGE), 1., "SPLK")
+
+        snd.playOnPoint(castPos).snd.setVolume(127)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    function tick()
+        this.timeLeft -= ANIMATION_PERIOD
+
+        if this.order != this.caster.getCurrentOrder() or not this.caster.isAlive()
+            this.caster.endAbilityCooldown(ID_FINALES_FUNKELN)
+            destroy this
+
+        else if this.timeLeft <= 0.
+
+            let castPos = this.caster.getPos3Real()
+            let facing = castPos.toVec2().angleTo(this.target)
+
+            for jj = 0 to 6
+                let source = castPos.polarProject(
+                    RADIUS / 2., facing + angle(PI / 2.), angle(jj * 2. * PI / 7.)
+                ) + vec3(0., 0., 100.)
+                let tgt = source.offset2d(facing, RANGE)
+
+                new TempLightning(source, tgt, 0.5, "AFOD")
+
+            tempSet.clear()
+
+            var i = RADIUS / 2.
+            while i <= RANGE + RADIUS
+                grp.enumUnitsInRange(castPos.toVec2().polarOffset(facing, i), RADIUS)
+                for u from grp
+                    if u.isAlive() and u.isEnemyOf(this.caster.getOwner()) and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE)
+                        tempSet.add(u)
+
+                i += (RADIUS / 2.)
+
+            for u in tempSet
+                this.caster.dealCodeDamage(u, this.damage)
+                snd2.playOnPoint(u.getPos3Zero())
+
+            destroy this
+
+
+init
+    EventListener.onCast(ID_FINALES_FUNKELN) caster ->
+        new FinalesFunkeln(caster, EventData.getSpellTargetPos())

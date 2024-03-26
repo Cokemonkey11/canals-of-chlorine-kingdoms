@@ -1,0 +1,8 @@
+package CodeDamage
+
+import DamageEvent
+
+
+public function unit.dealCodeDamage(unit target, real damage)
+    DamageEvent.setNextDamageFromCode()
+    this.damageTarget(target, damage)

@@ -1,0 +1,66 @@
+package TurboGills
+
+import BuffIds
+import BuffObjEditing
+import ClosureEvents
+import ClosureTimers
+
+import AbilityTooltipGenerator
+
+
+public constant ID_TURBO_GILLS = compiletime(ABIL_ID_GEN.next())
+
+constant ID_TURBO_GILLS_BUFF = compiletime(BUFF_ID_GEN.next())
+
+public constant DEFAULT_ATTACK_RANGE = 600
+
+public constant TURBO_GILLS_ATTACK_RANGE = 1000.
+
+constant DURATION = 8.
+
+
+function unit.setAttackRange(real newRange)
+    BlzSetUnitWeaponRealField(
+        this,
+        UNIT_WEAPON_RF_ATTACK_RANGE,
+        1,
+        newRange
+        - BlzGetUnitWeaponRealField(this, UNIT_WEAPON_RF_ATTACK_RANGE, 0)
+        + BlzGetUnitWeaponRealField(this, UNIT_WEAPON_RF_ATTACK_RANGE, 1)
+    )
+
+
+@compiletime function gen()
+    new BuffDefinition(ID_TURBO_GILLS_BUFF, BuffIds.berserk)
+    ..setName("Turbo Gills")
+    ..setIcon(Icons.bTNMurlocFleshEater)
+
+    let tgen = new AbilityTooltipGenerator("Temporarily provides bonus attack speed and attack range.")
+    new AbilityDefinitionBerserk(ID_TURBO_GILLS)
+    ..setHeroAbility(true)
+    ..registerTooltipGenerator(tgen)
+
+    ..tooltipStartListen()
+    ..setName("Turbo Gills")
+    ..setLevels(3)
+    ..presetAttackSpeedIncrease((int lvl) -> .15 + (lvl - 1) * .2)
+    ..addTooltipProperty("Bonus Attack Range", (int lvl) -> TURBO_GILLS_ATTACK_RANGE - DEFAULT_ATTACK_RANGE)
+    ..presetDurationHero((int lvl) -> DURATION)
+    ..presetCooldown(lvl -> 16. - 2 * lvl)
+    ..presetManaCost((int lvl) -> 70)
+    ..tooltipStopListen(true)
+
+    ..presetDamageTakenIncrease((int lvl) -> 0)
+    ..presetMovementSpeedIncrease((int lvl) -> 0)
+    ..presetButtonPosNormal(1, 2)
+    ..presetButtonPosResearch(1, 0)
+    ..presetHotkey("W")
+    ..presetIcon(Icons.bTNMurlocFleshEater)
+    ..presetBuffs(lvl -> commaList(ID_TURBO_GILLS_BUFF))
+
+
+init
+    EventListener.onCast(ID_TURBO_GILLS) u ->
+        u.setAttackRange(TURBO_GILLS_ATTACK_RANGE)
+        doAfter(DURATION) ->
+            u.setAttackRange(DEFAULT_ATTACK_RANGE.toReal())

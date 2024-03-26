@@ -1,5 +1,6 @@
 package Bounty
 
+import DamageEvent
 import HashMap
 import SoundUtils
 import StandardTextTags
@@ -27,38 +28,38 @@ constant TOWER_DESTROYED_WARNING_SOUND = new SoundDefinition(Sounds.warning)
 
 
 init
-    CreateTrigger()
-    ..registerAnyUnitEvent(EVENT_PLAYER_UNIT_DEATH)
-    ..addAction() ->
-        let dying_unit = GetDyingUnit()
-        let killing_player = GetKillingUnit().getOwner()
+    DamageEvent.addListener(1) ->
+        let damage = DamageEvent.getAmount()
+        let dying_unit = DamageEvent.getTarget()
+        let killing_player = DamageEvent.getSource().getOwner()
         let dying_unit_type = dying_unit.getTypeId()
         let dying_player = dying_unit.getOwner()
 
-        // If the unit gives bounty, give its killer the bounty.
-        if bounties.has(dying_unit_type)
-            if dying_player.isEnemyOf(killing_player)
-                for hr in all_heroes
-                    if hr.isEnemyOf(dying_player) and hr.isAlive() and hr.getPos().distanceToSq(dying_unit.getPos()) < BOUNTY_DIST * BOUNTY_DIST
-                        hr.addXp(UNIT_EXPERIENCE_BOUNTY, true)
+        if damage >= dying_unit.getHP() + 0.405
+            // If the unit gives bounty, give its killer the bounty.
+            if bounties.has(dying_unit_type)
+                if dying_player.isEnemyOf(killing_player)
+                    for hr in all_heroes
+                        if hr.isEnemyOf(dying_player) and hr.isAlive() and hr.getPos().distanceToSq(dying_unit.getPos()) < BOUNTY_DIST * BOUNTY_DIST
+                            hr.addXp(UNIT_EXPERIENCE_BOUNTY, true)
 
-                if player_heroes.has(killing_player)
-                    killing_player.addGold(bounties.get(dying_unit_type))
-                    createGoldBountyTextTag(dying_unit, bounties.get(dying_unit_type), killing_player)
+                    if player_heroes.has(killing_player)
+                        killing_player.addGold(bounties.get(dying_unit_type))
+                        createGoldBountyTextTag(dying_unit, bounties.get(dying_unit_type), killing_player)
 
-            else if player_heroes.has(killing_player)
-                standardTextTag(dying_unit.getPos(), "!")
+                else if player_heroes.has(killing_player)
+                    standardTextTag(dying_unit.getPos(), "!")
 
-        if dying_unit.isType(UNIT_TYPE_HERO)
-            if dying_player.isEnemyOf(killing_player)
-                killing_player.addGold(HERO_BOUNTY)
-                createGoldBountyTextTag(dying_unit, HERO_BOUNTY, killing_player)
+            if dying_unit.isType(UNIT_TYPE_HERO)
+                if dying_player.isEnemyOf(killing_player)
+                    killing_player.addGold(HERO_BOUNTY)
+                    createGoldBountyTextTag(dying_unit, HERO_BOUNTY, killing_player)
 
-        if dying_unit_type == ID_CANNON_TOWER
-            siegeQueue.add(ID_MORTAR_TEAM)
-            for pl in dying_player.getForce().opposingForce()
-                createGoldBountyTextTag(dying_unit, TOWER_BOUNTY, pl)
-                pl.addGold(TOWER_BOUNTY)
-            for pl in dying_player.getForce()
-                printTimedToPlayer("Your tower was destroyed.", 30., pl)
-                TOWER_DESTROYED_WARNING_SOUND.playForPlayer(pl)
+            if dying_unit_type == ID_CANNON_TOWER
+                siegeQueue.add(ID_MORTAR_TEAM)
+                for pl in dying_player.getForce().opposingForce()
+                    createGoldBountyTextTag(dying_unit, TOWER_BOUNTY, pl)
+                    pl.addGold(TOWER_BOUNTY)
+                for pl in dying_player.getForce()
+                    printTimedToPlayer("Your tower was destroyed.", 30., pl)
+                    TOWER_DESTROYED_WARNING_SOUND.playForPlayer(pl)

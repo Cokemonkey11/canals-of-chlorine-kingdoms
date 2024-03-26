@@ -80,7 +80,7 @@ init
             ReplaceUnitBJ(u, ID_CANNON_TOWER, bj_UNIT_STATE_METHOD_DEFAULTS)
             ..towerAi()
 
-    DamageEvent.addListener() ->
+    DamageEvent.addListener(0) ->
         let target = DamageEvent.getTarget()
         let source = DamageEvent.getSource()
 

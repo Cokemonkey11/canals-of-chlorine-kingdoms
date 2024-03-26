@@ -1,21 +1,46 @@
 package NightHowler
 
 // Finger of death + reset
-// Bonus range + attack speed
-// Artificial night + Ultravision + Ghost
-// Sniper shot
+// Artificial night + Ultravision + Ghosting
 
 import Assets
 
 import AbilityTooltipGenerator
 
 import HeroGlow
+import PainFinger
+import TurboGills
 
 
 public constant ID_NIGHT_HOWLER = compiletime(HERO_ID_GEN.next())
 
 
 @compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Channels briefly before loosing a powerful energy beam at the target unit. If the channel is interrupted, the cooldown of Pain Finger is reset."
+    )
+    new ChannelAbilityPreset(ID_PAIN_FINGER, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..setLevelSkipRequirement(2)
+    ..setRequiredLevel(6)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.UNIT)
+    ..presetManaCost(_ -> 90)
+    ..presetCastRange((int lvl) -> 2000.)
+    ..setName("Pain Finger")
+    ..presetCooldown(lvl -> 120. - (20. * lvl))
+    ..addTooltipProperty("Damage", lvl -> 200. + 50. * lvl)
+    ..addTooltipProperty("Channel Duration", lvl -> 2.)
+    ..presetFollowThroughTime(lvl -> 2.1)
+    ..tooltipStopListen()
+
+    ..presetButtonPosNormal(3, 2)
+    ..presetButtonPosResearch(3, 0)
+    ..presetHotkey("R")
+    ..presetIcon(Icons.bTNMarksmanship)
+    ..presetTargetsAllowed(lvl -> "enemies,ground,vulnerable")
+
     new HeroDefinition(ID_NIGHT_HOWLER, UnitIds.priestessofthemoon)
     ..setName("Night Howler")
     ..setProperNames(commaList("Awooo", "Paw Patrol", "Rawr Uwu"))
@@ -23,9 +48,12 @@ public constant ID_NIGHT_HOWLER = compiletime(HERO_ID_GEN.next())
     ..setAttack1DamageBase(34)
     ..setAttack1DamageNumberofDice(1)
     ..setAttack1DamageSidesperDie(1)
-    ..setModelFile(Units.voidWalker)
+    ..setModelFile(Units.hydralisk)
     ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
     ..setAttack1ProjectileArt(Abilities.voidWalkerMissile)
-    ..setUnitSoundSet("ObsidianDestroyer")
-    ..setHeroAbilities(commaList(AbilityIds.chainLightning1, AbilityIds.enduranceAura1, AbilityIds.wardenBlink, AbilityIds.stormBolt))
+    ..setAttack1ProjectileArc(0.01)
+    ..setAttack1ProjectileSpeed(1800)
+    ..setAttack1Range(DEFAULT_ATTACK_RANGE)
+    ..setUnitSoundSet(Soundsets.hydralisk)
+    ..setHeroAbilities(commaList(AbilityIds.chainLightning1, ID_TURBO_GILLS, AbilityIds.wardenBlink, ID_PAIN_FINGER))
     ..setIconGameInterface(Icons.bTNVoidWalker)

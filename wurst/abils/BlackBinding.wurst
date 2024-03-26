@@ -8,8 +8,13 @@ import LinkedListModule
 
 import VoidAnnihilator
 
+import CodeDamage
+
+
+constant COLLISION_SIZE_PROJECTILE = 64.
 
 constant MISSILE_SPEED = 700.
+
 constant MAX_DISTANCE = 700.
 
 
@@ -32,9 +37,9 @@ class BlackBinding
         else
             this.fx.setPos(this.fx.getPos() + this.vel)
 
-            forUnitsInRange(this.fx.getPos(), 50.) u ->
+            forUnitsInRange(this.fx.getPos(), COLLISION_SIZE_PROJECTILE) u ->
                 if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE)
-                    this.caster.damageTarget(u, damageFn(this.caster.getAbilityLevel(ID_BLACK_BINDING)))
+                    this.caster.dealCodeDamage(u, damageFn(this.caster.getAbilityLevel(ID_BLACK_BINDING)))
                     u..setMoveSpeed(0.)..setPropWindow(angle(0.))
                     let fx = this.fx
                     this.fx = null

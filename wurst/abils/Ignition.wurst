@@ -1,0 +1,119 @@
+package Ignition
+
+import Abilities
+import Doodads
+import ClosureEvents
+import ClosureTimers
+import DamageEvent
+import HashMap
+import LinkedListModule
+import StandardTextTags
+import SoundUtils
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+
+
+public constant ID_IGNITION = compiletime(ABIL_ID_GEN.next())
+
+constant RealLevelClosure INT_MULTIPLIER = lvl -> 0.6 + 0.2 * lvl
+
+constant DURATION = 5.
+
+constant IGNITE_SOUND = new SoundDefinition(Sounds.flameStrikeBirth1)
+
+constant SNUFF_SOUND = new SoundDefinition(Sounds.fireLordMissileDeath1)
+
+constant IGNITION_MAP = new HashMap<unit, Ignition>()
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        Targettype.UNIT,
+        "Interrupts (mini-stuns) and lights a target unit aflame, dealing damage over time based on the caster's intelligence. If an aflame unit is attacked, the flame is snuffed, dealing double the remaining damage."
+    )
+    new AbilityDefinitionFireBolt(ID_IGNITION)
+    ..registerTooltipGenerator(tgen)
+    ..setHeroAbility(true)
+
+    ..tooltipStartListen()
+    ..setLevels(3)
+    ..presetManaCost(_ -> 90)
+    ..presetCastRange((int lvl) -> 700.)
+    ..setName("Ignition")
+    ..presetCooldown(lvl -> 25. - (5. * lvl))
+    ..addTooltipProperty("Damage Multiplier (int)", INT_MULTIPLIER)
+    ..addTooltipProperty("Duration", lvl -> DURATION)
+    ..tooltipStopListen()
+
+    ..presetDamage(lvl -> 0.01)
+    ..presetDurationHero(lvl -> 0.01)
+    ..presetDurationNormal(lvl -> 0.01)
+    ..presetButtonPosNormal(0, 2)
+    ..presetButtonPosResearch(0, 0)
+    ..presetHotkey("Q")
+    ..presetIcon(Icons.bTNFireBolt)
+
+
+class Ignition
+    use LinkedListModule
+
+    unit caster
+    unit target
+    real timeRemaining
+    real damageRemaining
+    real tickDamage
+
+    construct(unit caster, unit target)
+        this.caster = caster
+        this.target = target
+        this.timeRemaining = DURATION
+        this.damageRemaining = this.caster.getInt(true) * INT_MULTIPLIER.run(this.caster.getAbilityLevel(ID_IGNITION)) / DURATION
+        this.tickDamage = this.damageRemaining * ANIMATION_PERIOD
+
+        IGNITE_SOUND.playOnPoint(this.target.getPos3Real())
+
+        IGNITION_MAP.put(this.target, this)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        IGNITION_MAP.remove(this.target)
+
+    function tick()
+        if this.timeRemaining <= 0. or not this.target.isAlive() or this.target.isInvulnerable() or not IGNITION_MAP.has(this.target)
+            destroy this
+            return
+
+        this.timeRemaining -= ANIMATION_PERIOD
+        this.caster.dealCodeDamage(this.target, this.tickDamage)
+        this.damageRemaining -= this.tickDamage
+        let fx = addEffect(Doodads.fireRockSmall, this.target, "origin")
+        doAfter(1.) ->
+            fx.destr()
+
+
+init
+    EventListener.onCast(ID_IGNITION) caster ->
+        let target = EventData.getSpellTargetUnit()
+        new Ignition(caster, target)
+
+    DamageEvent.addListener(0) ->
+        let source = DamageEvent.getSource()
+        let target = DamageEvent.getTarget()
+        if IGNITION_MAP.has(target) and DamageEvent.getType() == DamageType.ATTACK
+            let ignition = IGNITION_MAP.get(target)
+            if source == ignition.caster
+                IGNITION_MAP.remove(target)
+                SNUFF_SOUND.playOnPoint(target.getPos3Real()).snd.setVolume(127)
+                flashEffect(Abilities.lavaSpawnMissile, target.getPos())
+                Log.info(ignition.damageRemaining.toString())
+                source.dealCodeDamage(target, ignition.damageRemaining * 2.)
+                createCriticalStrikeTextTag(target, (ignition.damageRemaining * 2).toInt())

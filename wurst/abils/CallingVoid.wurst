@@ -6,7 +6,9 @@ import ClosureForGroups
 import ClosureTimers
 import LinkedListModule
 
+import CodeDamage
 import VoidAnnihilator
+
 
 constant DAMAGE_DELAY = 2.
 
@@ -28,21 +30,24 @@ class CallingVoid
 
         if size == 1
             doPeriodically(ANIMATION_PERIOD) cb ->
-                for blastoff from staticItr()
-                    blastoff.timeLeft -= ANIMATION_PERIOD
-
-                    flashEffect(Abilities.glaiveMissileTarget, blastoff.target.polarOffset(angle(GetRandomReal(0., 2. * PI)), 350.))
-
-                    if blastoff.timeLeft <= 0.
-                        forUnitsInRange(blastoff.target, 350.) u ->
-                            if u.isEnemyOf(blastoff.caster) and u.isAlive() and not u.isInvulnerable()
-                                blastoff.caster.damageTarget(u, damageFn(blastoff.caster.getAbilityLevel(ID_CALLING_VOID)))
-
-                        destroy blastoff
+                for void from staticItr()
+                    void.tick()
 
                 if size == 0
                     destroy cb
 
+    function tick()
+        this.timeLeft -= ANIMATION_PERIOD
+
+        flashEffect(Abilities.glaiveMissileTarget, this.target.polarOffset(angle(GetRandomReal(0., 2. * PI)), 350.))
+
+        if this.timeLeft <= 0.
+            forUnitsInRange(this.target, 325.) u ->
+                if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable()
+                    this.caster.dealCodeDamage(u, damageFn(this.caster.getAbilityLevel(ID_CALLING_VOID)))
+                    addEffect(Abilities.glaiveMissileTarget, u, "origin")..setColor(color(155, 155, 155))..setScale(1.5)..destr()
+
+            destroy this
 
 init
     EventListener.add(EVENT_PLAYER_UNIT_SPELL_EFFECT) ->

@@ -18,6 +18,9 @@ import Teams
 import WhenClose
 import WhenRevivable
 
+import Mongo
+import NightHowler
+import Sorcerer
 import SpaceCadet
 import SteelElemental
 import VoidAnnihilator
@@ -56,12 +59,18 @@ public constant hero_sounds = new HashMap<int, SoundDefinition>()
 ..put(ID_SPACE_CADET, new SoundDefinition(Sounds.peasantPissed5))
 ..put(ID_STEEL_ELEMENTAL, new SoundDefinition(Sounds.rockGolemPissed2))
 ..put(ID_VOID_ANNIHILATOR, new SoundDefinition(Sounds.acolytePissed8))
+..put(ID_MONGO, new SoundDefinition(Sounds.abominationPissed6))
+..put(ID_NIGHT_HOWLER, new SoundDefinition(Sounds.cryptFiendPissed7))
+..put(ID_SORCERER, new SoundDefinition(Sounds.priestPissed6))
 
 
 constant CUSTOM_HERO_ID_MAP = new HashMap<int, int>()
 ..put(UnitIds.sentryward, ID_STEEL_ELEMENTAL)
 ..put(UnitIds.stasistraptotem, ID_VOID_ANNIHILATOR)
 ..put(UnitIds.healingward, ID_SPACE_CADET)
+..put(UnitIds.carrionscarab1, ID_MONGO)
+..put(UnitIds.skeletalmage, ID_SORCERER)
+..put(UnitIds.skeletonwarrior, ID_NIGHT_HOWLER)
 
 
 init

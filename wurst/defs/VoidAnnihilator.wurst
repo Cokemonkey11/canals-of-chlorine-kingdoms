@@ -1,6 +1,5 @@
 package VoidAnnihilator
 
-// - calling void aoe skillshot 3, 9, 27, 162
 // - mana regenerator 1, 2, 3, 4
 // - presence of mind (pre-setup teleport)
 
@@ -22,29 +21,27 @@ public constant ID_BLACK_BINDING = compiletime(ABIL_ID_GEN.next())
     let tgen = new AbilityTooltipGenerator("Damages units in the target area after a short time.")
     new ChannelAbilityPreset(ID_CALLING_VOID, 3, true, tgen)
     ..setHeroAbility(true)
-    ..presetButtonPosNormal(1, 2)
-    ..presetButtonPosResearch(1, 0)
-    ..presetHotkey("W")
-    ..presetIcon(Icons.bTNBlackMarket)
 
     ..tooltipStartListen()
     ..presetTargetTypes(Targettype.POINT)
     ..presetManaCost(lvl -> 70 - 10 * lvl)
     ..setName("Calling Void")
     ..presetCastRange(_ -> 600.)
-    ..addTooltipProperty("Area of Effect", _ -> 350.)
-    ..addTooltipProperty("Cast Duration", _ -> 2.)
+    ..presetAreaofEffect((int lvl) -> 325.)
+    ..addTooltipProperty("Delay", _ -> 2.)
     ..presetCooldown(lvl -> 10. - (1. * lvl))
     ..addTooltipProperty("Damage", lvl -> 100. + 50. * lvl)
     ..tooltipStopListen()
 
+    ..presetButtonPosNormal(1, 2)
+    ..presetButtonPosResearch(1, 0)
+    ..presetHotkey("W")
+    ..presetIcon(Icons.bTNBlackMarket)
+    ..presetOption(Option.TARGETIMAGE, true)
+
     let tgen2 = new AbilityTooltipGenerator("Looses a missile which immobilises the first enemy struck.")
     new ChannelAbilityPreset(ID_BLACK_BINDING, 3, true, tgen2)
     ..setHeroAbility(true)
-    ..presetButtonPosNormal(0, 2)
-    ..presetButtonPosResearch(0, 0)
-    ..presetHotkey("Q")
-    ..presetIcon(Icons.bTNBlueDemoness)
 
     ..tooltipStartListen()
     ..presetTargetTypes(Targettype.POINT)
@@ -55,6 +52,11 @@ public constant ID_BLACK_BINDING = compiletime(ABIL_ID_GEN.next())
     ..addTooltipProperty("Damage", lvl -> 100. + 50. * lvl)
     ..addTooltipProperty("Immobilise Duration", lvl -> 4.)
     ..tooltipStopListen()
+
+    ..presetButtonPosNormal(0, 2)
+    ..presetButtonPosResearch(0, 0)
+    ..presetHotkey("Q")
+    ..presetIcon(Icons.bTNBlueDemoness)
 
     new HeroDefinition(ID_VOID_ANNIHILATOR, UnitIds.bloodmage)
     ..setAttack1DamageBase(34)

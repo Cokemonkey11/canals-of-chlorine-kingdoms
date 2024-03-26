@@ -8,6 +8,8 @@ import Knockback3
 import LinkedListModule
 import SoundUtils
 
+import CodeDamage
+
 
 constant BLASTOFF_SPEED = 1300.
 public constant BLASTOFF_AREA_OF_EFFECT = 325.
@@ -41,7 +43,7 @@ class Blastoff
                     if blastoff.distLeft <= 0.
                         forUnitsInRange(blastoff.caster.getPos(), BLASTOFF_AREA_OF_EFFECT) u ->
                             if u.isEnemyOf(blastoff.caster) and u.isAlive() and not u.isInvulnerable()
-                                blastoff.caster.damageTarget(u, damageFn(blastoff.caster.getAbilityLevel(ID_BLASTOFF)))
+                                blastoff.caster.dealCodeDamage(u, damageFn(blastoff.caster.getAbilityLevel(ID_BLASTOFF)))
                                 Knockback3.setVel(u, 700., angle(0.), angle(0.))
 
                     if blastoff.distLeft <= 0. or not blastoff.caster.isAlive()

@@ -1,18 +1,17 @@
 # TODO
 
-32. [x] debounce warning sound on tower attack
-33. [x] tower hero select should ignore invuln
-34. [x] tower aggro should react to enemy attacking but not ally
-36. [x] prevent shades from seeing other shades
-37. [x] 2 more items
-38. [x] second custom abil for each custom hero
-39. [ ] second set of custom heroes
-
+39. [x] second set of custom heroes
+41. [x] flash does not dodge storm bolt
+42. [ ] resurrection is faster than recall + fountain
+43. [x] black binding seems hard to land, collision too low
+44. [ ] spririt wolf is intense cheese
+45. [ ] sobi mask stacking may be OP
 
 ## Credits
 
 - peq
 - Frotty
 - Matro
+- lep
 - Blizzard Entertainment
 - Dionesiist

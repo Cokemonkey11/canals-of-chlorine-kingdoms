@@ -1,0 +1,108 @@
+package Supertank
+
+import ClosureEvents
+import ClosureTimers
+import DamageEvent
+import HashSet
+import LinkedListModule
+import SoundUtils
+
+import AbilityTooltipGenerator
+
+
+public constant ID_SUPERTANK = compiletime(ABIL_ID_GEN.next())
+
+constant ID_BONUS_HEALTH = compiletime(ABIL_ID_GEN.next())
+
+constant CAST_SOUND = new SoundDefinition(Sounds.tinkerMorph1)
+
+constant ATTACK_SOUND = new SoundDefinition(Sounds.steamTankAttack1)
+
+constant SUPERTANKS = new HashSet<unit>()
+
+constant RealLevelClosure DURATION_FN = (int lvl) -> 4. + 4 * lvl
+
+constant IntLevelClosure BONUS_HEALTH = lvl -> 500 * lvl
+
+
+@compiletime function gen()
+    new AbilityDefinitionMaxLifeBonusGreater(ID_BONUS_HEALTH)
+    ..setLevels(3)
+    ..presetMaxLifeGained(BONUS_HEALTH)
+
+    let tgen2 = new AbilityTooltipGenerator("Turns into an even bigger tank which grants bonus health and magic immunity.")
+    new ChannelAbilityPreset(ID_SUPERTANK, 3, true, tgen2)
+    ..setHeroAbility(true)
+    ..setLevelSkipRequirement(2)
+    ..setRequiredLevel(6)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetManaCost(_ -> 100)
+    ..setName("Supertank")
+    ..presetCooldown(lvl -> 90. - 20 * lvl)
+    ..addTooltipProperty("Duration", DURATION_FN)
+    ..addTooltipProperty("Bonus Health", BONUS_HEALTH)
+    ..tooltipStopListen()
+
+    ..presetButtonPosNormal(3, 2)
+    ..presetButtonPosResearch(3, 0)
+    ..presetHotkey("R")
+    ..presetIcon(Icons.bTNROBOGOBLIN)
+
+
+class Supertank
+    use LinkedListModule
+
+    unit caster
+    int level
+    real timeSpent
+    real maxTime
+
+    construct(unit caster)
+        this.caster = caster
+        this.level = this.caster.getAbilityLevel(ID_SUPERTANK)
+        this.timeSpent = 0.
+        this.maxTime = DURATION_FN.run(this.level)
+
+        this.caster..addAbility(AbilityIds.magicImmunityAImx)..hideAbility(AbilityIds.magicImmunityAImx, true)
+        this.caster..addAbility(ID_BONUS_HEALTH)..setAbilityLevel(ID_BONUS_HEALTH, this.level)
+        SUPERTANKS.add(this.caster)
+
+        CAST_SOUND.playOnPoint(this.caster.getPos3Real()).snd.setVolume(127)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.caster.setScale(1.)
+        this.caster.removeAbility(ID_BONUS_HEALTH)
+        this.caster.removeAbility(AbilityIds.magicImmunityAImx)
+        SUPERTANKS.remove(this.caster)
+
+    function tick()
+        this.timeSpent += ANIMATION_PERIOD
+
+        if this.timeSpent >= this.maxTime or not this.caster.isAlive()
+            destroy this
+            return
+
+        if this.timeSpent < 0.5
+            this.caster.setScale(1. + this.timeSpent)
+            let colorScale = (255 * (1 - this.timeSpent)).toInt()
+            this.caster.setVertexColor(color(colorScale, colorScale, colorScale))
+
+
+init
+    EventListener.onCast(ID_SUPERTANK) caster ->
+        new Supertank(caster)
+
+    DamageEvent.addListener(0) ->
+        let source = DamageEvent.getSource()
+        if SUPERTANKS.has(source) and DamageEvent.getType() == DamageType.ATTACK
+            ATTACK_SOUND.playOnPoint(source.getPos3Real()).snd.setVolume(127)

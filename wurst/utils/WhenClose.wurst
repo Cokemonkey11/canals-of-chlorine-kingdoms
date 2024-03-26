@@ -24,7 +24,7 @@ public function unit.whenCloseStatic(UnitAction action)
 
 
 public function unit.whenCloseStatic(UnitUnitAction action)
-    let t = CreateTrigger()..registerUnitInRange(this, 100., null)
+    let t = CreateTrigger()..registerUnitInRange(this, 200., null)
     triggerToUnitUnitActions.put(t, action)
     triggerToUnitUnitActionSources.put(t, this)
     t.addAction() ->

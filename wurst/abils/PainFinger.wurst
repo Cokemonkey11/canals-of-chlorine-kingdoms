@@ -1,0 +1,97 @@
+package PainFinger
+
+import ClosureEvents
+import ClosureTimers
+import LinkedListModule
+import ObjectIdGenerator
+
+import CodeDamage
+
+
+public constant ID_PAIN_FINGER = compiletime(ABIL_ID_GEN.next())
+
+public constant CHANNEL_DURATION = 2.
+
+constant LIGHTNING_COLOR = colorA(255, 255, 255, 155)
+
+constant LIGHTNING_OFFSET = vec3(0., 0., 50.)
+
+tuple vec3_2(vec3 a, vec3 b)
+
+
+class PainFinger
+    use LinkedListModule
+
+    int order
+    unit target
+    unit caster
+    real timeLeft
+    lightning lightningCaster
+    lightning lightningTarget
+
+    static function damageFn(int level) returns real
+        return 200. + 50 * level
+
+    function getIntermediateLightningPoints() returns vec3_2
+        let start = this.caster.getPos3Real()
+        let end_ = this.target.getPos3Real()
+
+        return vec3_2(
+            start.polarProject(400., start.angleTo2d(target.getPos()), angle(PI / 2.)) + LIGHTNING_OFFSET,
+            end_.polarProject(400., end_.angleTo2d(caster.getPos()), angle(PI / 2.)) + LIGHTNING_OFFSET
+        )
+
+    construct(unit caster, unit target)
+        this.order = caster.getCurrentOrder()
+        this.caster = caster
+        this.target = target
+        this.timeLeft = CHANNEL_DURATION
+        let intermediatePoints = this.getIntermediateLightningPoints()
+        this.lightningCaster = addLightning(
+            LIGHTNING_MANA_FLARE, true, this.caster.getPos3Real(), intermediatePoints.a
+        )..setColor(LIGHTNING_COLOR)
+        this.lightningTarget = addLightning(
+            LIGHTNING_MANA_FLARE, true, intermediatePoints.b, this.target.getPos3Real()
+        )..setColor(LIGHTNING_COLOR)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.lightningCaster.destr()
+        this.lightningTarget.destr()
+
+    function tick()
+        this.timeLeft -= ANIMATION_PERIOD
+
+        let newIntermediatePoints = this.getIntermediateLightningPoints()
+        this.lightningCaster.move(true, this.caster.getPos3Real(), newIntermediatePoints.a)
+        this.lightningTarget.move(true, newIntermediatePoints.b, this.target.getPos3Real())
+
+        if this.order != this.caster.getCurrentOrder() or not this.caster.isAlive() or not this.target.isAlive()
+            this.caster.endAbilityCooldown(ID_PAIN_FINGER)
+            destroy this
+
+        else if this.timeLeft <= 0.
+            this.caster.dealCodeDamage(this.target, damageFn(this.caster.getAbilityLevel(ID_PAIN_FINGER)))
+            let lightningFinal = addLightning(
+                LIGHTNING_FINGER_OF_DEATH,
+                false,
+                this.caster.getPos3Real() + LIGHTNING_OFFSET ,
+                this.target.getPos3Real() + LIGHTNING_OFFSET
+            )
+            doAfter(0.5) ->
+                lightningFinal.destr()
+
+            destroy this
+
+
+init
+    EventListener.onCast(ID_PAIN_FINGER) (unit caster) ->
+        let target = EventData.getSpellTargetUnit()
+        new PainFinger(caster, target)

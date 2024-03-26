@@ -1,0 +1,192 @@
+package BerzerkAndWinch
+
+import Abilities
+import BuffIds
+import BuffObjEditing
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import LinkedListModule
+import SoundUtils
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+
+
+public constant ID_BERZERK_AND_WINCH = compiletime(ABIL_ID_GEN.next())
+
+constant ID_WINCH = compiletime(ABIL_ID_GEN.next())
+
+constant ID_BERZERK_AND_WINCH_BUFF = compiletime(BUFF_ID_GEN.next())
+
+constant DURATION = 5.
+
+constant WINCH_DURATION = .8
+
+constant RANGE = 650.
+
+constant RealLevelClosure WINCH_COOLDOWN = (int lvl) -> 30. - 5 * lvl
+
+constant RealLevelClosure DAMAGE_FUNCTION = (int lvl) -> 50. + 25. * lvl
+
+constant MISSILE_SPEED = RANGE * 2 / WINCH_DURATION
+
+constant TIMER_STATE_FLIP = WINCH_DURATION / 2.
+
+constant COLLISION_SIZE = 50.
+
+constant SOUND_LAUNCH = new SoundDefinition(Sounds.steamTankAttack1)
+constant SOUND_STRUCK = new SoundDefinition(Sounds.steamTankReady1)
+
+
+@compiletime function gen()
+    new BuffDefinition(ID_BERZERK_AND_WINCH_BUFF, BuffIds.berserk)
+    ..setName("Berzerk and Winch")
+    ..setTooltipNormal("Berzerk")
+    ..setTooltipNormalExtended("This unit is berzerk; it moves faster and can cast winch")
+    ..setIcon(Icons.bTNAbomination)
+
+    let tgen = new AbilityTooltipGenerator(
+        "Provides bonus movement speed. While active, can cast Winch to hook the first enemy struck in the targeted direction. If Winch is used, the cooldown is increased."
+    )
+    new AbilityDefinitionBerserk(ID_BERZERK_AND_WINCH)
+    ..setHeroAbility(true)
+    ..registerTooltipGenerator(tgen)
+
+    ..tooltipStartListen()
+    ..setName("Berzerk and Winch")
+    ..setLevels(3)
+    ..presetMovementSpeedIncrease((int lvl) -> .1 + .15 * lvl)
+    ..presetDurationHero((int lvl) -> DURATION)
+    ..presetCooldown((int lvl) -> 10.)
+    ..addTooltipProperty("Cooldown (Winch Used)", (int lvl) -> 30 - 5 * lvl)
+    ..presetManaCost((int lvl) -> 50)
+    ..tooltipStopListen(true)
+
+    ..presetDamageTakenIncrease((int lvl) -> 0)
+    ..presetButtonPosNormal(0, 2)
+    ..presetButtonPosResearch(0, 0)
+    ..presetHotkey("Q")
+    ..presetIcon(Icons.bTNAbomination)
+    ..presetAttackSpeedIncrease((int lvl) -> 0.)
+    ..presetBuffs(lvl -> commaList(ID_BERZERK_AND_WINCH_BUFF))
+
+    // Winch
+    let tgen2 = new AbilityTooltipGenerator("Hooks the first enemy struck in the targeted direction. If not used, the cooldown of Berzerk and Winch is lower.")
+    new ChannelAbilityPreset(ID_WINCH, 3, true, tgen2)
+    ..setHeroAbility(false)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.POINT)
+    ..presetManaCost(_ -> 50)
+    ..presetCastRange((int lvl) -> 650.)
+    ..setName("Winch")
+    ..presetCooldown(WINCH_COOLDOWN)
+    ..addTooltipProperty("Damage", DAMAGE_FUNCTION)
+    ..tooltipStopListen()
+
+    ..presetButtonPosNormal(0, 2)
+    ..presetButtonPosResearch(0, 0)
+    ..presetHotkey("Q")
+    ..presetIcon(Icons.bTNExhumeCorpses)
+    ..presetFollowThroughTime((int lvl) -> WINCH_DURATION + 0.5)
+    ..presetDisableOtherAbilities((int lvl) -> true)
+
+
+class Winch
+    use LinkedListModule
+
+    vec3 vel
+    vec3 head
+    unit caster
+    unit hooked // Nullable
+    real timeMeter
+    lightning fx
+    bool state
+
+    construct(unit caster, vec2 target)
+        let angle = caster.getPos().angleTo(target)
+        this.vel = ZERO3.offset2d(angle, MISSILE_SPEED) * ANIMATION_PERIOD + vec3(0., 0., (target.getTerrainZ() - caster.getPos().getTerrainZ()) / (WINCH_DURATION / ANIMATION_PERIOD))
+        this.head = caster.getPos().withTerrainZ(50.)
+        this.caster = caster
+        this.hooked = null
+        this.timeMeter = 0.
+        this.fx = addLightning(LIGHTNING_MAGIC_LEASH, true, this.head, this.head)
+        this.state = false
+        SOUND_LAUNCH.playOnPoint(this.head)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx.destr()
+
+        if this.hooked != null
+            this.hooked.setMoveSpeed(this.hooked.getDefaultMovespeed())
+            this.hooked.setPropWindow(this.hooked.getDefaultPropWindow())
+
+    function tick()
+        if not this.caster.isAlive()
+            destroy this
+            return
+
+        if this.state
+            // Return swing
+            this.timeMeter -= ANIMATION_PERIOD
+            if this.timeMeter <= 0.
+                destroy this
+                return
+
+            this.head -= this.vel
+            this.fx.move(true, this.caster.getPos3Real() + vec3(0., 0., 50.), this.head)
+            if this.hooked != null
+                this.hooked.setPos(this.hooked.getPos() - this.vel.toVec2())
+        else
+            // Out swing
+            this.timeMeter += ANIMATION_PERIOD
+            if this.timeMeter >= TIMER_STATE_FLIP
+                this.state = true
+
+            this.head += this.vel
+            this.fx.move(true, this.caster.getPos3Real() + vec3(0., 0., 50.), this.head)
+
+            forUnitsInRange(this.head.toVec2(), COLLISION_SIZE) u ->
+                if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and this.hooked == null and not u.isType(UNIT_TYPE_STRUCTURE)
+                    this.caster.dealCodeDamage(u, DAMAGE_FUNCTION.run(this.caster.getAbilityLevel(ID_BERZERK_AND_WINCH)))
+                    flashEffect(Abilities.spiritLinkZapTarget, u, "origin")
+                    SOUND_STRUCK.playOnPoint(this.head)
+                    this.hooked = u
+                    this.state = true
+                    u.setMoveSpeed(0.)
+                    u.setPropWindow(angle(0.))
+
+
+init
+    EventListener.onCast(ID_BERZERK_AND_WINCH) caster ->
+        let bandwLevel = caster.getAbilityLevel(ID_BERZERK_AND_WINCH)
+
+        caster.hideAbility(ID_BERZERK_AND_WINCH, true)
+
+        caster..addAbility(ID_WINCH)..setAbilityLevel(ID_WINCH, bandwLevel)
+
+        doAfter(DURATION) ->
+            if caster.getAbilityLevel(ID_WINCH) > 0
+                // Caster has not cast winch.
+                caster.removeAbility(ID_WINCH)
+                caster.hideAbility(ID_BERZERK_AND_WINCH, false)
+                caster.startAbilityCooldown(ID_BERZERK_AND_WINCH, 10.)
+
+    EventListener.onCast(ID_WINCH) caster ->
+        let target = EventData.getSpellTargetPos()
+        caster.removeAbility(ID_WINCH)
+        caster.removeAbility(ID_BERZERK_AND_WINCH_BUFF)
+        caster.hideAbility(ID_BERZERK_AND_WINCH, false)
+        let lvl = caster.getAbilityLevel(ID_BERZERK_AND_WINCH)
+        caster.startAbilityCooldown(ID_BERZERK_AND_WINCH, WINCH_COOLDOWN.run(lvl))
+        new Winch(caster, target)

@@ -6,10 +6,6 @@ import WurstCommand
 
 import Teams
 
-import Mongo
-import NightHowler
-import Sorcerer
-
 
 init
     if isSinglePlayer()
@@ -17,9 +13,5 @@ init
             forUnitsOfPlayer(p) (unit u) ->
                 if u.isType(UNIT_TYPE_HERO)
                     u.setLevel(u.getLevel() + 1, true)
-        addCommand("mongo") (p, _cmd, _args) ->
-            createUnit(p, ID_MONGO)
-        addCommand("night") (p, _cmd, _args) ->
-            createUnit(p, ID_NIGHT_HOWLER)
-        addCommand("sorcerer") (p, _cmd, _args) ->
-            createUnit(p, ID_SORCERER)
+        addCommand("enemy") (p, _cmd, _args) ->
+            createUnit(players[1], 'hfoo')
