@@ -1,9 +1,11 @@
 package TurboGills
 
+import Abilities
 import BuffIds
 import BuffObjEditing
 import ClosureEvents
 import ClosureTimers
+import SoundUtils
 
 import AbilityTooltipGenerator
 
@@ -17,6 +19,8 @@ public constant DEFAULT_ATTACK_RANGE = 600
 public constant TURBO_GILLS_ATTACK_RANGE = 1000.
 
 constant DURATION = 8.
+
+constant SHRIEK_SOUND = new SoundDefinition(Sounds.duneWormDeath1)
 
 
 function unit.setAttackRange(real newRange)
@@ -62,5 +66,12 @@ function unit.setAttackRange(real newRange)
 init
     EventListener.onCast(ID_TURBO_GILLS) u ->
         u.setAttackRange(TURBO_GILLS_ATTACK_RANGE)
+        BlzSetUnitWeaponRealField(u, UNIT_WEAPON_RF_ATTACK_PROJECTILE_ARC, 1, 0.3)
+        addEffect(Abilities.thornsAura, u, "origin").destr()
+        let fx = addEffect(Abilities.generalAuraTarget, u, "origin")
+        SHRIEK_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
+
         doAfter(DURATION) ->
+            fx.destr()
             u.setAttackRange(DEFAULT_ATTACK_RANGE.toReal())
+            BlzSetUnitWeaponRealField(u, UNIT_WEAPON_RF_ATTACK_PROJECTILE_ARC, 1, 0.01)

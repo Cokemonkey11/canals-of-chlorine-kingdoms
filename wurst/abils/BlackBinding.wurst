@@ -5,6 +5,7 @@ import ClosureEvents
 import ClosureForGroups
 import ClosureTimers
 import LinkedListModule
+import SoundUtils
 
 import VoidAnnihilator
 
@@ -16,6 +17,8 @@ constant COLLISION_SIZE_PROJECTILE = 64.
 constant MISSILE_SPEED = 700.
 
 constant MAX_DISTANCE = 700.
+
+constant HIT_SOUND = new SoundDefinition(Sounds.bansheeMissileHit2)
 
 
 class BlackBinding
@@ -40,8 +43,14 @@ class BlackBinding
             forUnitsInRange(this.fx.getPos(), COLLISION_SIZE_PROJECTILE) u ->
                 if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE)
                     this.caster.dealCodeDamage(u, damageFn(this.caster.getAbilityLevel(ID_BLACK_BINDING)))
+
+                    // Playing a sound twice seems to make it louder.
+                    HIT_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
+                    HIT_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
+                    flashEffect(Abilities.roots1, u.getPos())
+
                     u..setMoveSpeed(0.)..setPropWindow(angle(0.))
-                    let fx = this.fx
+                    let fx = this.fx..setAlpha(127)
                     this.fx = null
                     doAfter(4.) ->
                         u..setMoveSpeed(u.getDefaultMovespeed())..setPropWindow(u.getDefaultPropWindow())

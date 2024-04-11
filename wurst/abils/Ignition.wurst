@@ -69,8 +69,8 @@ class Ignition
         this.caster = caster
         this.target = target
         this.timeRemaining = DURATION
-        this.damageRemaining = this.caster.getInt(true) * INT_MULTIPLIER.run(this.caster.getAbilityLevel(ID_IGNITION)) / DURATION
-        this.tickDamage = this.damageRemaining * ANIMATION_PERIOD
+        this.damageRemaining = this.caster.getInt(true) * INT_MULTIPLIER.run(this.caster.getAbilityLevel(ID_IGNITION))
+        this.tickDamage = (this.damageRemaining * ANIMATION_PERIOD) / DURATION
 
         IGNITE_SOUND.playOnPoint(this.target.getPos3Real())
 
@@ -108,12 +108,12 @@ init
     DamageEvent.addListener(0) ->
         let source = DamageEvent.getSource()
         let target = DamageEvent.getTarget()
+        let attackDamage = DamageEvent.getAmount()
         if IGNITION_MAP.has(target) and DamageEvent.getType() == DamageType.ATTACK
             let ignition = IGNITION_MAP.get(target)
             if source == ignition.caster
                 IGNITION_MAP.remove(target)
                 SNUFF_SOUND.playOnPoint(target.getPos3Real()).snd.setVolume(127)
                 flashEffect(Abilities.lavaSpawnMissile, target.getPos())
-                Log.info(ignition.damageRemaining.toString())
                 source.dealCodeDamage(target, ignition.damageRemaining * 2.)
-                createCriticalStrikeTextTag(target, (ignition.damageRemaining * 2).toInt())
+                createCriticalStrikeTextTag(target, (attackDamage + ignition.damageRemaining * 2).toInt())

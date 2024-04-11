@@ -1,13 +1,21 @@
 package Commands
 
 import ClosureForGroups
+import LinkedList
 
 import WurstCommand
 
+import ChooseHero
 import Teams
 
 
 init
+    addCommand("name") (p, _cmd, args) ->
+        player_heroes.get(p).setProperName(args.joinBy(" "))
+
+    addCommand("repick") (p, _cmd, _args) ->
+        p.print("You can't.".color(COLOR_GOLD))
+
     if isSinglePlayer()
         addCommand("level") (p, _cmd, _args) ->
             forUnitsOfPlayer(p) (unit u) ->

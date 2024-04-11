@@ -9,12 +9,16 @@ import Barracks
 import ChooseHero
 import Creeps
 import Teams
+import UnitIds
 
 
 constant bounties = new HashMap<int, int>()
 ..put(ID_FOOTMAN, 1)
 ..put(ID_ARCHER, 1)
 ..put(ID_MORTAR_TEAM, 1)
+..put(UnitIds.spiritwolf1, 1)
+..put(UnitIds.spiritwolf2, 1)
+..put(UnitIds.spiritwolf3, 1)
 
 constant HERO_BOUNTY = 10
 

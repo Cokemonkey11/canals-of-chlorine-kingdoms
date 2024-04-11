@@ -1,16 +1,16 @@
 package ChooseHero
 
-import AbilityIds
+import ClosureEvents
 import ClosureForGroups
+import DialogBox
 import ErrorHandling
 import HashMap
 import ItemIds
 import ItemObjEditing
-import ObjectIds
-import ObjectIdGenerator
 import SoundUtils
 import UnitIds
 
+import Castles
 import ClassicHeroes
 import ClosureTimers
 import Recall
@@ -25,18 +25,27 @@ import SpaceCadet
 import SteelElemental
 import VoidAnnihilator
 
+import AbilityTooltipGenerator
+
 
 constant ID_STARTER_CIRCLET = compiletime(ITEM_ID_GEN.next())
 
+constant ID_CLICK_STARTER_CIRCLET = compiletime(ABIL_ID_GEN.next())
+
 
 @compiletime function genStarterCirclet()
+    new AbilityDefinitionItemHealAoe(ID_CLICK_STARTER_CIRCLET)
+    ..presetHitPointsGained((int lvl) -> 0)
+    ..setArtTarget("")
+
     new ItemDefinition(ID_STARTER_CIRCLET, ItemIds.circletofNobility)
     ..setName("Starter Circlet")
-    ..setGoldCost(20)
+    ..setGoldCost(10)
     ..setLumberCost(0)
-    ..setAbilities(commaList(AbilityIds.allPlus1))
+    ..setAbilities(commaList(ID_CLICK_STARTER_CIRCLET, AbilityIds.allPlus1))
     ..setTooltipBasic("Starter Circlet")
-    ..setTooltipExtended("Sell this item for a better one at the castle")
+    ..setTooltipExtended("Click this item to transform it into a better one.".color(COLOR_GOLD))
+    ..setActivelyUsed(true)
 
 
 public constant player_heroes = new HashMap<player, unit>()
@@ -86,6 +95,7 @@ init
                 which.getOwner().panCameraToTimed(where, 0.)
 
         player_heroes.put(hero.getOwner(), hero)
+        hero.setProperName(hero.getOwner().getName(true))
         all_heroes.add(hero)
 
         hero..addItemById(ID_STARTER_CIRCLET)..addAbility(ID_RECALL)
@@ -103,3 +113,43 @@ init
         else if CUSTOM_HERO_ID_MAP.has(u.getTypeId())
             ReplaceUnitBJ(u, CUSTOM_HERO_ID_MAP.get(u.getTypeId()), bj_UNIT_STATE_METHOD_DEFAULTS)
             ..whenCloseStatic(whenCloseStaticFn)
+
+    EventListener.onCast(ID_CLICK_STARTER_CIRCLET) caster ->
+        let dBox = new DialogBox("Choose your starter item")
+        dBox.addButton("Ring (+3 int)") ->
+            if caster.hasItemById(ID_STARTER_CIRCLET)
+                caster.getItemById(ID_STARTER_CIRCLET).remove()
+                caster.addItemById(ID_RING)
+            destroy dBox
+
+        dBox.addButton("Socks (+3 agi)") ->
+            if caster.hasItemById(ID_STARTER_CIRCLET)
+                caster.getItemById(ID_STARTER_CIRCLET).remove()
+                caster.addItemById(ID_SOCKS)
+            destroy dBox
+
+        dBox.addButton("Pig (+3 str)") ->
+            if caster.hasItemById(ID_STARTER_CIRCLET)
+                caster.getItemById(ID_STARTER_CIRCLET).remove()
+                caster.addItemById(ID_PIG)
+            destroy dBox
+
+        dBox.addButton("Gem (+250 mana)") ->
+            if caster.hasItemById(ID_STARTER_CIRCLET)
+                caster.getItemById(ID_STARTER_CIRCLET).remove()
+                caster.addItemById(ID_GEM)
+            destroy dBox
+
+        dBox.addButton("Amulet (+50% mana regeneration)") ->
+            if caster.hasItemById(ID_STARTER_CIRCLET)
+                caster.getItemById(ID_STARTER_CIRCLET).remove()
+                caster.addItemById(ID_AMULET)
+            destroy dBox
+
+        dBox.addButton("Hat (+3 armor)") ->
+            if caster.hasItemById(ID_STARTER_CIRCLET)
+                caster.getItemById(ID_STARTER_CIRCLET).remove()
+                caster.addItemById(ID_HAT)
+            destroy dBox
+
+        dBox.display(caster.getOwner(), true)

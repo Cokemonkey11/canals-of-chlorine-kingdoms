@@ -17,21 +17,29 @@ constant ID_100_INT = compiletime(ABIL_ID_GEN.next())
 constant ID_100_AGI = compiletime(ABIL_ID_GEN.next())
 constant ID_100_STR = compiletime(ABIL_ID_GEN.next())
 constant ID_100_DMG = compiletime(ABIL_ID_GEN.next())
+constant ID_20_MOVESPEED = compiletime(ABIL_ID_GEN.next())
+constant ID_5000_HP = compiletime(ABIL_ID_GEN.next())
+constant ID_40_INT = compiletime(ABIL_ID_GEN.next())
+constant ID_40_AGI = compiletime(ABIL_ID_GEN.next())
+constant ID_40_STR = compiletime(ABIL_ID_GEN.next())
 
 constant ID_CASTLE = compiletime(UNIT_ID_GEN.next())
 
-constant ID_RING = compiletime(ITEM_ID_GEN.next()) // Intelligence
-constant ID_SOCKS = compiletime(ITEM_ID_GEN.next()) // Agility
-constant ID_PIG = compiletime(ITEM_ID_GEN.next()) // Strength
-constant ID_GEM = compiletime(ITEM_ID_GEN.next()) // Mana
-constant ID_AMULET = compiletime(ITEM_ID_GEN.next()) // Mana regen
-constant ID_HAT = compiletime(ITEM_ID_GEN.next()) // Armor
+public constant ID_RING = compiletime(ITEM_ID_GEN.next()) // Intelligence
+public constant ID_SOCKS = compiletime(ITEM_ID_GEN.next()) // Agility
+public constant ID_PIG = compiletime(ITEM_ID_GEN.next()) // Strength
+public constant ID_GEM = compiletime(ITEM_ID_GEN.next()) // Mana
+public constant ID_AMULET = compiletime(ITEM_ID_GEN.next()) // Mana regen
+public constant ID_HAT = compiletime(ITEM_ID_GEN.next()) // Armor
 
 constant ID_GLOBE = compiletime(ITEM_ID_GEN.next()) // Intelligence
 constant ID_SHOES = compiletime(ITEM_ID_GEN.next()) // Agility
 constant ID_HELMET = compiletime(ITEM_ID_GEN.next()) // Strength
 constant ID_GRINDCORE = compiletime(ITEM_ID_GEN.next()) // AD + lifesteal
 constant ID_EXASPERATION = compiletime(ITEM_ID_GEN.next()) // AD + spell shield
+constant ID_WINDRUNNER = compiletime(ITEM_ID_GEN.next()) // AD + movespeed
+constant ID_RAIDBOSS = compiletime(ITEM_ID_GEN.next()) // 5000 HP
+constant ID_HOLY_TRINITY = compiletime(ITEM_ID_GEN.next()) // 40 int, agi, and str
 
 
 class BaseItem extends ItemDefinition
@@ -64,8 +72,18 @@ class ExpensiveItem extends BaseItem
     ..setAgilityBonus(1, 100)
     new AbilityDefinitionAgilityBonusPlus1(ID_100_STR)
     ..setStrengthBonus(1, 100)
+    new AbilityDefinitionIntelligenceBonusPlus1(ID_40_INT)
+    ..setIntelligenceBonus(1, 40)
+    new AbilityDefinitionAgilityBonusPlus1(ID_40_AGI)
+    ..setAgilityBonus(1, 40)
+    new AbilityDefinitionAgilityBonusPlus1(ID_40_STR)
+    ..setStrengthBonus(1, 40)
     new AbilityDefinitionAttackBonusPlus1(ID_100_DMG)
     ..setAttackBonus(1, 100)
+    new AbilityDefinitionMoveSpeedBonus(ID_20_MOVESPEED)
+    ..setMovementSpeedBonus(1, 20)
+    new AbilityDefinitionMaxLifeBonusGreater(ID_5000_HP)
+    ..setMaxLifeGained(1, 5000)
 
     new BaseItem(ID_RING, 0, 0, Icons.bTNGoldRing, "Ring", "Provides 3 bonus int")
     ..setAbilities(commaList(AbilityIds.intelligenceBonusPlus3))
@@ -85,21 +103,23 @@ class ExpensiveItem extends BaseItem
     new BaseItem(ID_HAT, 1, 2, Icons.bTNHelmutPurple, "Hat", "Provides bonus armor")
     ..setAbilities(commaList(AbilityIds.defenseBonusPlus3))
 
-    new ExpensiveItem(ID_GLOBE, 2, 0, Icons.bTNCrystalBall, "Globe", "Provides 100 bonus int")
+    // Expensive items
+
+    new ExpensiveItem(ID_GLOBE, 0, 0, Icons.bTNCrystalBall, "Globe", "Provides 100 bonus int")
     ..setAbilities(commaList(ID_100_INT))
 
-    new ExpensiveItem(ID_SHOES, 2, 1, Icons.bTNBoots, "Shoes", "Provides 100 bonus agi")
+    new ExpensiveItem(ID_SHOES, 0, 1, Icons.bTNBoots, "Shoes", "Provides 100 bonus agi")
     ..setAbilities(commaList(ID_100_AGI))
 
-    new ExpensiveItem(ID_HELMET, 2, 2, Icons.bTNHelmOfValor, "Helmet", "Provides 100 bonus str")
+    new ExpensiveItem(ID_HELMET, 0, 2, Icons.bTNHelmOfValor, "Helmet", "Provides 100 bonus str")
     ..setAbilities(commaList(ID_100_STR))
 
-    new ExpensiveItem(ID_GRINDCORE, 3, 0, Icons.bTNOrcMeleeUpThree, "Grindcore", "Provides 100 attack damage and 50% lifesteal")
+    new ExpensiveItem(ID_GRINDCORE, 2, 0, Icons.bTNOrcMeleeUpThree, "Grindcore", "Provides 100 attack damage and 50% lifesteal")
     ..setAbilities(commaList(AbilityIds.itemLifeSteal, ID_100_DMG))
 
     new ExpensiveItem(
         ID_EXASPERATION,
-        3,
+        2,
         1,
         Icons.bTNArcaniteRanged,
         "Exasperation",
@@ -107,21 +127,29 @@ class ExpensiveItem extends BaseItem
     )
     ..setAbilities(commaList('ANss', ID_100_DMG))
 
+    new ExpensiveItem(ID_WINDRUNNER, 2, 2, Icons.bTNWindSerpent, "Windrunner", "Provides 100 attack damage and 20 movement speed")
+    ..setAbilities(commaList(ID_100_DMG, ID_20_MOVESPEED))
+
+    new ExpensiveItem(ID_RAIDBOSS, 3, 0, Icons.bTNMoonArmor, "Raid Boss", "Provides 5000 hit points")
+    ..setAbilities(commaList(ID_5000_HP))
+
+    new ExpensiveItem(ID_HOLY_TRINITY, 3, 1, Icons.bTN3M3, "Holy Trinity", "Provides 40 bonus int, agi, and str")
+    ..setAbilities(commaList(ID_40_AGI, ID_40_INT, ID_40_STR))
+
     new BuildingDefinition(ID_CASTLE, UnitIds.castle)
     ..setNormalAbilities(commaList(AbilityIds.shopSharingAlliedBldg, AbilityIds.shopPurchaseItem))
     ..setItemsMade(
         commaList(
-            ID_RING,
-            ID_SOCKS,
-            ID_PIG,
-            ID_GEM,
-            ID_AMULET,
-            ID_HAT,
             ID_GLOBE,
             ID_SHOES,
             ID_HELMET,
+
             ID_GRINDCORE,
-            ID_EXASPERATION
+            ID_EXASPERATION,
+            ID_WINDRUNNER,
+
+            ID_RAIDBOSS,
+            ID_HOLY_TRINITY
         )
     )
 
@@ -130,6 +158,8 @@ function unit.registerDeath(code func)
 
 
 init
+    SetMapFlag(MAP_LOCK_RESOURCE_TRADING, true)
+
     for i = 0 to 1
         createUnit(players[i], ID_CASTLE)
         ..setPos(players[i].getStartLocation())
