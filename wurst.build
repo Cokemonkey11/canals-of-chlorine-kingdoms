@@ -11,7 +11,7 @@ buildMapData:
   author: Cokemonkey11
   scenarioData:
     description: |
-      An old-school AoS/MOBA/Lane-pushing game that takes about 30-40 minutes.
+      An old-school AoS/MOBA/Lane-pushing game that takes about 30 minutes.
 
       Easy to learn, hard to master!
     suggestedPlayers: "8"

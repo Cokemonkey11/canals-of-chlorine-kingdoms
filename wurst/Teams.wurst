@@ -19,6 +19,10 @@ public function force.getHomePos() returns vec2
     return this == forceWest ? players[0].getStartLocation() : players[1].getStartLocation()
 
 
+public function force.getFountainPos() returns vec2
+    return this == forceWest ? players[0].getStartLocation() - vec2(512. + 256., 256.) : players[1].getStartLocation() + vec2(512. + 256., -256.)
+
+
 public function isSinglePlayer() returns bool
     return playerCount == 1
 

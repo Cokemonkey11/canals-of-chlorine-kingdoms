@@ -19,8 +19,10 @@ init
                 fx2..setPos(vec2(0., -5000.))..destr()
                 cb.stop()
             else if cb.isLast()
+                let fountainPos = caster.getOwner().getForce().getFountainPos()
+
                 fx1.destr()
                 fx2.destr()
-                caster.setPos(caster.getOwner().getForce().getHomePos())
-                caster.getOwner().panCameraToTimed(caster.getOwner().getForce().getHomePos(), 0.)
+                caster.setPos(fountainPos)
+                caster.getOwner().panCameraToTimed(fountainPos, 0.)
                 caster.issueImmediateOrder("stop")
