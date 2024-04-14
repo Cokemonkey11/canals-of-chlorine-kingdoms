@@ -18,6 +18,7 @@ import Teams
 import WhenClose
 import WhenRevivable
 
+import Flash
 import Mongo
 import NightHowler
 import Sorcerer
@@ -98,7 +99,7 @@ init
         hero.setProperName(hero.getOwner().getName(true))
         all_heroes.add(hero)
 
-        hero..addItemById(ID_STARTER_CIRCLET)..addAbility(ID_RECALL)
+        hero..addItemById(ID_STARTER_CIRCLET)..addAbility(ID_RECALL)..addAbility(ID_FLASH)
         if hero_sounds.has(hero.getTypeId())
             hero_sounds.get(hero.getTypeId()).playForPlayer(hero.getOwner())
 

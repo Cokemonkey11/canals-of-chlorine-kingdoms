@@ -18,6 +18,7 @@
 62. [x] no item for hp and hp regen
 63. [ ] increase stats per level
 64. [ ] collision sizes and creeps are disruptive particularly for melee heroes
+65. [ ] it's problematic that creep spawning stops completely once a barracks is lost
 
 ## Credits
 

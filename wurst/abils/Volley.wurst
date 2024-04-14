@@ -1,0 +1,63 @@
+package Volley
+
+import Abilities
+import BuffIds
+import BuffObjEditing
+import ClosureEvents
+import ClosureTimers
+import SoundUtils
+import Units
+
+import AbilityTooltipGenerator
+
+
+public constant ID_VOLLEY = compiletime(ABIL_ID_GEN.next())
+
+constant ID_VOLLEY_BUFF = compiletime(BUFF_ID_GEN.next())
+
+constant RealLevelClosure DURATION = (lvl) -> 1. + lvl
+
+constant FRENZY_SOUND = new SoundDefinition(Sounds.unholyFrenzyBirth1)
+constant MIRROR_SOUND = new SoundDefinition(Sounds.mirrorImage)
+
+
+@compiletime function gen()
+    new BuffDefinition(ID_VOLLEY_BUFF, BuffIds.berserk)
+    ..setName("Volley")
+    ..setIcon(Icons.bTNVorpalBlades)
+
+    let tgen = new AbilityTooltipGenerator("Provides a brief burst of attack speed.")
+    new AbilityDefinitionBerserk(ID_VOLLEY)
+    ..setHeroAbility(true)
+    ..registerTooltipGenerator(tgen)
+
+    ..tooltipStartListen()
+    ..setName("Volley")
+    ..setLevels(3)
+    ..presetAttackSpeedIncrease((int lvl) -> .35 + (lvl - 1) * .25)
+    ..presetDurationHero(DURATION)
+    ..presetCooldown(lvl -> 16. - 2 * lvl)
+    ..presetManaCost((int lvl) -> 80)
+    ..tooltipStopListen(true)
+
+    ..presetDamageTakenIncrease((int lvl) -> 0)
+    ..presetMovementSpeedIncrease((int lvl) -> 0)
+    ..presetButtonPosNormal(1, 2)
+    ..presetButtonPosResearch(1, 0)
+    ..presetHotkey("W")
+    ..presetIcon(Icons.bTNVorpalBlades)
+    ..presetBuffs(lvl -> commaList(ID_VOLLEY_BUFF))
+
+
+init
+    EventListener.onCast(ID_VOLLEY) u ->
+        let fx = addEffect(Units.marine, u.getPos())..setAlpha(64)..setYaw(u.getFacingAngle())..playAnimation(ANIM_TYPE_ATTACK, 1.5)..setColorByPlayer(u.getOwner())
+        FRENZY_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
+        MIRROR_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
+        let lvl = u.getAbilityLevel(ID_VOLLEY)
+
+        doPeriodicallyCounted(ANIMATION_PERIOD, (DURATION.run(lvl) / ANIMATION_PERIOD).toInt()) cb ->
+            fx.setPos(u.getPos().polarOffset(angle(GetRandomReal(0., 2. * PI)), GetRandomReal(0., 64.)))
+            fx.setYaw(u.getFacingAngle())
+            if cb.isLast()
+                fx..setPos(vec2(0., -5000.))..destr()

@@ -1,15 +1,43 @@
 package Flash
 
 import ClosureEvents
-import ClosureTimers
 import HashMap
 import OrderIds
 import TerrainUtils
 
-import SpaceCadet
+import AbilityTooltipGenerator
 
+
+public constant ID_FLASH = compiletime(ABIL_ID_GEN.next())
 
 constant lastSmarts = new HashMap<unit, tile>()
+
+constant FLASH_DISTANCE = 400.
+
+
+@compiletime function gen()
+    let tgen2 = new AbilityTooltipGenerator("Blinks a short distance in the direction of the " + "last".color(color(170, 0, 0)) + " |cff919191right-click.|r")
+    new AbilityDefinitionWindWalk(ID_FLASH)
+    ..registerTooltipGenerator(tgen2)
+    ..setIconNormal(Icons.bTNBearBlink)
+    ..setIconResearch(Icons.bTNBearBlink)
+    ..setHeroAbility(false)
+
+    ..tooltipStartListen()
+    ..setLevels(1)
+    ..setName("Flash")
+    ..presetCooldown((int lvl) -> 60. - (15 * (lvl - 1)))
+    ..addTooltipProperty("Range", (int lvl) -> FLASH_DISTANCE)
+    ..tooltipStopListen(true)
+
+    ..presetBackstabDamage(lvl -> false)
+    ..presetMovementSpeedIncrease(lvl -> 0.)
+    ..presetDurationHero(lvl -> 0.1)
+    ..presetTransitionTime(lvl -> 0.)
+    ..presetManaCost(int lvl -> 50)
+    ..setButtonPositionNormalX(1)
+    ..setButtonPositionNormalY(1)
+    ..presetHotkey("F")
 
 
 init
@@ -18,12 +46,10 @@ init
         let isSmart = EventData.getIssuedOrderId() == OrderIds.smart
         let target = EventData.getOrderPos()
 
-        if isSmart and orderer.getTypeId() == ID_SPACE_CADET
+        if isSmart
             lastSmarts.put(orderer, target.getTile())
 
     EventListener.onCast(ID_FLASH) (unit caster) ->
         let whereTo = lastSmarts.has(caster) ? lastSmarts.get(caster) : ZERO2.getTile()
 
         caster.setXY(caster.getPos().polarOffset(caster.getPos().angleTo(whereTo.toVec2()), FLASH_DISTANCE))
-        nullTimer() ->
-            caster.issueImmediateOrderById(OrderIds.unimmolation)

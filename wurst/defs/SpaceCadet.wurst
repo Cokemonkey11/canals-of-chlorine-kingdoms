@@ -8,15 +8,12 @@ import Assets
 import AbilityTooltipGenerator
 
 import HeroGlow
+import Volley
 
 
 public constant ID_SPACE_CADET = compiletime(HERO_ID_GEN.next())
 
 public constant ID_DIVINE_SHIELD = compiletime(ABIL_ID_GEN.next())
-
-public constant ID_FLASH = compiletime(ABIL_ID_GEN.next())
-
-public constant FLASH_DISTANCE = 400.
 
 
 @compiletime function genSpaceCadet()
@@ -40,28 +37,6 @@ public constant FLASH_DISTANCE = 400.
     ..presetCanDeactivate(int lvl -> false)
     ..presetManaCost(int lvl -> 0)
 
-    let tgen2 = new AbilityTooltipGenerator("Blinks a short distance in the direction of the " + "last".color(color(170, 0, 0)) + " |cff919191right-click.|r")
-    new AbilityDefinitionWindWalk(ID_FLASH)
-    ..registerTooltipGenerator(tgen2)
-    ..setIconNormal(Icons.bTNBearBlink)
-    ..setIconResearch(Icons.bTNBearBlink)
-
-    ..tooltipStartListen()
-    ..setLevels(3)
-    ..setName("Flash")
-    ..presetCooldown((int lvl) -> 60. - (15 * (lvl - 1)))
-    ..addTooltipProperty("Range", (int lvl) -> FLASH_DISTANCE)
-    ..tooltipStopListen(true)
-
-    ..presetBackstabDamage(lvl -> false)
-    ..presetMovementSpeedIncrease(lvl -> 0.)
-    ..presetDurationHero(lvl -> 0.1)
-    ..presetTransitionTime(lvl -> 0.)
-    ..presetManaCost(int lvl -> 50)
-    ..setButtonPositionNormalX(2)
-    ..setButtonPositionNormalY(2)
-    ..setButtonPositionResearchX(2)
-    ..presetHotkey("E")
 
     new HeroDefinition(ID_SPACE_CADET, UnitIds.darkranger)
     ..setName("Space Cadet")
@@ -77,5 +52,5 @@ public constant FLASH_DISTANCE = 400.
     ..setAttack1AnimationBackswingPoint(0.35)
     ..setAttack1AnimationDamagePoint(.1)
     ..setUnitSoundSet("Marine")
-    ..setHeroAbilities(commaList(AbilityIds.stormBolt, AbilityIds.enduranceAura1, ID_FLASH, ID_DIVINE_SHIELD))
+    ..setHeroAbilities(commaList(AbilityIds.stormBolt, ID_VOLLEY, AbilityIds.enduranceAura1, ID_DIVINE_SHIELD))
     ..setIconGameInterface(Icons.bTNMarine)
