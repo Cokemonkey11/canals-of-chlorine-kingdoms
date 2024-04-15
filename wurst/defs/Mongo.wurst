@@ -1,12 +1,12 @@
 package Mongo
 
-// Amnesia (forget damage)
 // Lifesteal (grants temporary high lifesteal)
 
 import Assets
 
 import AbilityTooltipGenerator
 
+import Amnesia
 import BerzerkAndWinch
 import HeroGlow
 import Supertank
@@ -31,5 +31,5 @@ public constant ID_MONGO = compiletime(HERO_ID_GEN.next())
     ..setRequiredBoneNames("alternate")
     ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
     ..setUnitSoundSet("HeroTinker")
-    ..setHeroAbilities(commaList(ID_BERZERK_AND_WINCH, AbilityIds.alchemistHealingSpray, AbilityIds.darkRangerDrain, ID_SUPERTANK))
+    ..setHeroAbilities(commaList(ID_BERZERK_AND_WINCH, AbilityIds.alchemistHealingSpray, ID_AMNESIA, ID_SUPERTANK))
     ..setIconGameInterface(Icons.bTNROBOGOBLIN)

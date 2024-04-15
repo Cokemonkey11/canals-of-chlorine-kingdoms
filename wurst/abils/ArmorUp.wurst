@@ -1,5 +1,6 @@
 package ArmorUp
 
+import Abilities
 import AbilityObjEditing
 import ClosureEvents
 import ClosureTimers
@@ -21,5 +22,8 @@ init
         caster..addAbility(ID_ARMOR_BONUS)
         ..setAbilityLevel(ID_ARMOR_BONUS, caster.getAbilityLevel(ID_ARMOR_UP))
 
+        let fx = addEffect(Abilities.devotionAura, caster, "origin")
+
         doAfter(10.) ->
             caster.removeAbility(ID_ARMOR_BONUS)
+            fx.destr()

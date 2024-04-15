@@ -1,0 +1,102 @@
+package Amnesia
+
+import Abilities
+import ClosureEvents
+import ClosureTimers
+import HashMap
+import LinkedList
+import StandardTextTags
+
+import AbilityTooltipGenerator
+
+
+public constant ID_AMNESIA = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure WINDOW_FUNCTION = lvl -> 4 + lvl
+
+constant AMNESIAS = new IterableMap<unit, LinkedList<real>>()
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Forgets about how much HP he has, negating recent damage."
+    )
+    new ChannelAbilityPreset(ID_AMNESIA, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(2, 2)
+    ..presetButtonPosResearch(2, 0)
+    ..presetHotkey("E")
+    ..presetIcon(Icons.bTNSelectHeroOn)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetManaCost(_ -> 75)
+    ..setName("Amnesia")
+    ..presetCooldown(lvl -> 35. - (5. * lvl))
+    ..addTooltipProperty("Window (Seconds)", WINDOW_FUNCTION)
+    ..tooltipStopListen()
+
+
+init
+    CreateTrigger()..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)..addAction() ->
+        let u = GetLearningUnit()
+        let sk = GetLearnedSkill()
+
+        if sk == ID_AMNESIA and not AMNESIAS.has(u)
+            AMNESIAS.put(u, new LinkedList<real>())
+
+    doPeriodically(1.) (CallbackPeriodic cb) ->
+        AMNESIAS.forEach() (unit key, LinkedList<real> value) ->
+            let currHp = key.getHP()
+            value.add(currHp)
+
+            if value.size() > WINDOW_FUNCTION.run(key.getAbilityLevel(ID_AMNESIA))
+                value.dequeue()
+
+            let max = value.foldl(0., (lhs, rhs) -> max(lhs, rhs))
+
+            let tt = standardTextTag()
+                ..setText(max.toInt().toString())
+                ..setPos(key.getPos3Real() - vec3(64., 0., 0.))
+                ..setVelocity(0., 0.)
+                ..setColor(get_color_by_ratio(max, currHp).withAlpha(155))
+                ..setFadepoint(1.)
+                ..setLifespan(1.)
+            doPeriodicallyCounted(ANIMATION_PERIOD, (1. / ANIMATION_PERIOD).toInt()) (CallbackCounted cb) ->
+                tt.setPos(key.getPos3Real() - vec3(64., 0., 0.))
+
+    EventListener.onCast(ID_AMNESIA) caster ->
+        let vals = AMNESIAS.get(caster)
+        let max = vals.foldl(0., (lhs, rhs) -> max(lhs, rhs))
+        vals.clear()
+        caster.setHP(max(caster.getHP(), max))
+        let fx2 = addEffect(Abilities.healingSalveTarget, caster, "origin")
+        let fx = addEffect(Abilities.silenceTarget, caster, "overhead")
+
+        doAfter(3.) ->
+            fx.destr()
+            fx2.destr()
+
+
+function get_color_by_ratio(real numerator, real denominator) returns color
+    if denominator == 0
+        return color(255, 0, 0)
+
+    let ratio = numerator / denominator
+
+    if ratio <= 0
+        return color(255, 0, 0)
+
+    if 0 < ratio and ratio <= 1
+        let r = 255
+        let g = (255 * ratio).toInt()
+        let b = g
+        return color(r, g, b)
+
+    if 1 < ratio and ratio <= 2
+        let r = (255 * (2 - ratio)).toInt()
+        let g = 255
+        let b = r
+        return color(r, g, b)
+
+    return color(0, 255, 0)
