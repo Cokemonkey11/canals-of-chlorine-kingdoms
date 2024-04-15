@@ -24,11 +24,20 @@ constant HERO_BOUNTY = 10
 
 constant TOWER_BOUNTY = 10
 
-constant UNIT_EXPERIENCE_BOUNTY = 16
+constant UNIT_EXPERIENCE_BOUNTY = 24 // People were happy at 16 but I would like players to easily get level 6 before end of game
 
 constant BOUNTY_DIST = 1500.
 
 constant TOWER_DESTROYED_WARNING_SOUND = new SoundDefinition(Sounds.warning)
+
+
+function doesDamageKillUnit(real hp, real damage) returns bool
+    // https://www.hiveworkshop.com/threads/real-talk-floats-in-warcraft-3.270579/
+    let minAliveHp = 0.404998779
+    if hp - damage < minAliveHp
+        return true
+
+    return false
 
 
 init
@@ -39,7 +48,7 @@ init
         let dying_unit_type = dying_unit.getTypeId()
         let dying_player = dying_unit.getOwner()
 
-        if damage >= dying_unit.getHP() + 0.405
+        if doesDamageKillUnit(dying_unit.getHP(), damage)
             // If the unit gives bounty, give its killer the bounty.
             if bounties.has(dying_unit_type)
                 if dying_player.isEnemyOf(killing_player)
@@ -67,3 +76,11 @@ init
                 for pl in dying_player.getForce()
                     printTimedToPlayer("Your tower was destroyed.", 30., pl)
                     TOWER_DESTROYED_WARNING_SOUND.playForPlayer(pl)
+
+
+@test function testKillUnit()
+    assertTrue(doesDamageKillUnit(1, 1))
+
+    assertTrue(not doesDamageKillUnit(1.5, 1))
+
+    assertTrue(doesDamageKillUnit(1.404, 1))

@@ -16,9 +16,11 @@
 60. [ ] ? blizzard is not effective enough as a farming tool
 61. [x] mana and mana regen items dont say how much is provided
 62. [x] no item for hp and hp regen
-63. [ ] increase stats per level
-64. [ ] collision sizes and creeps are disruptive particularly for melee heroes
-65. [ ] it's problematic that creep spawning stops completely once a barracks is lost
+63. [x] increase ~stats per level~ stats per second
+64. [x] collision sizes and creeps are disruptive particularly for melee heroes
+66. [ ] priestess of the moon searing arrows doesn't stack with lifesteal item
+67. [ ] blizzard (sorcerer) causes creeps to sometimes run away
+68. [x] bounty gold doesn't work some of the time with blizzard
 
 ## Credits
 
@@ -26,5 +28,6 @@
 - Frotty
 - Matro
 - lep
+- looking_for_help
 - Blizzard Entertainment
 - Dionesiist

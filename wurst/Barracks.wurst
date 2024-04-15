@@ -7,17 +7,49 @@ import UnitIds
 import Creeps
 import Teams
 
+
 public constant siegeQueue = new LinkedList<int>
 public constant westFootmanRegion = CreateRegion()
 public constant eastFootmanRegion = CreateRegion()
 
+
+class RaxData
+    vec2 raxPos
+    vec2 spawnPos
+    vec2 targetPos
+    unit rax
+    player owner
+    bool isAlive
+    unit oppositeRax
+    bool spawnCaptain
+
+    construct(unit rax)
+        this.rax = rax
+        this.owner = rax.getOwner()
+        this.raxPos = this.rax.getPos()
+
+        let offsetMultiplier = forceWest.containsPlayer(rax.getOwner()) ? 1. : -1.
+        this.spawnPos = this.raxPos + vec2(500. * offsetMultiplier, 0.)
+        this.targetPos = this.spawnPos + vec2(12000. * offsetMultiplier, 0.)
+        this.isAlive = true
+        this.oppositeRax = null
+        this.spawnCaptain = false
+
+
 init
-    let raxes = CreateGroup()
+    let raxes = new LinkedList<RaxData>()
+
     forUnitsAll((u) -> begin
         if u.getTypeId() == UnitIds.footman
             (u.getOwner() == players[0] ? westFootmanRegion : eastFootmanRegion).addRect(u.getPos().withRadiusRect(500.))
-            raxes.add(ReplaceUnitBJ(u, UnitIds.arcanesanctum, bj_UNIT_STATE_METHOD_DEFAULTS))
+            raxes.add(new RaxData(ReplaceUnitBJ(u, UnitIds.arcanesanctum, bj_UNIT_STATE_METHOD_DEFAULTS)))
     end)
+
+    for rax_ii in raxes
+        for rax_jj in raxes
+            if rax_ii.owner != rax_jj.owner and (rax_ii.rax.getPos().y - rax_jj.rax.getPos().y).abs() < 500.
+                rax_ii.oppositeRax = rax_jj.rax
+                rax_jj.oppositeRax = rax_ii.rax
 
     CreateTrigger()
     ..registerEnterRegion(westFootmanRegion, null)
@@ -32,14 +64,20 @@ init
     doPeriodically(30., (_cb) -> begin
         let typOrNull = siegeQueue.pop()
         for rax in raxes
-            let directionMultiplier = forceWest.containsPlayer(rax.getOwner()) ? 1.: -1.
-            for i = 0 to 4
-                createUnit(rax.getOwner(), ID_FOOTMAN, rax.getPos() + vec2(500.* directionMultiplier, 0))
-                    ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
-            for i = 0 to 2
-                createUnit(rax.getOwner(), ID_ARCHER, rax.getPos())
-                    ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
+            if not rax.spawnCaptain and (rax.oppositeRax == null or rax.oppositeRax.getTypeId() == 0 or not rax.oppositeRax.isAlive())
+                rax.spawnCaptain = true
+
+            if rax.spawnCaptain
+                createUnit(rax.owner, ID_CAPTAIN, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
+
+            doPeriodicallyCounted(0.5, 5) (CallbackCounted cb) ->
+                createUnit(rax.owner, ID_FOOTMAN, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
+
+            doAfter(5 * 0.5) ->
+                doPeriodicallyCounted(0.5, 3) (CallbackCounted cb) ->
+                    createUnit(rax.owner, ID_ARCHER, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
+
             if typOrNull != 0
-                createUnit(rax.getOwner(), typOrNull, rax.getPos() + vec2(-500.* directionMultiplier, 0))
-                    ..issuePointOrder("attack", rax.getPos() + vec2(12000 * directionMultiplier, 0))
+                doAfter(9 * 0.5) ->
+                    createUnit(rax.owner, typOrNull, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
     end)

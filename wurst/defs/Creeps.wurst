@@ -5,10 +5,14 @@ import UnitIds
 import UnitObjEditing
 
 
+public constant ID_CAPTAIN = compiletime(UNIT_ID_GEN.next())
 public constant ID_FOOTMAN = compiletime(UNIT_ID_GEN.next())
 public constant ID_ARCHER = compiletime(UNIT_ID_GEN.next())
 public constant ID_MORTAR_TEAM = compiletime(UNIT_ID_GEN.next())
 public constant ID_CANNON_TOWER = compiletime(UNIT_ID_GEN.next())
+
+// 11 seemed too low. 16 seemed too high. I believe there's some discretization at boundaries of lots of 8, 16, 32 for pathing.
+constant COLLISION_SIZE = 15.
 
 
 @compiletime function genFootman()
@@ -17,7 +21,16 @@ public constant ID_CANNON_TOWER = compiletime(UNIT_ID_GEN.next())
     ..setAttack1DamageNumberofDice(1)
     ..setAttack1DamageSidesperDie(1)
     ..setHitPointsMaximumBase(400)
-    ..setCollisionSize(16.)
+    ..setCollisionSize(COLLISION_SIZE)
+
+
+@compiletime function genCapatin()
+    new UnitDefinition(ID_CAPTAIN, UnitIds.thecaptain)
+    ..setAttack1DamageBase(39)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)
+    ..setHitPointsMaximumBase(600)
+    ..setCollisionSize(COLLISION_SIZE)
 
 
 @compiletime function genArcher()
@@ -28,7 +41,7 @@ public constant ID_CANNON_TOWER = compiletime(UNIT_ID_GEN.next())
     ..setHitPointsMaximumBase(200)
     ..setAttack1CooldownTime(2.)
     ..setAttack1ProjectileSpeed(600)
-    ..setCollisionSize(16.)
+    ..setCollisionSize(COLLISION_SIZE)
 
 
 @compiletime function genMortarTeam()
@@ -36,6 +49,8 @@ public constant ID_CANNON_TOWER = compiletime(UNIT_ID_GEN.next())
     ..setAttack1DamageBase(99)
     ..setAttack1DamageNumberofDice(1)
     ..setAttack1DamageSidesperDie(1)
+    ..setCollisionSize(COLLISION_SIZE)
+    ..setAttacksEnabled(1)
 
 
 @compiletime function genCannonTower()

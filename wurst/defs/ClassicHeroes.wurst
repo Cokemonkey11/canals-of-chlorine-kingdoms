@@ -1,6 +1,8 @@
 package ClassicHeroes
 
+import AbilityIds
 import HashMap
+import ObjectIds
 import ObjectIdGenerator
 import UnitIds
 import UnitObjEditing
@@ -27,3 +29,4 @@ public constant CLASSIC_HERO_ID_MAP = new IterableMap<int, int>()
         ..setAttack1DamageBase(34)
         ..setAttack1DamageNumberofDice(1)
         ..setAttack1DamageSidesperDie(1)
+        ..setNormalAbilities(commaList(AbilityIds.inventory))
