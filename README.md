@@ -13,19 +13,19 @@
 57. [ ] third set of custom heroes
 58. [ ] third set of custom abilities for each hero
     - [x] space cadet charged blast
-    - [ ] sorcerer blizzard replacement
+    - [x] sorcerer blizzard replacement
     - [ ] mongo amnesia
     - [ ] night howler finger of pain reset
     - [ ] steel elemental scaling thunderclap
     - [ ] void annihilator mana regenerator
 59. [ ] ? some way to get permanent movement speed bonus by doing something in a central area
-60. [ ] ? blizzard is not effective enough as a farming tool
+60. [x] ? blizzard is not effective enough as a farming tool
 61. [x] mana and mana regen items dont say how much is provided
 62. [x] no item for hp and hp regen
 63. [x] increase ~stats per level~ stats per second
 64. [x] collision sizes and creeps are disruptive particularly for melee heroes
 66. [ ] priestess of the moon searing arrows doesn't stack with lifesteal item
-67. [ ] blizzard (sorcerer) causes creeps to sometimes run away
+67. [x] blizzard (sorcerer) causes creeps to sometimes run away
 68. [x] bounty gold doesn't work some of the time with blizzard
 
 ## Credits

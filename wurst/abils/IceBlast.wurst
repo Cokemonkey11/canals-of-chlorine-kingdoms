@@ -1,0 +1,88 @@
+package IceBlast
+
+import Abilities
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+
+
+public constant ID_ICE_BLAST = compiletime(ABIL_ID_GEN.next())
+
+constant RANGE = 700.
+constant IntLevelClosure DAMAGE_FUNCTION = lvl -> 50 + 25 * lvl
+constant RealLevelClosure INT_DAMAGE_FUNCTION = lvl -> 0.9 + 0.1 * lvl
+constant IntLevelClosure MANA_COST_INCREASE_DURATION_FUNCTION = lvl -> 9 - lvl
+constant AOE = 300.
+constant MANA_COST_INCREASE = 25
+constant DELAY = 1.
+constant DAMAGE_DELAY = 1.4
+constant ANG_CIRCLE = angle(2. * PI)
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Blasts the target area with an ice storm after a short delay. Can be cast multiple times in succession at increased mana cost."
+    )
+    new ChannelAbilityPreset(ID_ICE_BLAST, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(2, 2)
+    ..presetButtonPosResearch(2, 0)
+    ..presetHotkey("E")
+    ..presetIcon(Icons.bTNBlizzard)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.POINT)
+    ..presetAreaofEffect((int lvl) -> AOE)
+    ..presetManaCost(_ -> 50)
+    ..presetCastRange((int lvl) -> RANGE)
+    ..setName("Ice Blast")
+    ..presetCooldown(lvl -> 0.5)
+    ..addTooltipProperty("Damage", DAMAGE_FUNCTION)
+    ..addTooltipProperty("Damage (int)", INT_DAMAGE_FUNCTION)
+    ..addTooltipProperty("Mana Cost Increase", lvl -> MANA_COST_INCREASE)
+    ..addTooltipProperty("Mana Cost Increase Duration", MANA_COST_INCREASE_DURATION_FUNCTION)
+    ..tooltipStopListen()
+
+    ..presetOption(Option.TARGETIMAGE, true)
+
+
+init
+    EventListener.onCast(ID_ICE_BLAST) caster ->
+        let lvl = caster.getAbilityLevel(ID_ICE_BLAST)
+        let damage = DAMAGE_FUNCTION.run(lvl) + INT_DAMAGE_FUNCTION.run(lvl) * caster.getInt(true)
+        let manaIncreaseDuration = MANA_COST_INCREASE_DURATION_FUNCTION.run(lvl)
+        let target = EventData.getSpellTargetPos()
+
+        caster.setAbilityManaCost(ID_ICE_BLAST, lvl - 1, caster.getAbilityManaCost(ID_ICE_BLAST, lvl - 1) + MANA_COST_INCREASE)
+        doAfter(manaIncreaseDuration.toReal()) ->
+            caster.setAbilityManaCost(ID_ICE_BLAST, lvl - 1, caster.getAbilityManaCost(ID_ICE_BLAST, lvl - 1) - MANA_COST_INCREASE)
+
+        let fx = addEffect(Abilities.blizzardTarget, target)..setTimeScale(0.25)
+        let fx2 = addEffect(Abilities.frostDamage, target)
+
+        let ang = angle(GetRandomReal(0., 2. * PI))
+        let fx3 = addEffect(Abilities.blizzardTarget, target.polarOffset(ang, AOE / 2.))..setTimeScale(0.25)
+        let fx4 = addEffect(Abilities.blizzardTarget, target.polarOffset(ang + ANG_CIRCLE / 3., AOE / 2.))..setTimeScale(0.25)
+        let fx5 = addEffect(Abilities.blizzardTarget, target.polarOffset(ang + 2. * ANG_CIRCLE / 3., AOE / 2.))..setTimeScale(0.25)
+        doAfter(DELAY) ->
+            fx2.destr()
+            fx..setTimeScale(1.5).destr()
+
+        doAfter(DELAY + 0.25) ->
+            fx3..setTimeScale(1.5).destr()
+            fx4..setTimeScale(1.5).destr()
+            fx5..setTimeScale(1.5).destr()
+
+        // Normal animation takes about 0.9 seconds to damage point.
+        // Our animation takes 1.4s
+        // 1.4s = 1s at 25% speed followed by 0.4s at 150% speed
+        //      = 1s from 3.6s followed by 0.4s from 0.6s
+        //      = 27% followed by 66% of the animation duration
+        doAfter(DAMAGE_DELAY) ->
+            forUnitsInRange(target, AOE) (unit u) ->
+                if u.isEnemyOf(caster) and u.isAlive() and not u.isInvulnerable()
+                    caster.dealCodeDamage(u, damage)

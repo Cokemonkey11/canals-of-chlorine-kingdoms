@@ -9,6 +9,7 @@ import AbilityTooltipGenerator
 
 import FinalesFunkeln
 import HeroGlow
+import IceBlast
 import Ignition
 
 
@@ -26,5 +27,5 @@ public constant ID_SORCERER = compiletime(HERO_ID_GEN.next())
     ..setModelFile(Units.humanMage1)
     ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW, AbilityIds.lightningAttack))
     ..setUnitSoundSet("ElfWizard")
-    ..setHeroAbilities(commaList(ID_IGNITION, AbilityIds.frostArmor1, AbilityIds.blizzard, ID_FINALES_FUNKELN))
+    ..setHeroAbilities(commaList(ID_IGNITION, AbilityIds.frostArmor1, ID_ICE_BLAST, ID_FINALES_FUNKELN))
     ..setIconGameInterface(Icons.bTNBanditMage)
