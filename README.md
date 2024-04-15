@@ -8,10 +8,16 @@
 48. [x] no leaver message
 50. [x] gold pooling is possible
 52. [x] b should tp to fountain not castle, move fountain further back
-55. [ ] spell shield from exasperation does not work on malphite ult
-56. [ ] space cadet storm bolt is overpowered
+55. [x] spell shield from exasperation does not work on malphite ult
+56. [x] space cadet storm bolt is overpowered
 57. [ ] third set of custom heroes
 58. [ ] third set of custom abilities for each hero
+    - [x] space cadet charged blast
+    - [ ] sorcerer blizzard replacement
+    - [ ] mongo amnesia
+    - [ ] night howler finger of pain reset
+    - [ ] steel elemental scaling thunderclap
+    - [ ] void annihilator mana regenerator
 59. [ ] ? some way to get permanent movement speed bonus by doing something in a central area
 60. [ ] ? blizzard is not effective enough as a farming tool
 61. [x] mana and mana regen items dont say how much is provided

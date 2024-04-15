@@ -102,7 +102,7 @@ init
     EventListener.onCast(ID_SUPERTANK) caster ->
         new Supertank(caster)
 
-    DamageEvent.addListener(0) ->
+    DamageEvent.addListener(1) ->
         let source = DamageEvent.getSource()
         if SUPERTANKS.has(source) and DamageEvent.getType() == DamageType.ATTACK
             ATTACK_SOUND.playOnPoint(source.getPos3Real()).snd.setVolume(127)

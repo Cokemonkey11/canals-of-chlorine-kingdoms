@@ -1,13 +1,13 @@
 package SpaceCadet
 
 // - executor 5, 10, 15, 20
-// - berserk 35, 55, 75, 95
 
 import Assets
 
 import AbilityTooltipGenerator
 
 import HeroGlow
+import ChargedBlast
 import Volley
 
 
@@ -52,5 +52,5 @@ public constant ID_DIVINE_SHIELD = compiletime(ABIL_ID_GEN.next())
     ..setAttack1AnimationBackswingPoint(0.35)
     ..setAttack1AnimationDamagePoint(.1)
     ..setUnitSoundSet("Marine")
-    ..setHeroAbilities(commaList(AbilityIds.stormBolt, ID_VOLLEY, AbilityIds.enduranceAura1, ID_DIVINE_SHIELD))
+    ..setHeroAbilities(commaList(ID_CHARGED_BLAST, ID_VOLLEY, AbilityIds.enduranceAura1, ID_DIVINE_SHIELD))
     ..setIconGameInterface(Icons.bTNMarine)

@@ -105,7 +105,7 @@ init
         let target = EventData.getSpellTargetUnit()
         new Ignition(caster, target)
 
-    DamageEvent.addListener(0) ->
+    DamageEvent.addListener(1) ->
         let source = DamageEvent.getSource()
         let target = DamageEvent.getTarget()
         let attackDamage = DamageEvent.getAmount()

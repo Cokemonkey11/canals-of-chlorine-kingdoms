@@ -1,0 +1,28 @@
+package Exasperation
+
+import Abilities
+import DamageEvent
+import SoundUtils
+
+import Castles
+
+
+constant SHIELD_SOUND = new SoundDefinition(Sounds.spellShieldImpact1)
+
+
+init
+    DamageEvent.addListener(0) ->
+        let target = DamageEvent.getTarget()
+        let event_t = DamageEvent.getType()
+        let damage = DamageEvent.getAmount()
+        if (
+            target.getAbilityLevel(ID_EXASPERATION_SPELL_SHIELD) > 0
+            and event_t != DamageType.ATTACK
+            and target.getAbilityCooldownRemaining(ID_EXASPERATION_SPELL_SHIELD) <= 0.
+            and damage > 0.
+            and not target.isInvulnerable()
+        )
+            DamageEvent.setAmount(0.)
+            SHIELD_SOUND.playOnPoint(target.getPos3Real()).snd.setVolume(127)
+            flashEffect(Abilities.spellShieldCaster, target.getPos())
+            target.setAbilityCooldown(ID_EXASPERATION_SPELL_SHIELD, 1, EXASPERATION_SPELL_SHIELD_COOLDOWN)

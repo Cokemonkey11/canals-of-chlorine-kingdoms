@@ -1,0 +1,135 @@
+package ChargedBlast
+
+import Abilities
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import DamageEvent
+import HashMap
+import LinkedListModule
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+
+
+public constant ID_CHARGED_BLAST = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure DAMAGE_FUNCTION = lvl -> 50 + 50 * lvl
+
+constant STABILITY_WINDOW = 1.25
+constant CHARGED_ATTACK_TIMEOUT = 5
+constant STUN_DURATION = 1
+constant MISSILE_SPEED = 750.
+constant DAMAGE_RADIUS = 200
+
+constant CHARGED_BLASTS = new HashMap<unit, ChargedBlast>()
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Charges up an EMP blast. "
+        + "The next basic attack causes the blast to be loosed at the target, dealing damage in an area. "
+        + "If the blast is not immediately loosed, it becomes unstable, causing it to additionally stun its primary target."
+    )
+    new ChannelAbilityPreset(ID_CHARGED_BLAST, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(0, 2)
+    ..presetButtonPosResearch(0, 0)
+    ..presetHotkey("Q")
+    ..presetIcon(Icons.bTNLightningShield)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetManaCost(_ -> 75)
+    ..setName("Charged Blast")
+    ..presetCooldown(lvl -> 9. - (1. * lvl))
+    ..addTooltipProperty("Damage", DAMAGE_FUNCTION)
+    ..addTooltipProperty("Stability Window", lvl -> STABILITY_WINDOW)
+    ..addTooltipProperty("Charged Attack Timeout", lvl -> CHARGED_ATTACK_TIMEOUT)
+    ..addTooltipProperty("Stun Duration (Unstable)", lvl -> STUN_DURATION)
+    ..addTooltipProperty("Damage Radius", lvl -> DAMAGE_RADIUS)
+    ..tooltipStopListen()
+
+
+class ChargedBlast
+    use LinkedListModule
+
+    unit caster
+    real timeSpent
+    effect fx
+    bool loosed
+    bool stable
+    unit target
+
+    construct(unit caster)
+        this.caster = caster
+        this.timeSpent = 0.
+        this.fx = addEffect(Abilities.lightningBoltMissile, this.caster.getPos3Real() + vec3(0., 0., 100.))..setScale(0.75)
+        this.loosed = false
+        this.stable = true
+        this.target = null
+
+        CHARGED_BLASTS.put(caster, this)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx.destr()
+        CHARGED_BLASTS.remove(this.caster)
+
+    function tick()
+        this.timeSpent += ANIMATION_PERIOD
+
+        if not this.loosed and (this.timeSpent > CHARGED_ATTACK_TIMEOUT or not this.caster.isAlive())
+            destroy this
+            return
+
+        if this.loosed and (this.fx.getPos().distanceToSq(this.target.getPos()) < 64. * 64. or not this.target.isAlive())
+            if not this.stable
+                let targ = this.target
+                let fx = addEffect(Abilities.stasisTotemTarget, this.target, "overhead")
+                targ.pause()
+                doAfter(STUN_DURATION.toReal()) ->
+                    fx.destr()
+                    targ.unpause()
+
+            let damage = DAMAGE_FUNCTION.run(this.caster.getAbilityLevel(ID_CHARGED_BLAST)).toReal()
+
+            forUnitsInRange(this.fx.getPos(), DAMAGE_RADIUS.toReal()) u ->
+                if u.isAlive() and u.isEnemyOf(this.caster) and not u.isInvulnerable()
+                    this.caster.dealCodeDamage(u, damage)
+
+            destroy this
+            return
+
+        if this.stable and this.timeSpent >= STABILITY_WINDOW
+            this.stable = false
+
+        if not this.loosed
+            let offset = this.stable ? 0. : GetRandomReal(-50., 50.)
+            this.fx.setPos(this.caster.getPos3Real() + vec3(0., 0., 100. + offset))
+        else
+            this.fx.setPos(this.fx.getPos3().moveTowards(this.target.getPos3Real() + vec3(0., 0., 50.), MISSILE_SPEED * ANIMATION_PERIOD))
+
+
+init
+    EventListener.onCast(ID_CHARGED_BLAST) caster ->
+        new ChargedBlast(caster)
+
+    DamageEvent.addListener(1) ->
+        let attacker = DamageEvent.getSource()
+        let target = DamageEvent.getTarget()
+        let event_t = DamageEvent.getType()
+
+        if CHARGED_BLASTS.has(attacker) and event_t == DamageType.ATTACK
+            let blast = CHARGED_BLASTS.get(attacker)
+            if not blast.loosed
+                blast.loosed = true
+                blast.target = target

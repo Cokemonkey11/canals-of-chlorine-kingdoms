@@ -41,7 +41,7 @@ function doesDamageKillUnit(real hp, real damage) returns bool
 
 
 init
-    DamageEvent.addListener(1) ->
+    DamageEvent.addListener(2) ->
         let damage = DamageEvent.getAmount()
         let dying_unit = DamageEvent.getTarget()
         let killing_player = DamageEvent.getSource().getOwner()

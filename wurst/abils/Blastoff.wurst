@@ -15,6 +15,7 @@ constant BLASTOFF_SPEED = 1300.
 public constant BLASTOFF_AREA_OF_EFFECT = 325.
 public constant ID_BLASTOFF = compiletime(ABIL_ID_GEN.next())
 constant GO_SOUND = new SoundDefinition(Sounds.flameStrikeBirth1)
+constant KNOCKUP_VEL = 800.
 
 
 class Blastoff
@@ -44,7 +45,7 @@ class Blastoff
                         forUnitsInRange(blastoff.caster.getPos(), BLASTOFF_AREA_OF_EFFECT) u ->
                             if u.isEnemyOf(blastoff.caster) and u.isAlive() and not u.isInvulnerable()
                                 blastoff.caster.dealCodeDamage(u, damageFn(blastoff.caster.getAbilityLevel(ID_BLASTOFF)))
-                                Knockback3.setVel(u, 700., angle(0.), angle(0.))
+                                Knockback3.setVel(u, KNOCKUP_VEL, angle(0.), angle(0.))
 
                     if blastoff.distLeft <= 0. or not blastoff.caster.isAlive()
                         destroy blastoff

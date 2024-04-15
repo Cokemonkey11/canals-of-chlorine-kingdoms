@@ -41,6 +41,9 @@ constant ID_WINDRUNNER = compiletime(ITEM_ID_GEN.next()) // AD + movespeed
 constant ID_RAIDBOSS = compiletime(ITEM_ID_GEN.next()) // 5000 HP
 constant ID_HOLY_TRINITY = compiletime(ITEM_ID_GEN.next()) // 40 int, agi, and str
 
+public constant ID_EXASPERATION_SPELL_SHIELD = 'ANss'
+public constant EXASPERATION_SPELL_SHIELD_COOLDOWN = 40.
+
 
 class BaseItem extends ItemDefinition
     construct(int id, int buttonPosX, int buttonPosY, string icon, string name, string description)
@@ -123,9 +126,9 @@ class ExpensiveItem extends BaseItem
         1,
         Icons.bTNArcaniteRanged,
         "Exasperation",
-        "Provides 100 attack damage and a spell shield every <ANss,Cool1> seconds"
+        "Provides 100 attack damage and a spell shield every " + EXASPERATION_SPELL_SHIELD_COOLDOWN.toInt().toString() + " seconds"
     )
-    ..setAbilities(commaList('ANss', ID_100_DMG))
+    ..setAbilities(commaList(ID_EXASPERATION_SPELL_SHIELD, ID_100_DMG))
 
     new ExpensiveItem(ID_WINDRUNNER, 2, 2, Icons.bTNWindSerpent, "Windrunner", "Provides 100 attack damage and 20 movement speed")
     ..setAbilities(commaList(ID_100_DMG, ID_20_MOVESPEED))
