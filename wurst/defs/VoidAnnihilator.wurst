@@ -1,6 +1,5 @@
 package VoidAnnihilator
 
-// - mana regenerator 1, 2, 3, 4
 // - presence of mind (pre-setup teleport)
 
 import Assets
@@ -8,6 +7,7 @@ import Assets
 import AbilityTooltipGenerator
 
 import HeroGlow
+import Regenerator
 
 
 public constant ID_VOID_ANNIHILATOR = compiletime(HERO_ID_GEN.next())
@@ -70,5 +70,5 @@ public constant ID_BLACK_BINDING = compiletime(ABIL_ID_GEN.next())
     ..setModelFile("FacelessOneSorcerer.mdl")
     ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
     ..setUnitSoundSet(Soundsets.facelessOne)
-    ..setHeroAbilities(commaList(ID_BLACK_BINDING, ID_CALLING_VOID, AbilityIds.siphonMana, AbilityIds.massTeleport))
+    ..setHeroAbilities(commaList(ID_BLACK_BINDING, ID_CALLING_VOID, ID_REGENERATOR, AbilityIds.massTeleport))
     ..setIconGameInterface(Icons.bTNFacelessOne)

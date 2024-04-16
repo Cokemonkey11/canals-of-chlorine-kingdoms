@@ -1,0 +1,102 @@
+package Regenerator
+
+import Abilities
+import ClosureEvents
+import ClosureTimers
+import LinkedListModule
+import SoundUtils
+
+import AbilityTooltipGenerator
+
+
+public constant ID_REGENERATOR = compiletime(ABIL_ID_GEN.next())
+
+constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 22. - 2 * lvl
+constant IntLevelClosure HEALTH_REGEN_DELAY_FUNCTION = lvl -> 6 - lvl
+
+constant CAST_SOUND = new SoundDefinition(Sounds.manaShieldCaster1)
+constant UPGRADE_SOUND = new SoundDefinition(Sounds.lifeDrain)
+constant IntLevelClosure MANA_REGENERATION_FUNCTION = lvl -> lvl
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator("Channels, regenerating mana. After a time, channeling begins to also regenerate health.")
+    new ChannelAbilityPreset(ID_REGENERATOR, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(2, 2)
+    ..presetButtonPosResearch(2, 0)
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetHotkey("E")
+    ..presetIcon(Icons.bTNManaStone)
+    ..presetManaCost(_ -> 0)
+
+    ..tooltipStartListen()
+    ..setName("Regenerator")
+    ..presetCooldown(COOLDOWN_FUNCTION)
+    ..presetFollowThroughTime(lvl -> 15.)
+    ..addTooltipProperty("Mana Regeneration Rate (%)", MANA_REGENERATION_FUNCTION)
+    ..addTooltipProperty("Health Regeneration Rate (%)", lvl -> 1.)
+    ..addTooltipProperty("Health Regeneration Delay", HEALTH_REGEN_DELAY_FUNCTION)
+    ..tooltipStopListen()
+
+
+class Regenerator
+    use LinkedListModule
+
+    unit caster
+    int order
+    real timeSpent
+    real addHealthAfter
+    real manaPerSecond
+    real healthPerSecond
+    effect fx1
+    effect fx2
+
+    construct(unit caster)
+        this.caster = caster
+        this.order = caster.getCurrentOrder()
+        this.timeSpent = 0.
+        let lvl = caster.getAbilityLevel(ID_REGENERATOR)
+        this.addHealthAfter = HEALTH_REGEN_DELAY_FUNCTION.run(lvl).toReal()
+        this.manaPerSecond = caster.getMaxMana() * 0.01 * MANA_REGENERATION_FUNCTION.run(lvl)
+        this.healthPerSecond = 0.
+        this.fx1 = addEffect(Abilities.manaDrainCaster, caster.getPos())
+        this.fx2 = null
+
+        CAST_SOUND.playOnPoint(this.caster.getPos3Real()).snd.setVolume(127)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for iter from staticItr()
+                    iter.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx1.destr()
+        if this.fx2 != null
+            this.fx2.destr()
+        this.caster.issueImmediateOrder("stop")
+
+    function tick()
+        if this.caster.getCurrentOrder() != order or this.timeSpent > 15.
+            destroy this
+
+        else
+            this.timeSpent += ANIMATION_PERIOD
+
+            this.caster.addMana(this.manaPerSecond * ANIMATION_PERIOD)
+
+            if this.timeSpent > this.addHealthAfter
+                this.caster.addHP(this.healthPerSecond * ANIMATION_PERIOD)
+
+                if this.fx2 == null
+                    UPGRADE_SOUND.playOnPoint(this.caster.getPos3Real()).snd.setVolume(127)
+                    this.healthPerSecond = caster.getMaxHP() * 0.01
+                    this.fx2 = addEffect(Abilities.manaDrainTarget, caster.getPos())..setZ(50.)
+
+
+init
+    EventListener.onCast(ID_REGENERATOR) (unit caster) ->
+        new Regenerator(caster)
