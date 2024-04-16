@@ -7,6 +7,7 @@ import StandardTextTags
 
 import Barracks
 import ChooseHero
+import CodeDamage
 import Creeps
 import Teams
 import UnitIds
@@ -29,15 +30,6 @@ constant UNIT_EXPERIENCE_BOUNTY = 24 // People were happy at 16 but I would like
 constant BOUNTY_DIST = 1500.
 
 constant TOWER_DESTROYED_WARNING_SOUND = new SoundDefinition(Sounds.warning)
-
-
-function doesDamageKillUnit(real hp, real damage) returns bool
-    // https://www.hiveworkshop.com/threads/real-talk-floats-in-warcraft-3.270579/
-    let minAliveHp = 0.404998779
-    if hp - damage < minAliveHp
-        return true
-
-    return false
 
 
 init

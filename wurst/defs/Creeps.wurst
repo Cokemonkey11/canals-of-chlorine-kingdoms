@@ -11,8 +11,9 @@ public constant ID_ARCHER = compiletime(UNIT_ID_GEN.next())
 public constant ID_MORTAR_TEAM = compiletime(UNIT_ID_GEN.next())
 public constant ID_CANNON_TOWER = compiletime(UNIT_ID_GEN.next())
 
-// 11 seemed too low. 16 seemed too high. I believe there's some discretization at boundaries of lots of 8, 16, 32 for pathing.
-constant COLLISION_SIZE = 15.
+// 15 seemed too low. 16 seemed too high. There's some discretization at boundaries of lots of 8, 16, 32 for pathing.
+// Solution: leave at 16 but reduce creep counts.
+constant COLLISION_SIZE = 16.
 
 
 @compiletime function genFootman()

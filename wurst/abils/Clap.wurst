@@ -1,0 +1,56 @@
+package Clap
+
+import ClosureEvents
+import ClosureForGroups
+import StandardTextTags
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+
+
+public constant ID_CLAP = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure DAMAGE_FUNCTION = lvl -> 75 * lvl
+constant IntLevelClosure DAMAGE_ARMOR_FUNCTION = lvl -> Pow(2, lvl.toReal()).toInt()
+
+constant DURATION = 3
+constant AOE = 250.
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator("Claps the ground/cheeks, dealing damage that scales with armor, and slowing nearby enemy units.")
+    new AbilityDefinitionMountainKingThunderClap(ID_CLAP)
+    ..registerTooltipGenerator(tgen)
+
+    ..tooltipStartListen()
+    ..setName("Clap")
+    ..setLevels(3)
+    ..addTooltipProperty("Damage", DAMAGE_FUNCTION)
+    ..addTooltipProperty("Damage (armor)", DAMAGE_ARMOR_FUNCTION)
+    ..addTooltipProperty("Slow Duration", lvl -> DURATION)
+    ..presetCooldown(lvl -> 16. - 2 * lvl)
+    ..presetAreaofEffect((int lvl) -> AOE)
+    ..presetManaCost((int lvl) -> 70)
+    ..tooltipStopListen(true)
+
+    ..presetDurationHero((int lvl) -> DURATION.toReal())
+    ..presetSpecificTargetDamage(lvl -> 0)
+    ..presetAOEDamage(lvl -> 0)
+    ..presetMaximumDamage(lvl -> 0)
+    ..presetButtonPosNormal(0, 2)
+    ..presetButtonPosResearch(0, 0)
+    ..presetHotkey("Q")
+    ..presetIcon(Icons.bTNThunderClap)
+
+
+init
+    EventListener.onCast(ID_CLAP) caster ->
+        let lvl = caster.getAbilityLevel(ID_CLAP)
+        let damage = DAMAGE_FUNCTION.run(lvl) + DAMAGE_ARMOR_FUNCTION.run(lvl) * caster.getArmor()
+
+        createCriticalStrikeTextTag(caster, damage.toInt())
+
+        forUnitsInRange(caster.getPos(), AOE) u ->
+            if u.isEnemyOf(caster) and u.isAlive() and not u.isInvulnerable()
+                caster.dealCodeDamage(u, damage)

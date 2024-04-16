@@ -16,7 +16,7 @@ constant ID_TURBO_GILLS_BUFF = compiletime(BUFF_ID_GEN.next())
 
 public constant DEFAULT_ATTACK_RANGE = 600
 
-public constant TURBO_GILLS_ATTACK_RANGE = 1000.
+public constant TURBO_GILLS_ATTACK_RANGE = 900.
 
 constant DURATION = 8.
 

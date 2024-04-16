@@ -6,3 +6,12 @@ import DamageEvent
 public function unit.dealCodeDamage(unit target, real damage)
     DamageEvent.setNextDamageFromCode()
     this.damageTarget(target, damage)
+
+
+public function doesDamageKillUnit(real hp, real damage) returns bool
+    // https://www.hiveworkshop.com/threads/real-talk-floats-in-warcraft-3.270579/
+    let minAliveHp = 0.404998779
+    if hp - damage < minAliveHp
+        return true
+
+    return false

@@ -1,0 +1,103 @@
+package Finger
+
+import ClosureEvents
+import ClosureTimers
+import DamageEvent
+import Objects
+import SoundUtils
+import StandardTextTags
+
+import AbilityTooltipGenerator
+import WurstTempLightning
+
+import CodeDamage
+
+
+public constant ID_FINGER = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure DAMAGE_FUNCTION = lvl -> 50 + lvl * 25
+constant RealLevelClosure DAMAGE_BONUS_FUNCTION = lvl -> 0.5 * lvl
+constant MANA_COST = 90
+constant OFFSET = vec3(0., 0., 50.)
+constant ANG_2PI = angle(2. * PI)
+
+constant BLAST_SOUND = new SoundDefinition(Sounds.artilleryCorpseExplodeDeath1)
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Attempts to implode the target enemy from the inside out, dealing damage that increases based on the its missing health. "
+        + "If the target is destroyed, Finger's mana cost and cooldown are reset."
+    )
+    new ChannelAbilityPreset(ID_FINGER, 3, true, tgen)
+    ..setHeroAbility(true)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.UNIT)
+    ..presetManaCost(_ -> MANA_COST)
+    ..presetCastRange((int lvl) -> 600.)
+    ..setName("Finger")
+    ..presetCooldown(lvl -> 10)
+    ..addTooltipProperty("Damage", DAMAGE_FUNCTION)
+    ..addTooltipProperty("Damage Bonus (% per % missing health)", DAMAGE_BONUS_FUNCTION)
+    ..tooltipStopListen()
+
+    ..presetButtonPosNormal(0, 2)
+    ..presetButtonPosResearch(0, 0)
+    ..presetHotkey("Q")
+    ..presetIcon(Icons.bTNCorpseExplode)
+    ..presetTargetsAllowed(lvl -> "enemies,ground,vulnerable")
+
+
+init
+    DamageEvent.addListener(2) ->
+        let damage = DamageEvent.getAmount()
+        let dying_unit = DamageEvent.getTarget()
+        let id = DamageEvent.getId()
+        let attacker = DamageEvent.getSource()
+
+        if id == ID_FINGER
+            if doesDamageKillUnit(dying_unit.getHP(), damage)
+                if not dying_unit.isType(UNIT_TYPE_HERO) and not dying_unit.isType(UNIT_TYPE_STRUCTURE)
+                    dying_unit.setExploded(true)
+
+                BLAST_SOUND.playOnPoint(dying_unit.getPos3Real()).snd.setVolume(127)
+
+                let ang = angle(GetRandomReal(0., 2. * PI))
+                addEffect(Objects.humanLargeDeathExplode, dying_unit.getPos())..setYaw(ang)..setRoll(angle(PI / 8.))..destr()
+                addEffect(Objects.humanLargeDeathExplode, dying_unit.getPos())..setYaw(ang + ANG_2PI / 3.)..setRoll(angle(PI / 8.))..destr()
+                addEffect(Objects.humanLargeDeathExplode, dying_unit.getPos())..setYaw(ang + 2. * ANG_2PI / 3.)..setRoll(angle(PI / 8.))..destr()
+
+                nullTimer() ->
+                    attacker.addMana(MANA_COST.toReal())
+
+                attacker.resetAbilityCooldown(ID_FINGER)
+
+            createCriticalStrikeTextTag(dying_unit, damage.toInt())
+
+    EventListener.onCast(ID_FINGER) caster ->
+        let target = EventData.getSpellTargetUnit()
+        new TempLightning(caster.getPos3Real() + OFFSET, target.getPos3Real() + OFFSET, 0.5, LIGHTNING_FINGER_OF_DEATH)
+
+        DamageEvent.setNextDamageId(ID_FINGER)
+        let lvl = caster.getAbilityLevel(ID_FINGER)
+        let hpRatio = 1. - target.getHP() / target.getMaxHP()
+        let damage = DAMAGE_FUNCTION.run(lvl) * (1. + DAMAGE_BONUS_FUNCTION.run(lvl) * hpRatio)
+        caster.dealCodeDamage(target, damage)
+
+
+@test function damageFunctions()
+    let lvl = 1
+    let hpRatio = 0.
+
+    let damage = DAMAGE_FUNCTION.run(lvl) * (1. + DAMAGE_BONUS_FUNCTION.run(lvl) * hpRatio)
+
+    assertTrue(damage == 75.)
+
+    let lvl2 = 3
+    let hpRatio2 = 0.9
+
+    let damage2 = DAMAGE_FUNCTION.run(lvl2) * (1. + DAMAGE_BONUS_FUNCTION.run(lvl2) * hpRatio2)
+
+    print(damage2)
+    assertTrue(damage2 == 125. + (125. * 1.5 * 0.9))

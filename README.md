@@ -1,22 +1,19 @@
 # TODO
 
 41. [x] flash does not dodge storm bolt
-42. [x] resurrection is faster than recall + fountain
 44. [x] spirit wolf is intense cheese
 46. [x] void annihilator mana costs are too low
 47. [x] fountain works for enemies
 48. [x] no leaver message
 50. [x] gold pooling is possible
-52. [x] b should tp to fountain not castle, move fountain further back
 55. [x] spell shield from exasperation does not work on malphite ult
-56. [x] space cadet storm bolt is overpowered
 57. [ ] third set of custom heroes
 58. [ ] third set of custom abilities for each hero
     - [x] space cadet charged blast
     - [x] sorcerer blizzard replacement
-    - [ ] mongo amnesia
-    - [ ] night howler finger of pain reset
-    - [ ] steel elemental scaling thunderclap
+    - [x] mongo amnesia
+    - [x] night howler finger of pain reset
+    - [x] steel elemental scaling thunderclap
     - [ ] void annihilator mana regenerator
 59. [ ] ? some way to get permanent movement speed bonus by doing something in a central area
 60. [x] ? blizzard is not effective enough as a farming tool

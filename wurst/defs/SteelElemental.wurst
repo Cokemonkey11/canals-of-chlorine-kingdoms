@@ -1,13 +1,13 @@
 package SteelElemental
 
-// - Thunderclap 1, 10, 100, 1000
-// - Haunt (nocturne)
+// - Haunt (nocturne), or maybe scaling war stomp
 
 import Assets
 
 import AbilityTooltipGenerator
 
 import Blastoff
+import Clap
 import HeroGlow
 
 
@@ -69,5 +69,5 @@ public constant ID_ARMOR_UP = compiletime(ABIL_ID_GEN.next())
     ..setModelFile(Units.golemStatue1)
     ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
     ..setUnitSoundSet(Soundsets.rockGolem)
-    ..setHeroAbilities(commaList(AbilityIds.thunderClap, ID_ARMOR_UP, AbilityIds.warStomp1, ID_BLASTOFF))
+    ..setHeroAbilities(commaList(ID_CLAP, ID_ARMOR_UP, AbilityIds.warStomp1, ID_BLASTOFF))
     ..setIconGameInterface(Icons.bTNArmorGolem)

@@ -2,6 +2,7 @@ package Fountains
 
 import AbilityObjEditing
 import ClosureForGroups
+import LinkedList
 import ObjectIdGenerator
 import UnitAnimations
 import UnitIds
@@ -12,20 +13,21 @@ constant ID_FOUNTAIN_MANA_REGENERATION = compiletime(ABIL_ID_GEN.next())
 
 
 @compiletime function gen()
-    new AbilityDefinitionNeutralRegenhealthonly(ID_FOUNTAIN_LIFE_REGENERATION)
-    ..presetTargetsAllowed((int lvl) -> "ground,air,organic,vuln,invu,friend")
+    new AbilityDefinitionAuraRegenerationHealingWard(ID_FOUNTAIN_LIFE_REGENERATION)
+    ..presetTargetsAllowed((int lvl) -> "ground,air,organic,vuln,invu,friend,neutral")
     ..presetPercentage(lvl -> true)
     ..presetAmountofHitPointsRegenerated((int lvl) -> .02)
 
     new AbilityDefinitionNeutralRegenmanaonly(ID_FOUNTAIN_MANA_REGENERATION)
-    ..presetTargetsAllowed((int lvl) -> "ground,air,organic,vuln,invu,friend")
+    ..presetTargetsAllowed((int lvl) -> "ground,air,organic,vuln,invu,friend,neutral")
     ..presetPercentage(lvl -> true)
     ..presetAmountRegenerated((int lvl) -> .02)
 
 
 init
-    forUnitsOfPlayer(players[0]) (unit u) ->
-        if u.getTypeId() == UnitIds.purplefountain
-            u..removeAbility(AbilityIds.manaRegeneration)..removeAbility(AbilityIds.lifeRegenerationAura)
-            ..addAbility(ID_FOUNTAIN_LIFE_REGENERATION)..addAbility(ID_FOUNTAIN_MANA_REGENERATION)
-            ..setAnimation(UnitAnimations.FountainOfPower.morphThird.idx)
+    asList(players[0], players[1]).forEach() (player player_) ->
+        forUnitsOfPlayer(player_) (unit u) ->
+            if u.getTypeId() == UnitIds.purplefountain
+                u..removeAbility(AbilityIds.manaRegeneration)..removeAbility(AbilityIds.lifeRegenerationAura)
+                ..addAbility(ID_FOUNTAIN_LIFE_REGENERATION)..addAbility(ID_FOUNTAIN_MANA_REGENERATION)
+                ..setAnimation(UnitAnimations.FountainOfPower.morphThird.idx)

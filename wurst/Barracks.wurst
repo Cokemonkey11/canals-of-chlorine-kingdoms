@@ -70,14 +70,14 @@ init
             if rax.spawnCaptain
                 createUnit(rax.owner, ID_CAPTAIN, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
 
-            doPeriodicallyCounted(0.5, 5) (CallbackCounted cb) ->
+            doPeriodicallyCounted(0.5, 3) (CallbackCounted cb) ->
                 createUnit(rax.owner, ID_FOOTMAN, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
 
-            doAfter(5 * 0.5) ->
+            doAfter(3 * 0.5) ->
                 doPeriodicallyCounted(0.5, 3) (CallbackCounted cb) ->
                     createUnit(rax.owner, ID_ARCHER, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
 
             if typOrNull != 0
-                doAfter(9 * 0.5) ->
+                doAfter(7 * 0.5) ->
                     createUnit(rax.owner, typOrNull, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
     end)
