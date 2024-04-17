@@ -9,6 +9,7 @@ import Barracks
 import ChooseHero
 import CodeDamage
 import Creeps
+import GameBoard
 import Teams
 import UnitIds
 
@@ -25,11 +26,13 @@ constant HERO_BOUNTY = 10
 
 constant TOWER_BOUNTY = 10
 
-constant UNIT_EXPERIENCE_BOUNTY = 24 // People were happy at 16 but I would like players to easily get level 6 before end of game
+constant UNIT_EXPERIENCE_BOUNTY = 24
 
 constant BOUNTY_DIST = 1500.
 
 constant TOWER_DESTROYED_WARNING_SOUND = new SoundDefinition(Sounds.warning)
+
+constant heroesToGrantExp = CreateGroup()
 
 
 init
@@ -44,19 +47,28 @@ init
             // If the unit gives bounty, give its killer the bounty.
             if bounties.has(dying_unit_type)
                 if dying_player.isEnemyOf(killing_player)
+                    heroesToGrantExp.clear()
                     for hr in all_heroes
                         if hr.isEnemyOf(dying_player) and hr.isAlive() and hr.getPos().distanceToSq(dying_unit.getPos()) < BOUNTY_DIST * BOUNTY_DIST
-                            hr.addXp(UNIT_EXPERIENCE_BOUNTY, true)
+                            heroesToGrantExp.add(hr)
+
+                    let size = heroesToGrantExp.size()
+                    for hr from heroesToGrantExp
+                        hr.addXp((UNIT_EXPERIENCE_BOUNTY / size).toInt(), true)
 
                     if player_heroes.has(killing_player)
                         killing_player.addGold(bounties.get(dying_unit_type))
+                        killing_player.addCreepScore()
                         createGoldBountyTextTag(dying_unit, bounties.get(dying_unit_type), killing_player)
 
                 else if player_heroes.has(killing_player)
                     standardTextTag(dying_unit.getPos(), "!")
 
             if dying_unit.isType(UNIT_TYPE_HERO)
-                if dying_player.isEnemyOf(killing_player)
+                if player_heroes.has(dying_player)
+                    dying_player.addDeath()
+                if dying_player.isEnemyOf(killing_player) and player_heroes.has(killing_player)
+                    killing_player.addKill()
                     killing_player.addGold(HERO_BOUNTY)
                     createGoldBountyTextTag(dying_unit, HERO_BOUNTY, killing_player)
 

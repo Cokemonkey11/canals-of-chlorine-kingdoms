@@ -1,0 +1,24 @@
+package Decimator
+
+import Abilities
+import ClosureTimers
+import DamageEvent
+import UnitAnimations
+
+import Castles
+
+
+init
+    DamageEvent.addListener(2) ->
+        let attacker = DamageEvent.getSource()
+        let damage = DamageEvent.getAmount()
+        let damage_t = DamageEvent.getType()
+        let target = DamageEvent.getTarget()
+
+        if attacker.hasItemById(ID_DECIMATOR) and damage > 0. and damage_t == DamageType.ATTACK and not target.isType(UNIT_TYPE_STRUCTURE)
+            let bonus = target.getMaxHP() * .02
+            DamageEvent.addAmount(bonus)
+            let fx = addEffect(Abilities.healTarget, attacker, "origin")
+            doAfter(UnitAnimations.HealTarget.birth.duration) ->
+                fx.destr()
+            attacker.addHP((damage.abs() + bonus) * .1)

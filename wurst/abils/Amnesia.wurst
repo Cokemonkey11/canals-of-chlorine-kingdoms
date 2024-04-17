@@ -47,23 +47,25 @@ init
 
     doPeriodically(1.) (CallbackPeriodic cb) ->
         AMNESIAS.forEach() (unit key, LinkedList<real> value) ->
-            let currHp = key.getHP()
-            value.add(currHp)
+            if key.isAlive()
+                let currHp = key.getHP()
+                value.add(currHp)
 
-            if value.size() > WINDOW_FUNCTION.run(key.getAbilityLevel(ID_AMNESIA))
-                value.dequeue()
+                if value.size() > WINDOW_FUNCTION.run(key.getAbilityLevel(ID_AMNESIA))
+                    value.dequeue()
 
-            let max = value.foldl(0., (lhs, rhs) -> max(lhs, rhs))
+                let max = value.foldl(0., (lhs, rhs) -> max(lhs, rhs))
 
-            let tt = standardTextTag()
-                ..setText(max.toInt().toString())
-                ..setPos(key.getPos3Real() - vec3(64., 0., 0.))
-                ..setVelocity(0., 0.)
-                ..setColor(get_color_by_ratio(max, currHp).withAlpha(155))
-                ..setFadepoint(1.)
-                ..setLifespan(1.)
-            doPeriodicallyCounted(ANIMATION_PERIOD, (1. / ANIMATION_PERIOD).toInt()) (CallbackCounted cb) ->
-                tt.setPos(key.getPos3Real() - vec3(64., 0., 0.))
+                let tt = standardTextTag()
+                    ..setText(max.toInt().toString())
+                    ..setPos(key.getPos3Real() - vec3(64., 0., 0.))
+                    ..setVelocity(0., 0.)
+                    ..setColor(get_color_by_ratio(max, currHp).withAlpha(155))
+                    ..setFadepoint(1.)
+                    ..setLifespan(1.)
+                    ..setVisibility(localPlayer == key.getOwner())
+                doPeriodicallyCounted(ANIMATION_PERIOD, (1. / ANIMATION_PERIOD).toInt()) (CallbackCounted cb) ->
+                    tt.setPos(key.getPos3Real() - vec3(64., 0., 0.))
 
     EventListener.onCast(ID_AMNESIA) caster ->
         let vals = AMNESIAS.get(caster)

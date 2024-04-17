@@ -45,6 +45,7 @@ constant ANG_CIRCLE = angle(2. * PI)
     ..addTooltipProperty("Damage (int)", INT_DAMAGE_FUNCTION)
     ..addTooltipProperty("Mana Cost Increase", lvl -> MANA_COST_INCREASE)
     ..addTooltipProperty("Mana Cost Increase Duration", MANA_COST_INCREASE_DURATION_FUNCTION)
+    ..addTooltipProperty("Animation Delay (sec)", lvl -> DAMAGE_DELAY)
     ..tooltipStopListen()
 
     ..presetOption(Option.TARGETIMAGE, true)

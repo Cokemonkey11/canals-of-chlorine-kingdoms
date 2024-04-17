@@ -19,6 +19,7 @@ import WhenClose
 import WhenRevivable
 
 import Flash
+import GameBoard
 import Mongo
 import NightHowler
 import Sorcerer
@@ -43,6 +44,9 @@ constant ID_CLICK_STARTER_CIRCLET = compiletime(ABIL_ID_GEN.next())
     ..setName("Starter Circlet")
     ..setGoldCost(10)
     ..setLumberCost(0)
+    ..setPerishable(true)
+    ..setNumberofCharges(1)
+    ..setClassification("Charged")
     ..setAbilities(commaList(ID_CLICK_STARTER_CIRCLET, AbilityIds.allPlus1))
     ..setTooltipBasic("Starter Circlet")
     ..setTooltipExtended("Click this item to transform it into a better one.".color(COLOR_GOLD))
@@ -88,12 +92,14 @@ init
         let where = forceWest.containsPlayer(close.getOwner()) ? players[0].getStartLocation() : players[1].getStartLocation()
         close.setPos(where)
         close.getOwner().panCameraToTimed(where, 0.)
+        close.getOwner().updateBoardIcon(source.getIcon())
         let hero = ReplaceUnitBJ(close, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)
         ..onRevivable() which ->
             printTimedToPlayer("You'll be revived in " + (1 + which.getLevel()).toString() + " seconds.", 10., which.getOwner())
             doAfter(1. + which.getLevel()) ->
-                which.revive(where, true)
-                which.getOwner().panCameraToTimed(where, 0.)
+                if which.getOwner().isIngame()
+                    which.revive(where, true)
+                    which.getOwner().panCameraToTimed(where, 0.)
 
         player_heroes.put(hero.getOwner(), hero)
         hero.setProperName(hero.getOwner().getName(true))
@@ -118,39 +124,27 @@ init
     EventListener.onCast(ID_CLICK_STARTER_CIRCLET) caster ->
         let dBox = new DialogBox("Choose your starter item")
         dBox.addButton("Ring (+3 int)") ->
-            if caster.hasItemById(ID_STARTER_CIRCLET)
-                caster.getItemById(ID_STARTER_CIRCLET).remove()
-                caster.addItemById(ID_RING)
+            caster.addItemById(ID_RING)
             destroy dBox
 
         dBox.addButton("Socks (+3 agi)") ->
-            if caster.hasItemById(ID_STARTER_CIRCLET)
-                caster.getItemById(ID_STARTER_CIRCLET).remove()
-                caster.addItemById(ID_SOCKS)
+            caster.addItemById(ID_SOCKS)
             destroy dBox
 
         dBox.addButton("Pig (+3 str)") ->
-            if caster.hasItemById(ID_STARTER_CIRCLET)
-                caster.getItemById(ID_STARTER_CIRCLET).remove()
-                caster.addItemById(ID_PIG)
+            caster.addItemById(ID_PIG)
             destroy dBox
 
         dBox.addButton("Gem (+250 mana)") ->
-            if caster.hasItemById(ID_STARTER_CIRCLET)
-                caster.getItemById(ID_STARTER_CIRCLET).remove()
-                caster.addItemById(ID_GEM)
+            caster.addItemById(ID_GEM)
             destroy dBox
 
         dBox.addButton("Amulet (+50% mana regeneration)") ->
-            if caster.hasItemById(ID_STARTER_CIRCLET)
-                caster.getItemById(ID_STARTER_CIRCLET).remove()
-                caster.addItemById(ID_AMULET)
+            caster.addItemById(ID_AMULET)
             destroy dBox
 
         dBox.addButton("Hat (+3 armor)") ->
-            if caster.hasItemById(ID_STARTER_CIRCLET)
-                caster.getItemById(ID_STARTER_CIRCLET).remove()
-                caster.addItemById(ID_HAT)
+            caster.addItemById(ID_HAT)
             destroy dBox
 
         dBox.display(caster.getOwner(), true)

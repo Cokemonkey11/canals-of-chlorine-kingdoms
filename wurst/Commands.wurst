@@ -6,12 +6,16 @@ import LinkedList
 import WurstCommand
 
 import ChooseHero
+import GameBoard
+import PowerLevelingChamber
 import Teams
 
 
 init
     addCommand("name") (p, _cmd, args) ->
-        player_heroes.get(p).setProperName(args.joinBy(" "))
+        let name = args.joinBy(" ")
+        player_heroes.get(p).setProperName(name)
+        p.updateBoardName(name.color(p.getColor().toColor()))
 
     addCommand("repick") (p, _cmd, _args) ->
         p.print("You can't.".color(COLOR_GOLD))
@@ -23,3 +27,6 @@ init
                     u.setLevel(u.getLevel() + 1, true)
         addCommand("enemy") (p, _cmd, _args) ->
             createUnit(players[1], 'hfoo')
+
+        addCommand("generator") (p, _cmd, _args) ->
+            enableGenerator()

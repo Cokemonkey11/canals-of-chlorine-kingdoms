@@ -22,9 +22,9 @@ constant ID_BERZERK_AND_WINCH_BUFF = compiletime(BUFF_ID_GEN.next())
 
 constant DURATION = 5.
 
-constant WINCH_DURATION = .8
+constant WINCH_DURATION = .75
 
-constant RANGE = 650.
+constant RANGE = 750.
 
 constant RealLevelClosure WINCH_COOLDOWN = (int lvl) -> 30. - 5 * lvl
 

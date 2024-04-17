@@ -24,4 +24,4 @@ init
                 close.getOwner().panCameraToTimed(mortarPos, 0.)
                 close.issueImmediateOrder("stop")
 
-            staticTextTag("Classic heroes (beginner)", cop.getPos())
+            staticTextTag("Wc3 Melee heroes (beginner)", cop.getPos())

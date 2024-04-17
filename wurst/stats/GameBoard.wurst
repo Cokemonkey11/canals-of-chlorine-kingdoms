@@ -1,0 +1,91 @@
+package GameBoard
+
+import Board
+import ClosureTimers
+import HashMap
+import LinkedList
+
+import Teams
+
+
+public constant BOARD = new Board("Stats", 0.26)
+
+public constant PLAYER_CELLS = new HashMap<player, NamedDynamicCells>()
+
+
+class NamedDynamicCells
+    DynamicCellValue<string> nameCell
+    DynamicCellValue<int> killsCell
+    DynamicCellValue<int> deathsCell
+    DynamicCellValue<int> creepScoreCell
+
+    int kills
+    int deaths
+    int creepScore
+
+    construct(player pl)
+        this.nameCell = dynamicCell<string>(pl.getNameColored(true), ss -> ss)
+        this.killsCell = dynamicCell<int>(0, ii -> ii.toString())
+        this.deathsCell = dynamicCell<int>(0, ii -> ii.toString())
+        this.creepScoreCell = dynamicCell<int>(0, ii -> ii.toString())
+
+        this.kills = 0
+        this.deaths = 0
+        this.creepScore = 0
+
+    function addKill()
+        this.kills += 1
+        this.killsCell.updateValue(this.kills)
+
+    function addDeath()
+        this.deaths += 1
+        this.deathsCell.updateValue(this.deaths)
+
+    function addCreepScore()
+        this.creepScore += 1
+        this.creepScoreCell.updateValue(this.creepScore)
+
+
+function addRowForPlayer(player pl)
+    let playerCells = PLAYER_CELLS.get(pl)
+    BOARD.addRow()..addDynamic(playerCells.nameCell)..addDynamic(playerCells.killsCell)..addDynamic(playerCells.deathsCell)..addDynamic(playerCells.creepScoreCell)
+
+
+public function player.updateBoardName(string st)
+    PLAYER_CELLS.get(this).nameCell.updateValue(st)
+
+
+public function player.updateBoardIcon(string icon)
+    PLAYER_CELLS.get(this).nameCell.updateIcon(icon)
+
+
+public function player.addKill()
+    PLAYER_CELLS.get(this).addKill()
+
+
+public function player.addDeath()
+    PLAYER_CELLS.get(this).addDeath()
+
+
+public function player.addCreepScore()
+    PLAYER_CELLS.get(this).addCreepScore()
+
+
+init
+    nullTimer() ->
+        BOARD.getBoard().setTitle("Stats")
+        BOARD.columns(asList(new BoardColumn(" ", 0.4), new BoardColumn("Kills", 0.16), new BoardColumn("Deaths", 0.17), new BoardColumn("Creep Score", 0.27)))
+
+        for pl in forceWest
+            if pl.isIngame()
+                PLAYER_CELLS.put(pl, new NamedDynamicCells(pl))
+                addRowForPlayer(pl)
+
+        BOARD.addRow()..addCell(" ")..addCell(" ")..addCell(" ")..addCell(" ")
+
+        for pl in forceEast
+            if pl.isIngame()
+                PLAYER_CELLS.put(pl, new NamedDynamicCells(pl))
+                addRowForPlayer(pl)
+
+        BOARD.show()

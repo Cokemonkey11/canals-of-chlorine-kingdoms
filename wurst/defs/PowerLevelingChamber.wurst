@@ -1,0 +1,74 @@
+package PowerLevelingChamber
+
+import AbilityIds
+import ClosureForGroups
+import ClosureTimers
+import Doodads
+import ObjectIds
+import ObjectIdGenerator
+import SoundUtils
+import UnitAnimations
+import UnitIds
+import UnitObjEditing
+
+import ChooseHero
+
+
+constant ID_GENERATOR = compiletime(UNIT_ID_GEN.next())
+
+constant STATUE_POINT = vec3(0., 6148, 256. + 32.)
+
+constant GEN_SOUND = new SoundDefinition(Sounds.zigguratMissileLaunch2)
+
+
+@compiletime function gen()
+    new BuildingDefinition(ID_GENERATOR, UnitIds.bookofsummoning)
+    ..setName("Generator (Disabled)")
+    ..setNormalAbilities(commaList(AbilityIds.invulnerable))
+    ..setRequiredAnimationNames("second")
+
+
+unit generator = null
+int level = 0
+bool tempAny = false
+
+
+public function enableGenerator()
+    addLightning(LIGHTNING_SPIRIT_LINK, false, STATUE_POINT, generator.getPos3Real() + vec3(0., 0., 64.))..setColor(colorA(255, 255, 255, 127))
+    generator.setAnimation(UnitAnimations.BookOfSummoning.stand.idx)
+
+    for hr in all_heroes
+        level = max(level, hr.getLevel())
+    level += 3
+
+    Log.info("The power-leveling chamber has been enabled at level " + level.toString().color(COLOR_GOLD) + ".")
+
+    generator.setName("Generator (Level " + level.toString() + ")")
+    PingMinimap(generator.getX(), generator.getY(), 10.)
+
+    doPeriodically(1.) (CallbackPeriodic cb) ->
+        tempAny = false
+        forUnitsInRange(generator.getPos(), 512.) (unit u) ->
+            if u.isType(UNIT_TYPE_HERO) and u.getLevel() < level
+                tempAny = true
+                u.addXp(36, true)
+                let fx = addEffect(Doodads.energyField, u.getPos3Real())
+                doAfter(1.) ->
+                    fx.destr()
+
+        if tempAny
+            GEN_SOUND.playOnPoint(generator.getPos3Real())
+
+    addWeather(generator.getPos().withRadiusRect(512. / SquareRoot(2.)), WeatherEffects.raysOfLight)..enable()
+
+init
+    forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
+        if u.getTypeId() == UnitIds.bookofsummoning
+            generator = ReplaceUnitBJ(u, ID_GENERATOR, bj_UNIT_STATE_METHOD_DEFAULTS)
+
+    doAfter(9 * 60.) ->
+        Log.info("The power-leveling chamber will be enabled in one minute.")
+        PingMinimap(generator.getX(), generator.getY(), 10.)
+
+    doAfter(10 * 60.) ->
+        enableGenerator()

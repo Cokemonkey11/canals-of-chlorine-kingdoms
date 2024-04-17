@@ -50,6 +50,16 @@ init
             lastSmarts.put(orderer, target.getTile())
 
     EventListener.onCast(ID_FLASH) (unit caster) ->
-        let whereTo = lastSmarts.has(caster) ? lastSmarts.get(caster) : ZERO2.getTile()
+        let whereTo = (lastSmarts.has(caster) ? lastSmarts.get(caster) : ZERO2.getTile()).toVec2()
+        let casterPos = caster.getPos()
 
-        caster.setXY(caster.getPos().polarOffset(caster.getPos().angleTo(whereTo.toVec2()), FLASH_DISTANCE))
+        let ang = casterPos.angleTo(whereTo)
+        let offsIter = ZERO2.polarOffset(ang, 16.)
+
+        var offs = 0.
+        var testPos = casterPos
+        while offs <= FLASH_DISTANCE and testPos.isTerrainWalkable()
+            testPos += offsIter
+            offs += 16.
+
+        caster.setXY(testPos)

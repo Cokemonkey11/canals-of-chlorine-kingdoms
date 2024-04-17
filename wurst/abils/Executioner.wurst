@@ -1,0 +1,20 @@
+package Executioner
+
+import DamageEvent
+import Objects
+
+import Castles
+
+
+init
+    DamageEvent.addListener(2) ->
+        let attacker = DamageEvent.getSource()
+        let damage = DamageEvent.getAmount()
+        let damage_t = DamageEvent.getType()
+        let target = DamageEvent.getTarget()
+
+        if attacker.hasItemById(ID_EXECUTIONER) and damage > 0. and damage_t == DamageType.ATTACK and not target.isType(UNIT_TYPE_STRUCTURE)
+            let threshold = target.getMaxHP() * 0.05
+            if target.getHP() - damage.abs() < threshold
+                DamageEvent.addAmount(1000.)
+                addEffect(Objects.humanSmallDeathExplode, target, "origin")..setTimeScale(0.5)..destr()
