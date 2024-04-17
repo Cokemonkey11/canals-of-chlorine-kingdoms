@@ -7,8 +7,7 @@
 72. [x] raid boss is OP
 77. [x] amnesia floating text is visible to everyone
 78. [x] Multiboard
-79. [x] 2 more items
-80. [x] minimap icon
+81. ...
 
 ## Credits
 
@@ -17,6 +16,7 @@
 - Matro
 - lep
 - Petr
+- Overkane
 - looking_for_help
 - Blizzard Entertainment
 - Dionesiist

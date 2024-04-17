@@ -1,6 +1,6 @@
 ## Foundations
 
-- 30-40 minute game time
+- 30 minute game time
 - a fed carry should be able to 1v5
 - a fed carry should be able to few-shot other carries and casters
 - the game is closer to chess in the sense that the carry is the queen and everyone else's job is to prepare the queen to ace
@@ -11,15 +11,11 @@
 
 ## Design decisions
 
-- looking for alternatives to neutral creeps for create team fights
-- would like to have some way for new players to be relevant. For now, that means classic wc3 heroes are supported
-- First power spike item at 1000g is significant:
+- power-leveling chamber is an alternative to neutral creeps to create fighting chokepoints. Look out for other options like this.
+- would like to have some way for new players to be relevant. For now, that means classic wc3 heroes are supported. It's unclear how useful this actually is to new players or to game design or balance. Most likely, I will have to throw away this design axiom and instead focus on communicating hero capabilities proactively to new players in some other way.
+- First power spike item at 100g is significant:
     Essence reaver
     Giant slayer
-    Bloodthirster
-    Blade of the ruined king
-    Lord Dominiks regards
-    Edge of night
 
     Warmogs
     Banshees veil
@@ -48,7 +44,6 @@
 - Braum
 - Nasus
 - Zac
-- Blitz
 
 ### Well-designed casters
 
@@ -58,8 +53,6 @@
 - Anivia
 - Janna
 - Gragas
-- Morgana
-- Lux
 - Fizz
 
 ### Well-designed carries
