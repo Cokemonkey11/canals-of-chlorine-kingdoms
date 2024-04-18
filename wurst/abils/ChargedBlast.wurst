@@ -20,7 +20,7 @@ constant IntLevelClosure DAMAGE_FUNCTION = lvl -> 50 + 50 * lvl
 constant STABILITY_WINDOW = 1.25
 constant CHARGED_ATTACK_TIMEOUT = 5
 constant STUN_DURATION = 1
-constant MISSILE_SPEED = 750.
+constant MISSILE_SPEED = 800.
 constant DAMAGE_RADIUS = 200
 
 constant CHARGED_BLASTS = new HashMap<unit, ChargedBlast>()
@@ -52,6 +52,19 @@ constant CHARGED_BLASTS = new HashMap<unit, ChargedBlast>()
     ..tooltipStopListen()
 
 
+tuple maybe_unit_or_point(unit u, vec2 point, bool isUnit, bool isPresent)
+
+
+function maybe_unit_or_point.getPos() returns vec2
+    if not this.isPresent
+        return ZERO2
+
+    if not this.isUnit
+        return this.point
+
+    return this.u.getPos()
+
+
 class ChargedBlast
     use LinkedListModule
 
@@ -60,7 +73,7 @@ class ChargedBlast
     effect fx
     bool loosed
     bool stable
-    unit target
+    maybe_unit_or_point target
 
     construct(unit caster)
         this.caster = caster
@@ -68,7 +81,7 @@ class ChargedBlast
         this.fx = addEffect(Abilities.lightningBoltMissile, this.caster.getPos3Real() + vec3(0., 0., 100.))..setScale(0.75)
         this.loosed = false
         this.stable = true
-        this.target = null
+        this.target = maybe_unit_or_point(null, ZERO2, true, false)
 
         CHARGED_BLASTS.put(caster, this)
 
@@ -91,14 +104,15 @@ class ChargedBlast
             destroy this
             return
 
-        if this.loosed and (this.fx.getPos().distanceToSq(this.target.getPos()) < 64. * 64. or not this.target.isAlive())
-            if not this.stable
-                let targ = this.target
-                let fx = addEffect(Abilities.stasisTotemTarget, this.target, "overhead")
-                targ.pause()
-                doAfter(STUN_DURATION.toReal()) ->
-                    fx.destr()
-                    targ.unpause()
+        if this.loosed and (this.fx.getPos().distanceToSq(this.target.getPos()) < 64. * 64.)
+            if not this.stable and this.target.isUnit
+                let targ = this.target.u
+                if not targ.isInvulnerable()
+                    let fx = addEffect(Abilities.stasisTotemTarget, targ, "overhead")
+                    targ.pause()
+                    doAfter(STUN_DURATION.toReal()) ->
+                        fx.destr()
+                        targ.unpause()
 
             let damage = DAMAGE_FUNCTION.run(this.caster.getAbilityLevel(ID_CHARGED_BLAST)).toReal()
 
@@ -109,6 +123,9 @@ class ChargedBlast
             destroy this
             return
 
+        if this.target.isUnit and not this.target.u.isAlive()
+            this.target = maybe_unit_or_point(null, this.target.u.getPos(), false, true)
+
         if this.stable and this.timeSpent >= STABILITY_WINDOW
             this.stable = false
 
@@ -116,7 +133,7 @@ class ChargedBlast
             let offset = this.stable ? 0. : GetRandomReal(-50., 50.)
             this.fx.setPos(this.caster.getPos3Real() + vec3(0., 0., 100. + offset))
         else
-            this.fx.setPos(this.fx.getPos3().moveTowards(this.target.getPos3Real() + vec3(0., 0., 50.), MISSILE_SPEED * ANIMATION_PERIOD))
+            this.fx.setPos(this.fx.getPos3().moveTowards(this.target.getPos().withTerrainZ() + vec3(0., 0., 50.), MISSILE_SPEED * ANIMATION_PERIOD))
 
 
 init
@@ -132,4 +149,4 @@ init
             let blast = CHARGED_BLASTS.get(attacker)
             if not blast.loosed
                 blast.loosed = true
-                blast.target = target
+                blast.target = maybe_unit_or_point(target, ZERO2, true, true)

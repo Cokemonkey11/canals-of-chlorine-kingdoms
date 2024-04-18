@@ -1,0 +1,18 @@
+package ItemOwners
+
+import ClosureEvents
+import HashMap
+
+
+constant ITEM_MAP = new HashMap<item, player>()
+
+
+init
+    EventListener.add(EVENT_PLAYER_UNIT_PICKUP_ITEM) ->
+        let item_ = EventData.getManipulatedItem()
+        let uu = EventData.getManipulatingUnit()
+
+        if ITEM_MAP.has(item_) and ITEM_MAP.get(item_) != uu.getOwner()
+            uu.dropItemPoint(item_, item_.getPos())
+        else
+            ITEM_MAP.put(item_, uu.getOwner())

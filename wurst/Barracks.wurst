@@ -61,23 +61,24 @@ init
         else if tu.getOwner() == players[1] and tu.getPos().x < 0.
             tu.issuePointOrder("attack", players[0].getStartLocation())
 
-    doPeriodically(30., (_cb) -> begin
-        let typOrNull = siegeQueue.pop()
-        for rax in raxes
-            if not rax.spawnCaptain and (rax.oppositeRax == null or rax.oppositeRax.getTypeId() == 0 or not rax.oppositeRax.isAlive())
-                rax.spawnCaptain = true
+    doAfter(30) ->
+        doPeriodically(30., (_cb) -> begin
+            let typOrNull = siegeQueue.pop()
+            for rax in raxes
+                if not rax.spawnCaptain and (rax.oppositeRax == null or rax.oppositeRax.getTypeId() == 0 or not rax.oppositeRax.isAlive())
+                    rax.spawnCaptain = true
 
-            if rax.spawnCaptain
-                createUnit(rax.owner, ID_CAPTAIN, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
+                if rax.spawnCaptain
+                    createUnit(rax.owner, ID_CAPTAIN, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
 
-            doPeriodicallyCounted(0.5, 3) (CallbackCounted cb) ->
-                createUnit(rax.owner, ID_FOOTMAN, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
-
-            doAfter(3 * 0.5) ->
                 doPeriodicallyCounted(0.5, 3) (CallbackCounted cb) ->
-                    createUnit(rax.owner, ID_ARCHER, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
+                    createUnit(rax.owner, ID_FOOTMAN, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
 
-            if typOrNull != 0
-                doAfter(7 * 0.5) ->
-                    createUnit(rax.owner, typOrNull, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
-    end)
+                doAfter(3 * 0.5) ->
+                    doPeriodicallyCounted(0.5, 3) (CallbackCounted cb) ->
+                        createUnit(rax.owner, ID_ARCHER, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
+
+                if typOrNull != 0
+                    doAfter(7 * 0.5) ->
+                        createUnit(rax.owner, typOrNull, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
+        end)

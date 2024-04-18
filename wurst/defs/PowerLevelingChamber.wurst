@@ -18,7 +18,7 @@ constant ID_GENERATOR = compiletime(UNIT_ID_GEN.next())
 
 constant STATUE_POINT = vec3(0., 6148, 256. + 32.)
 
-constant GEN_SOUND = new SoundDefinition(Sounds.zigguratMissileLaunch2)
+constant GEN_SOUND = new SoundDefinition(Sounds.watchTowerWhat1)
 
 
 @compiletime function gen()
@@ -68,7 +68,7 @@ init
 
     doAfter(9 * 60.) ->
         Log.info("The power-leveling chamber will be enabled in one minute.")
-        PingMinimap(generator.getX(), generator.getY(), 10.)
+        PingMinimap(generator.getX(), generator.getY(), 120.)
 
     doAfter(10 * 60.) ->
         enableGenerator()

@@ -1,8 +1,0 @@
-package Leaver
-
-import ClosureEvents
-
-init
-    EventListener.add(EVENT_PLAYER_LEAVE) ->
-        let pl = EventData.getTriggerPlayer()
-        print(pl.getNameColored(true) + " has left the game (sadge)")

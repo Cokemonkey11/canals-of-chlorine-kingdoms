@@ -23,6 +23,7 @@ constant COLLISION_SIZE = 16.
     ..setAttack1DamageSidesperDie(1)
     ..setHitPointsMaximumBase(400)
     ..setCollisionSize(COLLISION_SIZE)
+    ..setUpgradesUsed("")
 
 
 @compiletime function genCapatin()
@@ -32,6 +33,7 @@ constant COLLISION_SIZE = 16.
     ..setAttack1DamageSidesperDie(1)
     ..setHitPointsMaximumBase(600)
     ..setCollisionSize(COLLISION_SIZE)
+    ..setUpgradesUsed("")
 
 
 @compiletime function genArcher()
@@ -43,6 +45,7 @@ constant COLLISION_SIZE = 16.
     ..setAttack1CooldownTime(2.)
     ..setAttack1ProjectileSpeed(600)
     ..setCollisionSize(COLLISION_SIZE)
+    ..setUpgradesUsed("")
 
 
 @compiletime function genMortarTeam()
@@ -52,6 +55,7 @@ constant COLLISION_SIZE = 16.
     ..setAttack1DamageSidesperDie(1)
     ..setCollisionSize(COLLISION_SIZE)
     ..setAttacksEnabled(1)
+    ..setUpgradesUsed("")
 
 
 @compiletime function genCannonTower()
@@ -62,3 +66,4 @@ constant COLLISION_SIZE = 16.
     ..setAttack1ProjectileHomingEnabled(true)
     ..setHitPointsMaximumBase(1000)
     ..setArmorType(ArmorType.Fortified)
+    ..setUpgradesUsed("")

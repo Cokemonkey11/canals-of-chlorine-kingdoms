@@ -12,7 +12,11 @@ import AbilityTooltipGenerator
 
 public constant ID_SUPERTANK = compiletime(ABIL_ID_GEN.next())
 
-constant ID_BONUS_HEALTH = compiletime(ABIL_ID_GEN.next())
+constant ID_BONUS_HEALTH1 = compiletime(ABIL_ID_GEN.next())
+constant ID_BONUS_HEALTH2 = compiletime(ABIL_ID_GEN.next())
+constant ID_BONUS_HEALTH3 = compiletime(ABIL_ID_GEN.next())
+
+constant ID_BONUS_HEALTHS = [ID_BONUS_HEALTH1, ID_BONUS_HEALTH2, ID_BONUS_HEALTH3]
 
 constant CAST_SOUND = new SoundDefinition(Sounds.tinkerMorph1)
 
@@ -26,9 +30,14 @@ constant IntLevelClosure BONUS_HEALTH = lvl -> 500 * lvl
 
 
 @compiletime function gen()
-    new AbilityDefinitionMaxLifeBonusGreater(ID_BONUS_HEALTH)
-    ..setLevels(3)
-    ..presetMaxLifeGained(BONUS_HEALTH)
+    new AbilityDefinitionMaxLifeBonusGreater(ID_BONUS_HEALTH1)
+    ..setMaxLifeGained(1, BONUS_HEALTH.run(1))
+
+    new AbilityDefinitionMaxLifeBonusGreater(ID_BONUS_HEALTH2)
+    ..setMaxLifeGained(1, BONUS_HEALTH.run(2))
+
+    new AbilityDefinitionMaxLifeBonusGreater(ID_BONUS_HEALTH3)
+    ..setMaxLifeGained(1, BONUS_HEALTH.run(3))
 
     let tgen2 = new AbilityTooltipGenerator("Turns into an even bigger tank which grants bonus health and magic immunity.")
     new ChannelAbilityPreset(ID_SUPERTANK, 3, true, tgen2)
@@ -66,7 +75,7 @@ class Supertank
         this.maxTime = DURATION_FN.run(this.level)
 
         this.caster..addAbility(AbilityIds.magicImmunityAImx)..hideAbility(AbilityIds.magicImmunityAImx, true)
-        this.caster..addAbility(ID_BONUS_HEALTH)..setAbilityLevel(ID_BONUS_HEALTH, this.level)
+        this.caster..addAbility(ID_BONUS_HEALTHS[this.level - 1])
         SUPERTANKS.add(this.caster)
 
         CAST_SOUND.playOnPoint(this.caster.getPos3Real()).snd.setVolume(127)
@@ -81,7 +90,7 @@ class Supertank
 
     ondestroy
         this.caster.setScale(1.)
-        this.caster.removeAbility(ID_BONUS_HEALTH)
+        this.caster.removeAbility(ID_BONUS_HEALTHS[this.level - 1])
         this.caster.removeAbility(AbilityIds.magicImmunityAImx)
         SUPERTANKS.remove(this.caster)
 

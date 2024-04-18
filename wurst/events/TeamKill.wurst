@@ -1,0 +1,17 @@
+package TeamKill
+
+import ClosureEvents
+import SoundUtils
+
+
+constant ATTEMPT_SOUND = new SoundDefinition(Sounds.error)
+
+
+init
+    EventListener.add(EVENT_PLAYER_UNIT_ATTACKED) ->
+        let attacker = EventData.getAttackerUnit()
+        let target = EventData.getTriggerUnit()
+
+        if not attacker.isEnemyOf(target) and target.getHP() > 0.15 * target.getMaxHP()
+            attacker.issueImmediateOrder("stop")
+            ATTEMPT_SOUND.playOnPoint(attacker.getPos3Real())

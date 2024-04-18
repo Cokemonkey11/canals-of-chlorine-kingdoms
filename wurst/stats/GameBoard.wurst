@@ -4,6 +4,7 @@ import Board
 import ClosureTimers
 import HashMap
 import LinkedList
+import Time
 
 import Teams
 
@@ -73,7 +74,7 @@ public function player.addCreepScore()
 
 init
     nullTimer() ->
-        BOARD.getBoard().setTitle("Stats")
+        BOARD.getBoard().setTitle(" ")
         BOARD.columns(asList(new BoardColumn(" ", 0.4), new BoardColumn("Kills", 0.16), new BoardColumn("Deaths", 0.17), new BoardColumn("Creep Score", 0.27)))
 
         for pl in forceWest
@@ -89,3 +90,10 @@ init
                 addRowForPlayer(pl)
 
         BOARD.show()
+
+    doPeriodically(1.) (CallbackPeriodic cb) ->
+        let theTime = instant(0.) + 1..minutes()
+        let text = theTime.durationSince().lessThan(0..seconds())
+            ? "Game Start in " + duration(-theTime.durationSince().seconds).displayVerbose()
+            : theTime.durationSince().displayVerbose()
+        BOARD.getBoard().setTitle(text)
