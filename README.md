@@ -1,6 +1,7 @@
 # TODO
 
-44. [x] spirit wolf is intense cheese
+## Road to beta
+
 57. [ ] third set of custom heroes
   - [ ] Headhunter
     * [ ] Impetus (unit + point target skillshot with damage scaling with range)
@@ -19,21 +20,33 @@
     * [ ] Flame Shield (target unit gains a fire thorns effect)
 69. [x] exp sharing
 70. [ ] night crawler has B hotkey collision
-72. [x] raid boss is OP
 82. [x] sharing items should not be allowed
-83. [x] cadet's stun can stun invulnerable units
-84. [x] chamber ziggurat sound is global
 88. [x] no control over leavers
 89. [x] missed out on exp when spawns start so early
-90. [ ] it's still possible for tower to chime multiple times overlapping. Maybe because the order is issued while out of range, then it loops?
 91. [ ] kill not awarded when kingdom takes the kill
-92. [x] game timer
 93. [ ] revive timers
 94. [ ] kill notifications
-95. [ ] tower range indicators
-96. [ ] faster heal in base
 97. [ ] 4th custom ability for all custom heroes
-98. [ ] Flash does not disjoint charged blast
+  - [ ] Night Howler - artificial night OR ultravision
+  - [ ] Space Cadet - another kind of charged blast which has an execute effect
+  - [ ] Sorcerer - a shield that can self target or ally target
+  - [ ] Void Annihilator - pre-setup teleport
+  - [ ] Steel Elemental - war stomp, maybe synergise further
+  - [ ] Mongo - something for sustain, or maybe something bruisery like lifesteal
+
+## Other
+
+44. [x] spirit wolf is intense cheese
+72. [x] raid boss is OP
+83. [x] cadet's stun can stun invulnerable units
+84. [x] chamber ziggurat sound is global
+90. [x] it's still possible for tower to chime multiple times overlapping. Maybe because the order is issued while out of range, then it loops?
+92. [x] game timer
+95. [ ] tower range indicators
+96. [x] faster heal in base
+98. [x] Flash does not disjoint charged blast
+99. [ ] ignition starts procing immediately, can't be flashed
+100. [x] castle HP is too low
 
 ## Credits
 

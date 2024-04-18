@@ -164,6 +164,8 @@ class ExpensiveItem extends BaseItem
     ..setAbilities(commaList(ID_1000_HP, ID_10_ARMOR, ID_20_MOVESPEED))
 
     new BuildingDefinition(ID_CASTLE, UnitIds.castle)
+    ..setHitPointsMaximumBase(5000) // Default is 2500
+    ..setHitPointsRegenerationRate(1)
     ..setNormalAbilities(commaList(AbilityIds.shopSharingAlliedBldg, AbilityIds.shopPurchaseItem))
     ..setItemsMade(
         commaList(

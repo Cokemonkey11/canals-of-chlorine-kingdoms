@@ -15,6 +15,10 @@ constant aggroLevels = new IterableMap<unit, instant>()
 
 constant WARNING_SOUND = new SoundDefinition(Sounds.warning)
 
+// 800 attack range, 72 collision size of tower, 32 collision size of most heroes.
+constant CANNON_TOWER_RANGE = 800. + 72. + 32.
+constant CANNON_TOWER_BASE_RANGE = 800.
+
 
 function unit.isAggressiveTower() returns bool
     return aggroLevels.get(this).durationSince().lessThan(duration(5.0))
@@ -22,8 +26,8 @@ function unit.isAggressiveTower() returns bool
 
 function unit.tryToAcquireHeroTarget()
     let res = new Reference<unit>(null)
-    forUnitsInRange(this.getPos(), 800) u ->
-        if u.isAlive() and u.isEnemyOf(this.getOwner()) and u.isType(UNIT_TYPE_HERO) and not u.isInvulnerable()
+    forUnitsInRange(this.getPos(), CANNON_TOWER_RANGE) u ->
+        if u.isAlive() and u.isEnemyOf(this.getOwner()) and u.isType(UNIT_TYPE_HERO) and not u.isInvulnerable() and IsUnitInRange(u, this, CANNON_TOWER_BASE_RANGE)
             res.val = u
 
     if res.val != null
@@ -35,8 +39,8 @@ function unit.tryToAcquireHeroTarget()
 
 function unit.tryToAcquireNonHeroTarget()
     let res = new Reference<unit>(null)
-    forUnitsInRange(this.getPos(), 800) u ->
-        if u.isAlive() and u.isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_HERO)
+    forUnitsInRange(this.getPos(), CANNON_TOWER_RANGE) u ->
+        if u.isAlive() and u.isEnemyOf(this.getOwner()) and not u.isType(UNIT_TYPE_HERO) and IsUnitInRange(u, this, CANNON_TOWER_BASE_RANGE)
             res.val = u
 
     if res.val != null
@@ -86,7 +90,7 @@ init
 
         if source.isEnemyOf(target) and target.isType(UNIT_TYPE_HERO) and source.isType(UNIT_TYPE_HERO)
             aggroLevels.forEach() (unit key, instant _) ->
-                if key.isAlive() and key.getPos().distanceToSq(source.getPos()) < 800 * 800 and key.isEnemyOf(source)
+                if key.isAlive() and key.getPos().distanceToSq(source.getPos()) < CANNON_TOWER_RANGE * CANNON_TOWER_RANGE and key.isEnemyOf(source)
                     if not key.isAggressiveTower()
                         // Tower just became aggressive.
                         key.tryToAcquireHeroTarget()

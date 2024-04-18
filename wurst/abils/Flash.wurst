@@ -10,9 +10,27 @@ import AbilityTooltipGenerator
 
 public constant ID_FLASH = compiletime(ABIL_ID_GEN.next())
 
+constant FLASH_DISJOINTS = new HashMap<unit, int>()
+
 constant lastSmarts = new HashMap<unit, tile>()
 
 constant FLASH_DISTANCE = 400.
+
+
+public function unit.getDisjointState() returns int
+    if FLASH_DISJOINTS.has(this)
+        return FLASH_DISJOINTS.get(this)
+
+    FLASH_DISJOINTS.put(this, 0)
+
+    return 0
+
+
+function unit.incrDisjointState()
+    if FLASH_DISJOINTS.has(this)
+        FLASH_DISJOINTS.put(this, FLASH_DISJOINTS.get(this))
+    else
+        FLASH_DISJOINTS.put(this, 0)
 
 
 @compiletime function gen()
@@ -63,3 +81,4 @@ init
             offs += 16.
 
         caster.setXY(testPos)
+        caster.incrDisjointState()

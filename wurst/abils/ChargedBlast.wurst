@@ -11,6 +11,7 @@ import LinkedListModule
 import AbilityTooltipGenerator
 
 import CodeDamage
+import Flash
 
 
 public constant ID_CHARGED_BLAST = compiletime(ABIL_ID_GEN.next())
@@ -74,6 +75,7 @@ class ChargedBlast
     bool loosed
     bool stable
     maybe_unit_or_point target
+    int disjointState
 
     construct(unit caster)
         this.caster = caster
@@ -82,6 +84,7 @@ class ChargedBlast
         this.loosed = false
         this.stable = true
         this.target = maybe_unit_or_point(null, ZERO2, true, false)
+        this.disjointState = -1
 
         CHARGED_BLASTS.put(caster, this)
 
@@ -123,7 +126,7 @@ class ChargedBlast
             destroy this
             return
 
-        if this.target.isUnit and not this.target.u.isAlive()
+        if this.target.isUnit and (not this.target.u.isAlive() or this.target.u.getDisjointState() != this.disjointState)
             this.target = maybe_unit_or_point(null, this.target.u.getPos(), false, true)
 
         if this.stable and this.timeSpent >= STABILITY_WINDOW
@@ -150,3 +153,4 @@ init
             if not blast.loosed
                 blast.loosed = true
                 blast.target = maybe_unit_or_point(target, ZERO2, true, true)
+                blast.disjointState = target.getDisjointState()
