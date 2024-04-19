@@ -12,6 +12,7 @@ import ChooseHero
 import CodeDamage
 import Creeps
 import GameBoard
+import KillNotifications
 import Teams
 import UnitIds
 
@@ -43,7 +44,8 @@ init
     DamageEvent.addListener(2) ->
         let damage = DamageEvent.getAmount()
         let dying_unit = DamageEvent.getTarget()
-        let killing_player = DamageEvent.getSource().getOwner()
+        let killing_unit = DamageEvent.getSource()
+        let killing_player = killing_unit.getOwner()
         let dying_unit_type = dying_unit.getTypeId()
         let dying_player = dying_unit.getOwner()
 
@@ -76,12 +78,18 @@ init
                         killing_player.addKill()
                         killing_player.addGold(HERO_BOUNTY)
                         createGoldBountyTextTag(dying_unit, HERO_BOUNTY, killing_player)
+                        killing_unit.notifyKilledTarget(dying_unit)
                     else
                         let bestAssist = dying_player.getLastPlayerAttackerSince(ASSIST_CUTOFF.ago())
                         if bestAssist.has
                             bestAssist.who.addKill()
                             bestAssist.who.addGold(HERO_BOUNTY)
                             createGoldBountyTextTag(dying_unit, HERO_BOUNTY, bestAssist.who)
+                            player_heroes.get(bestAssist.who).notifyKilledTarget(dying_unit)
+                        else
+                            killing_unit.notifyKilledTarget(dying_unit)
+                else
+                    killing_unit.notifyKilledTarget(dying_unit)
 
             if dying_unit_type == ID_CANNON_TOWER
                 siegeQueue.add(ID_MORTAR_TEAM)

@@ -1,0 +1,103 @@
+package KillNotifications
+
+import ClosureTimers
+import Icons
+import LinkedList
+import Reference
+
+import Teams
+
+
+constant INITIAL_FRAME_OFFSET = 0.17
+constant ICON_SCALE = 0.018
+constant BACKDROP = getFrame("ConsoleUIBackdrop")
+
+constant DISPLAY_DURATION = 10.
+
+
+class NotifyKilledTarget
+    string textureLhs
+    string textureRhs
+    real offset
+    LinkedList<framehandle> frames
+
+    static constant NOTIFY_QUEUE = new LinkedList<NotifyKilledTarget>
+    static var frame_offset = INITIAL_FRAME_OFFSET
+
+    static function redraw()
+        frame_offset = INITIAL_FRAME_OFFSET
+
+        NOTIFY_QUEUE.forEach() (NotifyKilledTarget tt) ->
+            tt.draw(frame_offset)
+            frame_offset += 1.5 * ICON_SCALE
+
+
+    function draw(real frame_offset_)
+        let ref = new Reference(3)
+        this.frames.forEach() (framehandle tt) ->
+            tt.setAbsPoint(FRAMEPOINT_CENTER, vec2(0.94 - ICON_SCALE * ref.val, frame_offset_))
+            ref.val -= 1
+        ref.into()
+
+    construct(unit killer, unit target)
+        this.textureLhs = killer.getIcon()
+        this.textureRhs = target.getIcon()
+        this.offset = frame_offset
+        frame_offset += 1.5 * ICON_SCALE
+        this.frames = new LinkedList<framehandle>()
+
+        NOTIFY_QUEUE.add(this)
+
+        let frame = createFrame(
+            "BACKDROP",
+            "Face" + killer.getHandleId().toString() + "lhs" + target.getHandleId().toString(),
+            BACKDROP,
+            "",
+            0
+        )
+        ..setTexture(this.textureLhs, 0, true)
+        ..setVertexColor(killer.getOwner().getForce().getTeamPlayer().getColor().toColor())
+        ..setSize(ICON_SCALE, ICON_SCALE)
+        ..setAbsPoint(FRAMEPOINT_CENTER, 0.94 - ICON_SCALE * 3., this.offset)
+        ..show()
+        this.frames.push(frame)
+
+        let frame2 = createFrame(
+            "BACKDROP",
+            "Face" + killer.getHandleId().toString() + "mid" + target.getHandleId().toString(),
+            BACKDROP,
+            "",
+            0
+        )
+        ..setTexture(Icons.bTNAttack, 0, true)
+        ..setSize(ICON_SCALE, ICON_SCALE)
+        ..setAbsPoint(FRAMEPOINT_CENTER, 0.94 - ICON_SCALE * 2., this.offset)
+        ..show()
+        this.frames.push(frame2)
+
+        let frame3 = createFrame(
+            "BACKDROP",
+            "Face" + killer.getHandleId().toString() + "rhs" + target.getHandleId().toString(),
+            BACKDROP,
+            "",
+            0
+        )
+        ..setTexture(this.textureRhs, 0, true)
+        ..setVertexColor(target.getOwner().getForce().getTeamPlayer().getColor().toColor())
+        ..setSize(ICON_SCALE, ICON_SCALE)
+        ..setAbsPoint(FRAMEPOINT_CENTER, 0.94 - ICON_SCALE * 1., this.offset)
+        ..show()
+        this.frames.push(frame3)
+
+        doAfter(DISPLAY_DURATION) ->
+            destroy NOTIFY_QUEUE.dequeue()
+            NotifyKilledTarget.redraw()
+
+    ondestroy
+        this.frames.forEach() (framehandle t) ->
+            t.remove()
+        destroy this.frames
+
+
+public function unit.notifyKilledTarget(unit target)
+    new NotifyKilledTarget(this, target)

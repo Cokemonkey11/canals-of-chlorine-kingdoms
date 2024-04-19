@@ -14,6 +14,7 @@ import UnitIds
 import Castles
 import ClassicHeroes
 import ClosureTimers
+import KillNotifications
 import Recall
 import Teams
 import WhenClose
@@ -95,17 +96,19 @@ init
         close.getOwner().panCameraToTimed(where, 0.)
         close.getOwner().updateBoardIcon(source.getIcon())
         let hero = ReplaceUnitBJ(close, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)
+        ..notifyKilledTarget(source)
         ..onRevivable() which ->
+            let owner = which.getOwner()
             let reviveDuration = (1. + which.getLevel()).seconds()
             let reviveWhen = reviveDuration.fromNow()
-            printTimedToPlayer("You'll be revived in " + (reviveDuration.seconds.toInt()).toString() + " seconds.", 10., which.getOwner())
-            which.getOwner().updateReviveInCell(reviveWhen)
+            printTimedToPlayer("You'll be revived in " + (reviveDuration.seconds.toInt()).toString() + " seconds.", 10., owner)
+            owner.updateReviveInCell(reviveWhen)
             doPeriodicallyTimed(1., reviveDuration.seconds + 1.) cb ->
-                which.getOwner().updateReviveInCell(reviveWhen)
+                owner.updateReviveInCell(reviveWhen)
             doAfter(reviveDuration.seconds) ->
-                if which.getOwner().isIngame()
+                if owner.isIngame() and which.getTypeId() != 0
                     which.revive(where, true)
-                    which.getOwner().panCameraToTimed(where, 0.)
+                    owner.panCameraToTimed(where, 0.)
 
         player_heroes.put(hero.getOwner(), hero)
         hero.setProperName(hero.getOwner().getName(true))

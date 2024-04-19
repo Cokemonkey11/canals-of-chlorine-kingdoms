@@ -194,6 +194,9 @@ init
     BlzChangeMinimapTerrainTex("minimap.blp")
     SetMapFlag(MAP_LOCK_RESOURCE_TRADING, true)
 
+    // Hide the upkeep tooltip
+    BlzFrameGetChild(BlzGetFrameByName("ResourceBarFrame", 0), 2).hide()
+
     for i = 0 to 1
         castles[i] = createUnit(players[i], ID_CASTLE)
         ..setInvulnerable(true)

@@ -25,7 +25,7 @@
 89. [x] missed out on exp when spawns start so early
 91. [x] kill not awarded when kingdom takes the kill
 93. [x] revive timers
-94. [ ] kill notifications
+94. [x] kill notifications
 97. [ ] 4th custom ability for all custom heroes
   - [ ] Night Howler - artificial night OR ultravision
   - [ ] Space Cadet - another kind of charged blast which has an execute effect
@@ -37,7 +37,7 @@
 ## Road to release candidate (0.9.x)
 
 101. [ ] assist gold
-102. [ ] 4x3 custom heroes
+102. [ ] 4th set of custom heroes
 103. [ ] clarity, equtiy, or removal of wc3 melee heroes
 104. [ ] in-game communication of more design principals, especially the carry/caster/tank roles
 105. [ ] more stats for nerds
@@ -54,6 +54,7 @@
 98. [x] Flash does not disjoint charged blast
 99. [ ] ignition starts procing immediately, can't be flashed
 100. [x] castle HP is too low
+106. [ ] colorise the kill notifications by adding extra colored frames on the sides
 
 ## Credits
 
