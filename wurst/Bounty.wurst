@@ -4,7 +4,9 @@ import DamageEvent
 import HashMap
 import SoundUtils
 import StandardTextTags
+import Time
 
+import Assists
 import Barracks
 import ChooseHero
 import CodeDamage
@@ -33,6 +35,8 @@ constant BOUNTY_DIST = 1500.
 constant TOWER_DESTROYED_WARNING_SOUND = new SoundDefinition(Sounds.warning)
 
 constant heroesToGrantExp = CreateGroup()
+
+constant ASSIST_CUTOFF = 15..seconds()
 
 
 init
@@ -67,10 +71,17 @@ init
             if dying_unit.isType(UNIT_TYPE_HERO)
                 if player_heroes.has(dying_player)
                     dying_player.addDeath()
-                if dying_player.isEnemyOf(killing_player) and player_heroes.has(killing_player)
-                    killing_player.addKill()
-                    killing_player.addGold(HERO_BOUNTY)
-                    createGoldBountyTextTag(dying_unit, HERO_BOUNTY, killing_player)
+                if dying_player.isEnemyOf(killing_player)
+                    if player_heroes.has(killing_player)
+                        killing_player.addKill()
+                        killing_player.addGold(HERO_BOUNTY)
+                        createGoldBountyTextTag(dying_unit, HERO_BOUNTY, killing_player)
+                    else
+                        let bestAssist = dying_player.getLastPlayerAttackerSince(ASSIST_CUTOFF.ago())
+                        if bestAssist.has
+                            bestAssist.who.addKill()
+                            bestAssist.who.addGold(HERO_BOUNTY)
+                            createGoldBountyTextTag(dying_unit, HERO_BOUNTY, bestAssist.who)
 
             if dying_unit_type == ID_CANNON_TOWER
                 siegeQueue.add(ID_MORTAR_TEAM)

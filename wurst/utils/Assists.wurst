@@ -1,0 +1,48 @@
+package Assists
+
+import DamageEvent
+import HashMap
+import Reference
+import Time
+
+
+public tuple maybe_player(player who, bool has)
+
+
+// When was player (lhs) last hit by player (rhs)?
+constant ASSIST_TIMESTAMPS = new HashMap<player, IterableMap<player, instant>>()
+
+
+function player.recordWasHitBy(player attacker)
+    if not ASSIST_TIMESTAMPS.has(this)
+        ASSIST_TIMESTAMPS.put(this, new IterableMap<player, instant>())
+
+    let innerMap = ASSIST_TIMESTAMPS.get(this)
+
+    innerMap.put(attacker, instantNow())
+
+
+public function player.getLastPlayerAttackerSince(instant cutoff) returns maybe_player
+    if not ASSIST_TIMESTAMPS.has(this)
+        ASSIST_TIMESTAMPS.put(this, new IterableMap<player, instant>())
+
+    var best_player = new Reference(players[PLAYER_NEUTRAL_PASSIVE])
+    var last_hit = new Reference(instant(-60.))
+    ASSIST_TIMESTAMPS.get(this).forEach() (player key, instant value) ->
+        if value.isNewerThan(last_hit.val) and value.isNewerThan(cutoff)
+            last_hit.val = value
+            best_player.val = key
+
+    let best_player_val = best_player.into()
+    last_hit.into()
+    return maybe_player(best_player_val, best_player_val != players[PLAYER_NEUTRAL_PASSIVE])
+
+
+init
+    DamageEvent.addListener(2) ->
+        let attacker = DamageEvent.getSource()
+        let target = DamageEvent.getTarget()
+        let amt = DamageEvent.getAmount().abs()
+
+        if attacker.isType(UNIT_TYPE_HERO) and target.isType(UNIT_TYPE_HERO) and amt > 0. and attacker.isEnemyOf(target)
+            target.getOwner().recordWasHitBy(attacker.getOwner())

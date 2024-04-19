@@ -8,6 +8,7 @@ import HashMap
 import ItemIds
 import ItemObjEditing
 import SoundUtils
+import Time
 import UnitIds
 
 import Castles
@@ -95,8 +96,13 @@ init
         close.getOwner().updateBoardIcon(source.getIcon())
         let hero = ReplaceUnitBJ(close, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)
         ..onRevivable() which ->
-            printTimedToPlayer("You'll be revived in " + (1 + which.getLevel()).toString() + " seconds.", 10., which.getOwner())
-            doAfter(1. + which.getLevel()) ->
+            let reviveDuration = (1. + which.getLevel()).seconds()
+            let reviveWhen = reviveDuration.fromNow()
+            printTimedToPlayer("You'll be revived in " + (reviveDuration.seconds.toInt()).toString() + " seconds.", 10., which.getOwner())
+            which.getOwner().updateReviveInCell(reviveWhen)
+            doPeriodicallyTimed(1., reviveDuration.seconds + 1.) cb ->
+                which.getOwner().updateReviveInCell(reviveWhen)
+            doAfter(reviveDuration.seconds) ->
                 if which.getOwner().isIngame()
                     which.revive(where, true)
                     which.getOwner().panCameraToTimed(where, 0.)

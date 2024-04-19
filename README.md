@@ -1,6 +1,6 @@
 # TODO
 
-## Road to beta
+## Road to beta (0.1.x)
 
 57. [ ] third set of custom heroes
   - [ ] Headhunter
@@ -23,8 +23,8 @@
 82. [x] sharing items should not be allowed
 88. [x] no control over leavers
 89. [x] missed out on exp when spawns start so early
-91. [ ] kill not awarded when kingdom takes the kill
-93. [ ] revive timers
+91. [x] kill not awarded when kingdom takes the kill
+93. [x] revive timers
 94. [ ] kill notifications
 97. [ ] 4th custom ability for all custom heroes
   - [ ] Night Howler - artificial night OR ultravision
@@ -34,6 +34,14 @@
   - [ ] Steel Elemental - war stomp, maybe synergise further
   - [ ] Mongo - something for sustain, or maybe something bruisery like lifesteal
 
+## Road to release candidate (0.9.x)
+
+101. [ ] assist gold
+102. [ ] 4x3 custom heroes
+103. [ ] clarity, equtiy, or removal of wc3 melee heroes
+104. [ ] in-game communication of more design principals, especially the carry/caster/tank roles
+105. [ ] more stats for nerds
+
 ## Other
 
 44. [x] spirit wolf is intense cheese
@@ -41,7 +49,6 @@
 83. [x] cadet's stun can stun invulnerable units
 84. [x] chamber ziggurat sound is global
 90. [x] it's still possible for tower to chime multiple times overlapping. Maybe because the order is issued while out of range, then it loops?
-92. [x] game timer
 95. [ ] tower range indicators
 96. [x] faster heal in base
 98. [x] Flash does not disjoint charged blast
