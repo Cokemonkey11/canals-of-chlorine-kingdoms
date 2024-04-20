@@ -28,9 +28,9 @@ public constant ID_DIVINE_SHIELD = compiletime(ABIL_ID_GEN.next())
 
     ..tooltipStartListen()
     ..setLevels(3)
-    ..presetDurationHero((int lvl) -> 3.0 + 2.0 * (lvl - 1.0))
+    ..presetDurationHero((int lvl) -> 2.0 + 1.0 * (lvl - 1.0))
     ..setName("Divine Shield")
-    ..presetCooldown((int lvl) -> 60. - (10 * (lvl - 1)))
+    ..presetCooldown((int lvl) -> 70. - (10 * (lvl - 1)))
     ..tooltipStopListen(true)
 
     ..presetCanDeactivate(int lvl -> false)

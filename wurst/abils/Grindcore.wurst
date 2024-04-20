@@ -19,4 +19,4 @@ init
             let fx = addEffect(Abilities.healTarget, attacker, "origin")
             doAfter(UnitAnimations.HealTarget.birth.duration) ->
                 fx.destr()
-            attacker.addHP(damage.abs() / 2.)
+            attacker.addHP(damage.abs() / 4.)

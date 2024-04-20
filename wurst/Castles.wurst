@@ -132,7 +132,7 @@ class ExpensiveItem extends BaseItem
     new ExpensiveItem(ID_HELMET, 0, 2, Icons.bTNHelmOfValor, "Helmet", "Provides 100 bonus str")
     ..setAbilities(commaList(ID_100_STR))
 
-    new ExpensiveItem(ID_GRINDCORE, 1, 0, Icons.bTNOrcMeleeUpThree, "Grindcore", "Provides 100 attack damage and 50% lifesteal")
+    new ExpensiveItem(ID_GRINDCORE, 1, 0, Icons.bTNOrcMeleeUpThree, "Grindcore", "Provides 100 attack damage and 25% lifesteal")
     ..setAbilities(commaList(ID_100_DMG))
 
     new ExpensiveItem(
