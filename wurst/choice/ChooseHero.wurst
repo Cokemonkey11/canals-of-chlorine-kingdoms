@@ -14,7 +14,6 @@ import UnitIds
 import Castles
 import ClassicHeroes
 import ClosureTimers
-import KillNotifications
 import Recall
 import Teams
 import WhenClose
@@ -96,7 +95,6 @@ init
         close.getOwner().panCameraToTimed(where, 0.)
         close.getOwner().updateBoardIcon(source.getIcon())
         let hero = ReplaceUnitBJ(close, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)
-        ..notifyKilledTarget(source)
         ..onRevivable() which ->
             let owner = which.getOwner()
             let reviveDuration = (1. + which.getLevel()).seconds()

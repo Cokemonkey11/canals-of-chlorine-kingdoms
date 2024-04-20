@@ -1,0 +1,165 @@
+package DeathBlast
+
+import Abilities
+import ClosureEvents
+import ClosureTimers
+import DamageEvent
+import HashMap
+import LinkedListModule
+import StandardTextTags
+
+import AbilityTooltipGenerator
+import WurstTempLightning
+
+import CodeDamage
+import Flash
+
+
+public constant ID_DEATH_BLAST = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure DAMAGE_FUNCTION = lvl -> 25 + 25 * lvl
+constant IntLevelClosure DAMAGE_BONUS_MULTIPLIER_FUNCTION = lvl -> 1 + 1 * lvl
+constant RealLevelClosure HEALTH_RATIO_FOR_BONUS_FUNCTION = lvl -> 0.1 + 0.05 * lvl
+
+constant CHARGED_ATTACK_TIMEOUT = 5
+constant MISSILE_SPEED = 1200.
+
+constant DEATH_BLASTS = new HashMap<unit, DeathBlast>()
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Charges up a microwave blast. "
+        + "The next basic attack causes the blast to be loosed at the target, dealing damage on impact. "
+        + "If the target is struck with low health, the damage increases significantly."
+    )
+    new ChannelAbilityPreset(ID_DEATH_BLAST, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(2, 2)
+    ..presetButtonPosResearch(2, 0)
+    ..presetHotkey("E")
+    ..presetIcon(Icons.bTNChainLightning)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetManaCost(_ -> 100)
+    ..setName("Death Blast")
+    ..presetCooldown(lvl -> 11. - (1. * lvl))
+    ..addTooltipProperty("Damage", DAMAGE_FUNCTION)
+    ..addTooltipProperty("Bonus Multiplier", DAMAGE_BONUS_MULTIPLIER_FUNCTION)
+    ..addTooltipProperty("Health Ratio for Bonus (%)", HEALTH_RATIO_FOR_BONUS_FUNCTION)
+    ..addTooltipProperty("Charged Attack Timeout", lvl -> CHARGED_ATTACK_TIMEOUT)
+    ..tooltipStopListen()
+
+
+tuple maybe_unit_or_point(unit u, vec2 point, bool isUnit, bool isPresent)
+
+tuple vec3pair(vec3 start, vec3 fin)
+
+
+function maybe_unit_or_point.getPos() returns vec2
+    if not this.isPresent
+        return ZERO2
+
+    if not this.isUnit
+        return this.point
+
+    return this.u.getPos()
+
+
+function effect.toPointPairForTangentialLightning(angle ang) returns vec3pair
+    return vec3pair(
+        this.getPos3().polarProject(48., ang + 90..asAngleDegrees(), 90..asAngleDegrees()),
+        this.getPos3().polarProject(48., ang - 90..asAngleDegrees(), 90..asAngleDegrees())
+    )
+
+
+class DeathBlast
+    use LinkedListModule
+
+    unit caster
+    real timeSpent
+    effect fx
+    lightning lightning_
+    bool loosed
+    maybe_unit_or_point target
+    int disjointState
+
+    construct(unit caster)
+        this.caster = caster
+        this.timeSpent = 0.
+        let ang = this.caster.getFacingAngle()
+        this.fx = addEffect(Abilities.lightningBoltMissile, this.caster.getPos3Real() + vec3(0., 0., 125.))..setAlpha(0)
+        let lightningPoints = this.fx.toPointPairForTangentialLightning(ang)
+        this.lightning_ = addLightning(LIGHTNING_CHAIN_LIGHTNING_SEECONDARY, true, lightningPoints.start, lightningPoints.fin)
+        this.loosed = false
+        this.target = maybe_unit_or_point(null, ZERO2, true, false)
+        this.disjointState = -1
+
+        DEATH_BLASTS.put(caster, this)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx.destr()
+        this.lightning_.destr()
+        DEATH_BLASTS.remove(this.caster)
+
+    function tick()
+        this.timeSpent += ANIMATION_PERIOD
+
+        if not this.loosed and (this.timeSpent > CHARGED_ATTACK_TIMEOUT or not this.caster.isAlive())
+            destroy this
+            return
+
+        if this.loosed and (this.fx.getPos().distanceToSq(this.target.getPos()) < 64. * 64.)
+            if this.target.isUnit and this.target.u.isAlive() and this.target.u.isEnemyOf(this.caster) and not this.target.u.isInvulnerable()
+                let lvl = this.caster.getAbilityLevel(ID_DEATH_BLAST)
+                let damage = DAMAGE_FUNCTION.run(lvl).toReal()
+                let multiplier = DAMAGE_BONUS_MULTIPLIER_FUNCTION.run(lvl)
+                let ratio = HEALTH_RATIO_FOR_BONUS_FUNCTION.run(lvl)
+
+                let fullDamage = this.target.u.getHP() / this.target.u.getMaxHP() < ratio ? damage * multiplier : damage
+                createCriticalStrikeTextTag(this.target.u, fullDamage.toInt())
+                this.caster.dealCodeDamage(this.target.u, fullDamage)
+
+            destroy this
+            return
+
+        if this.target.isUnit and (not this.target.u.isAlive() or this.target.u.getDisjointState() != this.disjointState)
+            this.target = maybe_unit_or_point(null, this.target.u.getPos(), false, true)
+
+        if not this.loosed
+            this.fx.setPos(this.caster.getPos3Real() + vec3(0., 0., 125.))
+            let ang = this.caster.getFacingAngle()
+            let lightningPoints = this.fx.toPointPairForTangentialLightning(ang)
+            this.lightning_.move(true, lightningPoints.start, lightningPoints.fin)
+        else
+            this.fx.setPos(this.fx.getPos3().moveTowards(this.target.getPos().withTerrainZ() + vec3(0., 0., 50.), MISSILE_SPEED * ANIMATION_PERIOD))
+            let ang = this.fx.getPos().angleTo(this.target.getPos())
+            let lightningPoints = this.fx.toPointPairForTangentialLightning(ang)
+            this.lightning_.move(true, lightningPoints.start, lightningPoints.fin)
+            new TempLightning(lightningPoints.start, lightningPoints.fin, 0.5, LIGHTNING_CHAIN_LIGHTNING_SEECONDARY)
+
+
+init
+    EventListener.onCast(ID_DEATH_BLAST) caster ->
+        new DeathBlast(caster)
+
+    DamageEvent.addListener(1) ->
+        let attacker = DamageEvent.getSource()
+        let target = DamageEvent.getTarget()
+        let event_t = DamageEvent.getType()
+
+        if DEATH_BLASTS.has(attacker) and event_t == DamageType.ATTACK
+            let blast = DEATH_BLASTS.get(attacker)
+            if not blast.loosed
+                blast.loosed = true
+                blast.target = maybe_unit_or_point(target, ZERO2, true, true)
+                blast.disjointState = target.getDisjointState()

@@ -1,11 +1,10 @@
 package NightHowler
 
-// Artificial night + Ultravision + Ghosting
-
 import Assets
 
 import AbilityTooltipGenerator
 
+import Eclipse
 import Finger
 import HeroGlow
 import PainFinger
@@ -55,5 +54,5 @@ public constant ID_NIGHT_HOWLER = compiletime(HERO_ID_GEN.next())
     ..setAttack1ProjectileSpeed(1800)
     ..setAttack1Range(DEFAULT_ATTACK_RANGE)
     ..setUnitSoundSet(Soundsets.hydralisk)
-    ..setHeroAbilities(commaList(ID_FINGER, ID_TURBO_GILLS, AbilityIds.wardenBlink, ID_PAIN_FINGER))
+    ..setHeroAbilities(commaList(ID_FINGER, ID_TURBO_GILLS, ID_ECLIPSE, ID_PAIN_FINGER))
     ..setIconGameInterface(Icons.bTNVoidWalker)

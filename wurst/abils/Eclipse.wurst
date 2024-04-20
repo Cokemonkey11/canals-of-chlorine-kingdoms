@@ -1,0 +1,54 @@
+package Eclipse
+
+import ClosureEvents
+import ClosureTimers
+import InstantDummyCaster
+
+import AbilityTooltipGenerator
+
+
+public constant ID_ECLIPSE = compiletime(ABIL_ID_GEN.next())
+constant ID_FORCE_NIGHT = compiletime(ABIL_ID_GEN.next())
+constant ID_ULTRAVISION = compiletime(ABIL_ID_GEN.next())
+constant ORDER_MOONSTONE = 852621
+
+constant DURATION = 20.
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Grants increased nightvision and changes the day to night for a time."
+    )
+    new ChannelAbilityPreset(ID_ECLIPSE, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(2, 2)
+    ..presetButtonPosResearch(2, 0)
+    ..presetHotkey("E")
+    ..presetIcon(Icons.bTNAuraOfDarkness)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetManaCost(lvl -> 110 - 10 * lvl)
+    ..setName("Eclipse")
+    ..presetCooldown(lvl -> 60. - (10. * lvl))
+    ..addTooltipProperty("Duration", lvl -> DURATION)
+    ..tooltipStopListen()
+
+    new AbilityDefinitionItemChangeTOD(ID_FORCE_NIGHT)
+    ..presetDurationNormal((int lvl) -> DURATION)
+    ..presetCooldown((int lvl) -> 0.)
+    ..presetCastRange((int lvl) -> 92083)
+    ..presetManaCost((int lvl) -> 0)
+
+    new AbilityDefinition(ID_ULTRAVISION, 'Ault')
+    ..setRequirements("")
+
+
+init
+    EventListener.onCast(ID_ECLIPSE) caster ->
+        caster..addAbility(ID_ULTRAVISION)
+
+        InstantDummyCaster.castImmediate(DUMMY_PLAYER, ID_FORCE_NIGHT, 1, ORDER_MOONSTONE, ZERO2)
+
+        doAfter(DURATION) ->
+            caster..removeAbility(ID_ULTRAVISION)

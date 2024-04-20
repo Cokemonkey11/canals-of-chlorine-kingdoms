@@ -19,20 +19,14 @@
     * [ ] Immolation (cast on target and creates a ring of fire)
     * [ ] Flame Shield (target unit gains a fire thorns effect)
 69. [x] exp sharing
-70. [ ] night crawler has B hotkey collision
 82. [x] sharing items should not be allowed
 88. [x] no control over leavers
-89. [x] missed out on exp when spawns start so early
 91. [x] kill not awarded when kingdom takes the kill
-93. [x] revive timers
 94. [x] kill notifications
 97. [ ] 4th custom ability for all custom heroes
-  - [ ] Night Howler - artificial night OR ultravision
-  - [ ] Space Cadet - another kind of charged blast which has an execute effect
-  - [ ] Sorcerer - a shield that can self target or ally target
   - [ ] Void Annihilator - pre-setup teleport
   - [ ] Steel Elemental - war stomp, maybe synergise further
-  - [ ] Mongo - something for sustain, or maybe something bruisery like lifesteal
+  - [ ] Mongo - something for sustain, or maybe something bruisery like lifesteal, maybe something cluster-rockety
 
 ## Road to release candidate (0.9.x)
 
@@ -42,7 +36,7 @@
 104. [ ] in-game communication of more design principals, especially the carry/caster/tank roles
 105. [ ] more stats for nerds
 
-## Other
+## Backlog
 
 44. [x] spirit wolf is intense cheese
 72. [x] raid boss is OP
@@ -55,17 +49,3 @@
 99. [ ] ignition starts procing immediately, can't be flashed
 100. [x] castle HP is too low
 106. [ ] colorise the kill notifications by adding extra colored frames on the sides
-
-## Credits
-
-- peq
-- Frotty
-- Matro
-- lep
-- Petr
-- Overkane
-- Jaccouille
-- Footman16
-- looking_for_help
-- Blizzard Entertainment
-- Dionesiist

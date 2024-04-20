@@ -1,0 +1,51 @@
+package PresenseOfMind
+
+import AbilityTooltipGenerator
+
+
+public constant ID_PRESENSE_OF_MIND = compiletime(ABIL_ID_GEN.next())
+constant ID_PRESENSE_OF_MIND_DASH = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure MANA_COST_FUNCTION = lvl -> 110 - 10 * lvl
+
+constant RealLevelClosure CAST_RANGE_FUNCTION = lvl -> 500. * lvl
+constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 35. - 5 * lvl
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Hallucinates a copy at the target point. Can be re-cast to consume the copy, taking its place in the universe."
+    )
+    new ChannelAbilityPreset(ID_PRESENSE_OF_MIND, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(3, 2)
+    ..presetButtonPosResearch(3, 0)
+    ..presetHotkey("R")
+    ..presetIcon(Icons.bTNCharm)
+    ..setLevelSkipRequirement(2)
+    ..setRequiredLevel(6)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.POINT)
+    ..presetManaCost(MANA_COST_FUNCTION)
+    ..presetCastRange(CAST_RANGE_FUNCTION)
+    ..setName("Presence of Mind")
+    ..presetCooldown(COOLDOWN_FUNCTION)
+    ..tooltipStopListen()
+
+    let tgen2 = new AbilityTooltipGenerator(
+        "Consumes the presence of mind, taking its place in the universe."
+    )
+    new ChannelAbilityPreset(ID_PRESENSE_OF_MIND_DASH, 1, true, tgen2)
+    ..setHeroAbility(false)
+    ..presetButtonPosNormal(3, 2)
+    ..presetButtonPosResearch(3, 0)
+    ..presetHotkey("R")
+    ..presetIcon(Icons.bTNWindWalkOn)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetManaCost(lvl -> 0)
+    ..setName("Presence of Mind")
+    ..presetCooldown(lvl -> 1.)
+    ..tooltipStopListen()

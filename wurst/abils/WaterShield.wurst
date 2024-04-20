@@ -1,0 +1,177 @@
+package WaterShield
+
+import Abilities
+import AbilityTooltipGenerator
+import ClosureEvents
+import ClosureTimers
+import DamageEvent
+import HashMap
+import LinkedListModule
+import Reference
+import Time
+
+
+public constant ID_WATER_SHIELD = compiletime(ABIL_ID_GEN.next())
+
+constant MANA_COST = 60
+
+constant IntLevelClosure SHIELDED_HEALTH_FUNCTION = lvl -> 100 + 100 * lvl
+
+constant IntLevelClosure DURATION_FUNCTION = lvl -> 5 + 3 * lvl
+
+constant PROJECTILE_SPEED = 1200
+constant DISTANCE_THRESHOLD_SQ = (PROJECTILE_SPEED * ANIMATION_PERIOD * 1.5) * (PROJECTILE_SPEED * ANIMATION_PERIOD * 1.5)
+
+constant UNIT_SHIELD_AMOUNTS = new HashMap<unit, Reference<real>>()
+
+
+function unit.addShield(real amount, duration until)
+    if not UNIT_SHIELD_AMOUNTS.has(this)
+        UNIT_SHIELD_AMOUNTS.put(this, new Reference(0.))
+
+    let ref = UNIT_SHIELD_AMOUNTS.get(this)
+    ref.val += amount
+    Log.info(ref.val.toString())
+
+    doAfter(until.seconds) ->
+        ref.val -= min(ref.val, amount)
+        Log.info(ref.val.toString())
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Shields a target unit, negating damage for a time."
+    )
+    new ChannelAbilityPreset(ID_WATER_SHIELD, 3, true, tgen)
+    ..setHeroAbility(true)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.UNIT)
+    ..presetManaCost(_ -> MANA_COST)
+    ..presetCastRange((int lvl) -> 600.)
+    ..setName("Water Shield")
+    ..presetCooldown(lvl -> 16)
+    ..addTooltipProperty("Shielded Health", SHIELDED_HEALTH_FUNCTION)
+    ..addTooltipProperty("Shield Duration", DURATION_FUNCTION)
+    ..presetFollowThroughTime((int lvl) -> 1.0)
+    ..tooltipStopListen()
+
+    ..presetButtonPosNormal(1, 2)
+    ..presetButtonPosResearch(1, 0)
+    ..presetHotkey("W")
+    ..presetIcon(Icons.bTNCrushingWave)
+    ..presetTargetsAllowed(lvl -> "friend,ground,vulnerable,self")
+    ..presetDisableOtherAbilities((int lvl) -> true)
+
+
+enum WaterShieldMissileState
+    NONE
+    TR
+    TL
+    BL
+    BR
+    MOTION
+    T_TR
+    T_TL
+    T_BL
+    T_BR
+
+
+function WaterShieldMissileState.isSourceMode() returns bool
+    return this == TR or this == TL or this == BL or this == BR
+
+
+function WaterShieldMissileState.getOffset(angle ang) returns vec2
+    if this == TL or this == T_TL
+        return ZERO2.polarOffset(ang + 45..asAngleDegrees(), 75.)
+
+    if this == BL or this == T_BL
+        return ZERO2.polarOffset(ang + (45. + 90.).asAngleDegrees(), 75.)
+
+    if this == BR or this == T_BR
+        return ZERO2.polarOffset(ang - (45. + 90.).asAngleDegrees(), 75.)
+
+    return ZERO2.polarOffset(ang - 45..asAngleDegrees(), 75.)
+
+
+constant WaterShieldMissileState array sourceModes = [WaterShieldMissileState.TR, WaterShieldMissileState.TL, WaterShieldMissileState.BL, WaterShieldMissileState.BR]
+constant WaterShieldMissileState array targetModes = [WaterShieldMissileState.T_TR, WaterShieldMissileState.T_TL, WaterShieldMissileState.T_BL, WaterShieldMissileState.T_BR]
+
+
+class WaterShieldMissile
+    use LinkedListModule
+
+    unit source
+    unit target
+    effect fx
+    WaterShieldMissileState state
+    real time
+    real maxTime
+    real shieldAmount
+
+    construct(unit source, unit target)
+        this.source = source
+        this.target = target
+        let ang = source.getFacingAngle()
+        this.fx = addEffect(Abilities.waterElementalMissile, source.getPos3Real() + vec3(0., 0., 25.).polarProject(75., ang - 45..asAngleDegrees(), 90..asAngleDegrees()))..setScale(0.75)
+        this.state = source == target ? WaterShieldMissileState.T_TR : WaterShieldMissileState.TR
+        this.time = 0.
+        this.maxTime = DURATION_FUNCTION.run(source.getAbilityLevel(ID_WATER_SHIELD)).toReal()
+        this.shieldAmount = SHIELDED_HEALTH_FUNCTION.run(source.getAbilityLevel(ID_WATER_SHIELD)).toReal() / 4.
+
+        if not this.state.isSourceMode()
+            this.source.addShield(this.shieldAmount, duration(this.maxTime))
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx.destr()
+
+    function tick()
+        this.time += ANIMATION_PERIOD
+
+        if this.time >= this.maxTime or not this.target.isAlive()
+            destroy this
+            return
+
+        if this.time > 1. and this.state.isSourceMode()
+            this.state = WaterShieldMissileState.MOTION
+        else if this.state == WaterShieldMissileState.MOTION and this.fx.getPos().distanceToSq(this.target.getPos()) < 96. * 96.
+            this.state = WaterShieldMissileState.T_TR
+            this.target.addShield(this.shieldAmount, duration(this.maxTime))
+        else if not this.state == WaterShieldMissileState.MOTION
+            this.state = this.state.isSourceMode() ? sourceModes[(this.time * 4. % 4.).toInt()] : targetModes[(this.time * 4. % 4).toInt()]
+
+        let focus = this.state.isSourceMode() ? this.source.getPos3Real() + vec3(0., 0., 25.) : this.target.getPos3Real() + vec3(0., 0., 25.)
+        let ang = this.state.isSourceMode() ? this.source.getFacingAngle() : this.target.getFacingAngle()
+        let offset = this.state.getOffset(ang)
+        let targetPos = focus + offset
+
+        if this.fx.getPos().distanceToSq(targetPos.toVec2()) > DISTANCE_THRESHOLD_SQ
+            this.fx.setPos(this.fx.getPos3().moveTowards(targetPos, PROJECTILE_SPEED * ANIMATION_PERIOD))
+            this.fx.setYaw(this.fx.getPos().angleTo(targetPos.toVec2()))
+
+init
+    EventListener.onCast(ID_WATER_SHIELD) caster ->
+        let target = EventData.getSpellTargetUnit()
+        doPeriodicallyCounted(0.25, 4) (CallbackCounted cb) ->
+            if caster.isAlive()
+                new WaterShieldMissile(caster, target)
+
+    DamageEvent.addListener(1) ->
+        let target = DamageEvent.getTarget()
+        let damage = DamageEvent.getAmount()
+
+        if UNIT_SHIELD_AMOUNTS.has(target) and damage.abs() > 0.
+            let ref = UNIT_SHIELD_AMOUNTS.get(target)
+            if ref.val > 0.
+                let shieldedAmount = min(ref.val, damage.abs())
+                ref.val -= shieldedAmount
+                DamageEvent.subAmount(shieldedAmount)
+                Log.info(ref.val.toString())
