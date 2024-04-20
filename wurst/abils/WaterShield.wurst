@@ -31,11 +31,9 @@ function unit.addShield(real amount, duration until)
 
     let ref = UNIT_SHIELD_AMOUNTS.get(this)
     ref.val += amount
-    Log.info(ref.val.toString())
 
     doAfter(until.seconds) ->
         ref.val -= min(ref.val, amount)
-        Log.info(ref.val.toString())
 
 
 @compiletime function gen()
@@ -174,4 +172,3 @@ init
                 let shieldedAmount = min(ref.val, damage.abs())
                 ref.val -= shieldedAmount
                 DamageEvent.subAmount(shieldedAmount)
-                Log.info(ref.val.toString())
