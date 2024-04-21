@@ -1,5 +1,9 @@
 package PresenseOfMind
 
+import ClosureEvents
+import ClosureTimers
+import HashMap
+
 import AbilityTooltipGenerator
 
 
@@ -31,6 +35,8 @@ constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 35. - 5 * lvl
     ..presetCastRange(CAST_RANGE_FUNCTION)
     ..setName("Presence of Mind")
     ..presetCooldown(COOLDOWN_FUNCTION)
+    ..presetFollowThroughTime(lvl -> 1.0)
+    ..presetDisableOtherAbilities((int lvl) -> true)
     ..tooltipStopListen()
 
     let tgen2 = new AbilityTooltipGenerator(
@@ -49,3 +55,52 @@ constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 35. - 5 * lvl
     ..setName("Presence of Mind")
     ..presetCooldown(lvl -> 1.)
     ..tooltipStopListen()
+
+
+constant PRESENCE_OF_MINDS = new HashMap<unit, PresenceOfMind>()
+
+
+class PresenceOfMind
+    unit caster
+    effect fx
+    CallbackPeriodic animationCb
+
+    construct(unit caster, vec2 target)
+        this.caster = caster
+        this.fx = addEffect("FacelessOneSorcerer.mdl", caster.getPos())..setYaw(caster.getFacingAngle())..playAnimation(ANIM_TYPE_SPELL, 0.25)..setColor(colorA(155, 155, 255, 155))..setColorByPlayer(caster.getOwner())
+        this.animationCb = (CallbackPeriodic cb) ->
+            this.fx..playAnimation(ANIM_TYPE_SPELL, 0.25)
+
+        doPeriodically(4.5, this.animationCb)
+
+        let vel = ZERO2.polarOffset(caster.getPos().angleTo(target), caster.getPos().distanceTo(target) * ANIMATION_PERIOD)
+        PRESENCE_OF_MINDS.put(caster, this)
+
+        doPeriodicallyTimed(ANIMATION_PERIOD, 1.) (CallbackCounted cb) ->
+            this.fx.setPos(this.fx.getPos() + vel)
+
+            if cb.isLast()
+                this.caster..hideAbility(ID_PRESENSE_OF_MIND, true)..addAbility(ID_PRESENSE_OF_MIND_DASH)..setAbilityLevel(ID_PRESENSE_OF_MIND_DASH, this.caster.getAbilityLevel(ID_PRESENSE_OF_MIND))
+
+    ondestroy
+        this.fx..setAlpha(0)..destr()
+        PRESENCE_OF_MINDS.remove(this.caster)
+        destroy this.animationCb
+
+
+init
+    EventListener.onCast(ID_PRESENSE_OF_MIND) caster ->
+        let targ = EventData.getSpellTargetPos()
+        new PresenceOfMind(caster, targ)
+
+    EventListener.onCast(ID_PRESENSE_OF_MIND_DASH) caster ->
+        let presenceOfMind = PRESENCE_OF_MINDS.get(caster)
+
+        let dist = caster.getPos().distanceTo(presenceOfMind.fx.getPos())
+        let vel = ZERO2.polarOffset(caster.getPos().angleTo(presenceOfMind.fx.getPos()), dist * ANIMATION_PERIOD)
+        doPeriodicallyTimed(ANIMATION_PERIOD, 1.) (CallbackCounted cb) ->
+            caster.setXY(caster.getPos() + vel)
+
+            if cb.isLast()
+                presenceOfMind.caster..removeAbility(ID_PRESENSE_OF_MIND_DASH)..hideAbility(ID_PRESENSE_OF_MIND, false)
+                destroy presenceOfMind

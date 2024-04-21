@@ -1,12 +1,11 @@
 package VoidAnnihilator
 
-// - presence of mind (pre-setup teleport)
-
 import Assets
 
 import AbilityTooltipGenerator
 
 import HeroGlow
+import PresenseOfMind
 import Regenerator
 
 
@@ -24,7 +23,7 @@ public constant ID_BLACK_BINDING = compiletime(ABIL_ID_GEN.next())
 
     ..tooltipStartListen()
     ..presetTargetTypes(Targettype.POINT)
-    ..presetManaCost(lvl -> 80 - 10 * lvl)
+    ..presetManaCost(lvl -> 80)
     ..setName("Calling Void")
     ..presetCastRange(_ -> 600.)
     ..presetAreaofEffect((int lvl) -> 325.)
@@ -70,5 +69,5 @@ public constant ID_BLACK_BINDING = compiletime(ABIL_ID_GEN.next())
     ..setModelFile("FacelessOneSorcerer.mdl")
     ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
     ..setUnitSoundSet(Soundsets.facelessOne)
-    ..setHeroAbilities(commaList(ID_BLACK_BINDING, ID_CALLING_VOID, ID_REGENERATOR, AbilityIds.massTeleport))
+    ..setHeroAbilities(commaList(ID_BLACK_BINDING, ID_CALLING_VOID, ID_REGENERATOR, ID_PRESENSE_OF_MIND))
     ..setIconGameInterface(Icons.bTNFacelessOne)
