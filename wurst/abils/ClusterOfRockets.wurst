@@ -1,0 +1,99 @@
+package ClusterOfRockets
+
+import Abilities
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import LinkedListModule
+import Reference
+import StandardTextTags
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+
+
+public constant ID_CLUSTER_OF_ROCKETS = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure DAMAGE_FUNCTION = lvl -> 25 * lvl
+constant IntLevelClosure DURATION_FUNCTION = lvl -> 7 + lvl
+
+constant RADIUS = 128.
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        Targettype.NONE,
+        "Launches an experimental cluster of rockets. The rockets stay close to the heat signature of the tank and hit nearby enemies."
+    )
+    new ChannelAbilityPreset(ID_CLUSTER_OF_ROCKETS, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(1, 2)
+    ..presetButtonPosResearch(1, 0)
+    ..presetHotkey("W")
+    ..presetIcon(Icons.bTNClusterRockets)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetManaCost(_ -> 75)
+    ..setName("Cluster of Rockets")
+    ..presetCooldown(lvl -> 15. - (1. * lvl))
+    ..addTooltipProperty("Rocket Count", (int lvl) -> 3.)
+    ..addTooltipProperty("Damage (per rocket)", DAMAGE_FUNCTION)
+    ..addTooltipProperty("Duration", DURATION_FUNCTION)
+    ..presetFollowThroughTime((int lvl) -> 1.)
+    ..tooltipStopListen()
+
+    ..presetDisableOtherAbilities((int lvl) -> true)
+
+
+class ClusterOfRockets
+    use LinkedListModule
+
+    unit caster
+    real timeLeft
+    real damage
+    angle ang
+    effect fx
+
+    construct(unit caster)
+        this.caster = caster
+        let lvl = caster.getAbilityLevel(ID_CLUSTER_OF_ROCKETS)
+        this.timeLeft = DURATION_FUNCTION.run(lvl).toReal()
+        this.damage = DAMAGE_FUNCTION.run(lvl).toReal()
+        this.ang = this.caster.getFacingAngle()
+
+        this.fx = addEffect(Abilities.tinkerRocketMissile, this.caster.getPos().polarOffset(this.ang, RADIUS))..setYaw(this.ang + 90..asAngleDegrees())
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx.destr()
+
+    function tick()
+        this.timeLeft -= ANIMATION_PERIOD
+        this.ang += ((2. * PI) * ANIMATION_PERIOD).asAngleRadians()
+
+        this.fx..setPos(this.caster.getPos().polarOffset(this.ang, RADIUS))..setYaw(this.ang + 90..asAngleDegrees())
+
+        let hitRef = new Reference(false)
+        forUnitsInRange(this.fx.getPos(), 64.) u ->
+            if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and not hitRef.val
+                hitRef.val = true
+                this.caster.dealCodeDamage(u, this.damage)
+                createCriticalStrikeTextTag(u, this.damage.toInt())
+
+        if not this.caster.isAlive() or this.timeLeft <= 0. or hitRef.into()
+            destroy this
+
+init
+    EventListener.onCast(ID_CLUSTER_OF_ROCKETS) caster ->
+        doPeriodicallyCounted(1. / 3., 3) cb ->
+            if caster.isAlive()
+                new ClusterOfRockets(caster)

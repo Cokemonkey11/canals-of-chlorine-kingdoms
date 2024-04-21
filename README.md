@@ -12,7 +12,7 @@
     * [ ] Channeled Megastomp (knocks back all non-stunned enemies)
     * [ ] Execute (Leap with camera shake, stuns target in the center)
     * [ ] Resurrection (actively cast sepppuku, dies and resurrects actively)
-    * [ ] Eviscerate (execute-wurst ability, can only target low HP enemies)
+    * [ ] Eviscerate (execute-wurst ability, can only target low HP enemies, channels and stuns while killing the enemy, can be interrupted)
   - [ ] Molotov Cockatiel
     * [ ] Plumage (attacking leaves items that can be right-clicked to dash to them)
     * [ ] Fire Blast (cone of fire)
@@ -21,11 +21,6 @@
 69. [x] exp sharing
 82. [x] sharing items should not be allowed
 88. [x] no control over leavers
-91. [x] kill not awarded when kingdom takes the kill
-94. [x] kill notifications
-97. [ ] 4th custom ability for all custom heroes
-  - [x] Steel Elemental - war stomp, maybe synergise further
-  - [ ] Mongo - something for sustain, or maybe something bruisery like lifesteal, maybe something cluster-rockety
 
 ## Road to release candidate (0.9.x)
 
