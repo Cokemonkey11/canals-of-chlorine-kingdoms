@@ -1,0 +1,28 @@
+package WarStomp
+
+import AbilityTooltipGenerator
+
+
+public constant ID_WAR_STOMP = compiletime(ABIL_ID_GEN.next())
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(Targettype.NONE, "Slams the ground, damaging nearby enemies and stunning them.")
+    new AbilityDefinitionTaurenChieftainWarStomp(ID_WAR_STOMP)
+    ..registerTooltipGenerator(tgen)
+
+    ..tooltipStartListen()
+    ..setLevels(3)
+    ..setName("War Stomp")
+    ..presetAreaofEffect((int lvl) -> 325)
+    ..presetButtonPosNormal(2, 2)
+    ..presetButtonPosResearch(2, 0)
+    ..presetCooldown((int lvl) -> 10. - lvl)
+    ..presetDamage((int lvl) -> 50. + 25 * lvl)
+    ..presetHotkey("E")
+    ..presetManaCost((int lvl) -> 200 - 50 * lvl)
+    ..presetIcon(Icons.bTNWarStomp)
+    ..presetDurationHero((int lvl) -> 0.5 + 0.5 * lvl)
+    ..tooltipStopListen()
+
+    ..presetDurationNormal((int lvl) -> 1. + 1 * lvl)

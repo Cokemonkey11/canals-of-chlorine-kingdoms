@@ -24,8 +24,7 @@
 91. [x] kill not awarded when kingdom takes the kill
 94. [x] kill notifications
 97. [ ] 4th custom ability for all custom heroes
-  - [x] Void Annihilator - pre-setup teleport
-  - [ ] Steel Elemental - war stomp, maybe synergise further
+  - [x] Steel Elemental - war stomp, maybe synergise further
   - [ ] Mongo - something for sustain, or maybe something bruisery like lifesteal, maybe something cluster-rockety
 
 ## Road to release candidate (0.9.x)
