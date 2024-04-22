@@ -61,6 +61,7 @@ function unit.setAttackRange(real newRange)
     ..presetHotkey("W")
     ..presetIcon(Icons.bTNMurlocFleshEater)
     ..presetBuffs(lvl -> commaList(ID_TURBO_GILLS_BUFF))
+    ..setLevelSkipRequirement(2)
 
 
 init

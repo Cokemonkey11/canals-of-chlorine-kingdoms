@@ -56,6 +56,7 @@ public constant ID_ARMOR_UP = compiletime(ABIL_ID_GEN.next())
     ..presetHotkey("W")
     ..presetIcon(Icons.bTNArmorGolem)
     ..presetDurationHero((int lvl) -> 0.1)
+    ..setLevelSkipRequirement(2)
 
     new HeroDefinition(ID_STEEL_ELEMENTAL, UnitIds.taurenchieftain)
     ..setName("Steel Elemental")

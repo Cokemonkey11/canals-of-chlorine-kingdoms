@@ -10,6 +10,8 @@ import GameBoard
 import PowerLevelingChamber
 import Teams
 
+import MolotovCockatiel
+
 
 init
     addCommand("name") (p, _cmd, args) ->
@@ -27,6 +29,9 @@ init
                     u.setLevel(u.getLevel() + 1, true)
         addCommand("enemy") (p, _cmd, _args) ->
             createUnit(players[1], 'hfoo')
+
+        addCommand("cockatiel") (p, _cmd, _args) ->
+            createUnit(p, ID_MOLOTOV_COCKATIEL)
 
         addCommand("generator") (p, _cmd, _args) ->
             enableGenerator()

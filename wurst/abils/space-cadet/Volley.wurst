@@ -46,6 +46,7 @@ constant MIRROR_SOUND = new SoundDefinition(Sounds.mirrorImage)
     ..presetHotkey("W")
     ..presetIcon(Icons.bTNVorpalBlades)
     ..presetBuffs(lvl -> commaList(ID_VOLLEY_BUFF))
+    ..setLevelSkipRequirement(2)
 
 
 init

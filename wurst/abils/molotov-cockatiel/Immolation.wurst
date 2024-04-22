@@ -1,0 +1,106 @@
+package Immolation
+
+import Abilities
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import HashMap
+import LinkedListModule
+import Time
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+
+
+public constant ID_IMMOLATION = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure DAMAGE_FUNCTION = lvl -> 15 * lvl
+constant IntLevelClosure DURATION_FUNCTION = lvl -> 7
+
+constant RADIUS = 104.
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        Targettype.NONE,
+        "Immolates a target friendly hero, creating a ring of fire that damages adjacent enemies."
+    )
+    new ChannelAbilityPreset(ID_IMMOLATION, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(1, 2)
+    ..presetButtonPosResearch(1, 0)
+    ..presetHotkey("W")
+    ..presetIcon(Icons.bTNImmolationOn)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.UNIT)
+    ..presetManaCost(_ -> 75)
+    ..setName("Immolation")
+    ..presetCooldown(lvl -> 20.)
+    ..addTooltipProperty("Flame Count", (int lvl) -> 3.)
+    ..addTooltipProperty("Damage Per Second", lvl -> 3 * DAMAGE_FUNCTION.run(lvl))
+    ..addTooltipProperty("Duration", DURATION_FUNCTION)
+    ..tooltipStopListen()
+
+    ..presetTargetsAllowed((int lvl) -> "friend,ground,self,hero")
+
+
+class Immolation
+    use LinkedListModule
+
+    unit caster
+    unit target
+    real timeLeft
+    real damage
+    angle ang
+    effect fx
+    HashMap<unit, instant> lastHit
+
+    construct(unit caster, unit target, angle ang)
+        this.caster = caster
+        this.target = target
+        let lvl = caster.getAbilityLevel(ID_IMMOLATION)
+        this.timeLeft = DURATION_FUNCTION.run(lvl).toReal()
+        this.damage = DAMAGE_FUNCTION.run(lvl).toReal()
+        this.ang = ang
+
+        this.fx = addEffect(Abilities.fireBallMissile, this.target.getPos().polarOffset(this.ang, RADIUS))..setYaw(this.ang + 90..asAngleDegrees())
+
+        this.lastHit = new HashMap<unit, instant>()
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx.destr()
+        destroy this.lastHit
+
+    function tick()
+        this.timeLeft -= ANIMATION_PERIOD
+        this.ang += ((2. * PI) * ANIMATION_PERIOD).asAngleRadians()
+
+        this.fx..setPos(this.target.getPos().polarOffset(this.ang, RADIUS))..setYaw(this.ang + 90..asAngleDegrees())
+
+        let now = instantNow()
+        forUnitsInRange(this.fx.getPos(), 64.) u ->
+            if u.isEnemyOf(this.target) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE) and (not this.lastHit.has(u) or this.lastHit.get(u).isOlderThan(0.5.secondsAgo()))
+                this.caster.dealCodeDamage(u, this.damage)
+                flashEffect(Abilities.fireBallMissile, u.getPos())
+                this.lastHit.put(u, now)
+
+        if not this.target.isAlive() or this.timeLeft <= 0.
+            destroy this
+
+init
+    EventListener.onCast(ID_IMMOLATION) caster ->
+        let target = EventData.getSpellTargetUnit()
+        var ang = 0..asAngleDegrees()
+        for i = 0 to 2
+            new Immolation(caster, target, ang)
+            ang += (2 * PI / 3.).asAngleRadians()

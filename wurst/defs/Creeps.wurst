@@ -64,6 +64,7 @@ constant COLLISION_SIZE = 16.
     ..setAttack1DamageNumberofDice(1)
     ..setAttack1DamageSidesperDie(1)
     ..setAttack1ProjectileHomingEnabled(true)
+    ..setAttacksEnabled(1)
     ..setHitPointsMaximumBase(1000)
     ..setArmorType(ArmorType.Fortified)
     ..setUpgradesUsed("")

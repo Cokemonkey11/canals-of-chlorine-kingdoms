@@ -1,0 +1,46 @@
+package MolotovCockatiel
+
+import Assets
+
+import AbilityTooltipGenerator
+
+import Ember
+import FireBlast
+import HeroGlow
+import Immolation
+import SummonPhoenix
+
+
+public constant ID_MOLOTOV_COCKATIEL = compiletime(HERO_ID_GEN.next())
+
+constant ID_SPHERE = compiletime(ABIL_ID_GEN.next())
+
+
+@compiletime function gen()
+    new AbilityDefinition(ID_SPHERE, 'Asph', 1)
+    ..setMissileArt(Abilities.phoenix_Missile)
+    ..setMissileSpeed(1400)
+    ..setArtTarget(Abilities.phoenix_Missile_mini)
+    ..setTargetAttachmentPoint1("hand,left")
+    ..setTargetAttachmentPoint2("hand,right")
+    ..setTargetAttachmentPoint3("foot,left")
+    ..setTargetAttachmentPoint4("foot,right")
+    ..setTargetAttachments(4)
+
+    new HeroDefinition(ID_MOLOTOV_COCKATIEL, UnitIds.bloodmage)
+    ..setAttack1DamageBase(34)
+    ..setName("Molotov Cockatiel")
+    ..setProperNames(commaList("Birdy", "Firebird", "Hot Chick"))
+    ..setProperNamesUsed(3)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)
+    ..setAttack1WeaponType(WeaponType.Missile)
+    ..setAttack1ProjectileArt(Abilities.phoenix_Missile)
+    ..setModelFile(Units.hippoGryph)
+    ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW, ID_SPHERE))
+    ..setUnitSoundSet(Soundsets.hippoGryph)
+    ..setHeroAbilities(commaList(ID_FIRE_BLAST, ID_IMMOLATION, ID_EMBER, ID_SUMMON_PHOENIX))
+    ..setIconGameInterface(Icons.bTNMarkOfFire)
+    ..setMovementType(MovementType.Hover)
+    ..setMovementHeight(45.)
+    ..setMovementHeightMinimum(45.)

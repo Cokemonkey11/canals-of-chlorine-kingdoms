@@ -71,6 +71,7 @@ constant SOUND_STRUCK = new SoundDefinition(Sounds.steamTankReady1)
     ..presetIcon(Icons.bTNAbomination)
     ..presetAttackSpeedIncrease((int lvl) -> 0.)
     ..presetBuffs(lvl -> commaList(ID_BERZERK_AND_WINCH_BUFF))
+    ..setLevelSkipRequirement(2)
 
     // Winch
     let tgen2 = new AbilityTooltipGenerator("Hooks the first enemy struck in the targeted direction. If not used, the cooldown of Berzerk and Winch is lower.")

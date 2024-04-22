@@ -1,0 +1,171 @@
+package SummonPhoenix
+
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import LinkedListModule
+import Reference
+import SoundUtils
+import Time
+import Units
+
+import AbilityTooltipGenerator
+import WurstTempLightning
+
+import CodeDamage
+
+
+public constant ID_SUMMON_PHOENIX = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure HEAL_AMOUNT_FUNCTION = lvl -> 50 * lvl
+constant RealLevelClosure HEAL_PERIOD_FUNCTION = lvl -> 3 - .5 * lvl
+constant IntLevelClosure DPS_FUNCTION = lvl -> 300 + 200 * lvl
+
+constant PHOENIX_SPEED = 500
+constant PHOENIX_ACCELERATION = 30
+constant DISTANCE = 1000
+constant AOE_DURATION = 5
+
+constant HEAL_PROC_AREA = 500
+
+constant DAMAGE_AOE = 200.
+
+constant HEAL_SOUND = new SoundDefinition(Sounds.healingWave)
+constant DAMAGE_SOUND = new SoundDefinition(Sounds.alchemistAcidBurnMissileDeath1)
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        Targettype.POINT,
+        "Summons a slow-moving phoenix that heals friendly heroes along its path, prioritising lower health ones. "
+        + "Upon arriving at the target, blasts the area with a death laser that does extreme amounts of damage over time."
+    )
+    new ChannelAbilityPreset(ID_SUMMON_PHOENIX, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(3, 2)
+    ..presetButtonPosResearch(3, 0)
+    ..presetHotkey("R")
+    ..presetIcon(Icons.bTNMarkOfFire)
+    ..setLevelSkipRequirement(2)
+    ..setRequiredLevel(6)
+
+    ..tooltipStartListen()
+    ..presetCastRange((int lvl) -> DISTANCE.toReal())
+    ..presetTargetTypes(Targettype.POINT)
+    ..presetManaCost(_ -> 100)
+    ..setName("Summon Phoenix")
+    ..presetCooldown(lvl -> 50.)
+    ..presetAreaofEffect((int lvl) -> DAMAGE_AOE)
+    ..addTooltipProperty("Heal Amount", HEAL_AMOUNT_FUNCTION)
+    ..addTooltipProperty("Heal Period (sec)", HEAL_PERIOD_FUNCTION)
+    ..addTooltipProperty("Heal Sampling Area", lvl -> HEAL_PROC_AREA)
+    ..addTooltipProperty("Damage Per Second", DPS_FUNCTION)
+    ..addTooltipProperty("Total Duration (approx)", lvl -> (DISTANCE / PHOENIX_SPEED).toInt() + AOE_DURATION)
+    ..tooltipStopListen()
+
+    ..presetOption(Option.TARGETIMAGE, true)
+
+
+class Phoenix
+    use LinkedListModule
+
+    unit caster
+    vec2 targ
+    angle ang
+    effect fx
+    real timeBlasting
+    vec2 vel
+    vec2 accel
+    bool animationPlayed
+    real dps
+    instant lastHeal
+    real healAmount
+    duration healPeriod
+
+    construct(unit caster, vec2 targ)
+        this.caster = caster
+        this.targ = targ
+        let pos = targ.moveTowards(caster.getPos(), 1000.)
+        this.ang = caster.getPos().angleTo(targ)
+        this.fx = addEffect(Units.phoenix, pos)..setZ(pos.getTerrainZ() + 800.)..setAlpha(100)..playAnimation(ANIM_TYPE_WALK, 0.5)..setYaw(this.ang)..setColorByPlayer(caster.getOwner())..setScale(1.25)
+        this.timeBlasting = 0.
+        this.vel = ZERO2
+        this.accel = ZERO2.polarOffset(ang, PHOENIX_ACCELERATION * ANIMATION_PERIOD)
+        this.animationPlayed = false
+        let lvl = caster.getAbilityLevel(ID_SUMMON_PHOENIX)
+        this.dps = DPS_FUNCTION.run(lvl).toReal()
+        this.lastHeal = 30..minutesAgo()
+        this.healAmount = HEAL_AMOUNT_FUNCTION.run(lvl).toReal()
+        this.healPeriod = HEAL_PERIOD_FUNCTION.run(lvl).seconds()
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx..setY(-5000.)..destr()
+
+    function tick()
+        let dist = this.fx.getPos().distanceToSq(targ)
+        if this.timeBlasting < ANIMATION_PERIOD and this.vel.lengthSq() < PHOENIX_SPEED * PHOENIX_SPEED and dist > (DAMAGE_AOE + 100) * (DAMAGE_AOE + 100)
+            this.vel += this.accel
+
+        if dist < (DAMAGE_AOE + 150) * (DAMAGE_AOE + 150)
+            this.timeBlasting += ANIMATION_PERIOD
+            this.vel -= this.accel
+
+            if not this.animationPlayed
+                this.animationPlayed = true
+                this.fx.playAnimation(ANIM_TYPE_ATTACK, 0.25)
+
+            if this.vel.lengthSq() < 32 * 32
+                this.vel = ZERO2
+
+        this.fx.setPos(this.fx.getPos3() + this.vel)
+
+        let phoenixHeadPos = this.fx.getPos3().polarProject(100., this.ang, 70..asAngleDegrees())
+        if this.timeBlasting > 0.5 and not this.timeBlasting > AOE_DURATION - 1.
+            new TempLightning(
+                phoenixHeadPos, targ.polarOffset(2. * angle(2 * PI) / this.timeBlasting, 50.).withTerrainZ(), 0.5, LIGHTNING_FORKED_LIGHTNING
+            )
+
+            DAMAGE_SOUND.playOnPoint(this.targ.withTerrainZ()).snd.setVolume(90)
+
+            forUnitsInRange(this.targ, DAMAGE_AOE) u ->
+                if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE)
+                    this.caster.dealCodeDamage(u, this.dps * ANIMATION_PERIOD)
+
+        if this.lastHeal.isOlderThan(this.healPeriod.ago())
+            let candidateUnit = new Reference<unit>(null)
+            let candidateHealthRatio = new Reference(2.)
+
+            forUnitsInRange(this.fx.getPos(), HEAL_PROC_AREA.toReal()) u ->
+                if u.isAllyOf(this.caster) and u.isAlive() and u.isType(UNIT_TYPE_HERO)
+                    if u.getHPRatio() < candidateHealthRatio.val
+                        candidateHealthRatio.val = u.getHPRatio()
+                        candidateUnit.val = u
+
+            candidateHealthRatio.into()
+            let candidate = candidateUnit.into()
+
+            if candidate != null
+                new TempLightning(phoenixHeadPos, candidate.getPos3Real() + vec3(0., 0., 50.), 1., LIGHTNING_HEALING_WAWE_SEECONDARY)
+                candidate.addHP(this.healAmount)
+                HEAL_SOUND.playOnPoint(candidate.getPos3Real())
+                this.lastHeal = instantNow()
+
+        if this.timeBlasting > AOE_DURATION - 1.
+            this.fx.setAlpha(100 - (this.timeBlasting * 100 - 400).toInt())
+
+        if this.timeBlasting > AOE_DURATION
+            destroy this
+
+
+init
+    EventListener.onCast(ID_SUMMON_PHOENIX) caster ->
+        let targ = EventData.getSpellTargetPos()
+        new Phoenix(caster, targ)

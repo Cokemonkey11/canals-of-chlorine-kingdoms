@@ -1,0 +1,32 @@
+package FireBlast
+
+import AbilityTooltipGenerator
+
+
+public constant ID_FIRE_BLAST = compiletime(ABIL_ID_GEN.next())
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(Targettype.POINTUNIT, "Blasts the target with fire, dealing moderate damage in an area.")
+    new AbilityDefinitionBrewmasterBreathofFire(ID_FIRE_BLAST)
+    ..registerTooltipGenerator(tgen)
+    ..presetIcon(Icons.bTNFire)
+
+    ..tooltipStartListen()
+    ..setLevels(3)
+    ..presetHotkey("Q")
+    ..setName("Fire Blast")
+    ..presetDamage(lvl -> 15. + 50 * lvl)
+    ..presetDistance((int lvl) -> 375)
+    ..presetFinalArea((int lvl) -> 300)
+    ..presetAreaofEffect((int lvl) -> 125)
+    ..presetCooldown((int lvl) -> 10. - 3 * lvl)
+    ..presetManaCost(lvl -> 70)
+    ..tooltipStopListen()
+
+    ..presetDamagePerSecond((int lvl) -> 0)
+    ..presetMaxDamage((int lvl) -> 9999)
+    ..presetCastRange((int lvl) -> 375)
+    ..presetDurationHero((int lvl) -> 0)
+    ..presetDurationNormal((int lvl) -> 0)
+    ..presetTargetsAllowed((int lvl) -> "ground,enemies,vulnerable")

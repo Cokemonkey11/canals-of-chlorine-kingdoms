@@ -1,0 +1,177 @@
+package Ember
+
+import Abilities
+import ClosureEvents
+import ClosureTimers
+import DamageEvent
+import HashMap
+import LinkedListModule
+import OrderIds
+import SoundUtils
+import TerrainUtils
+import Time
+
+import AbilityTooltipGenerator
+
+
+public constant ID_EMBER = compiletime(ABIL_ID_GEN.next())
+
+constant DASH_SPEED = 1000
+constant MAX_DISTANCE = 1000
+
+constant IntLevelClosure PASSIVE_EMBER_RATE_FUNCTION = lvl -> 20 - 5 * lvl
+
+constant EMBERS = new HashMap<unit, HashMap<tile, Ember>>()
+
+constant ERR_SOUND = new SoundDefinition(Sounds.error)
+
+constant DASH_SOUND = new SoundDefinition(Sounds.hippogryphPissed3)
+
+constant LAST_EMBERS = new HashMap<unit, instant>()
+
+constant DURATION = 30
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Passively, causes attacks to occasionally leave behind a glowing ember. Actively, leaves a glowing ember near the caster. Glowing embers can be right-clicked to dash to them."
+    )
+    new AbilityDefinitionBerserk(ID_EMBER)
+    ..setHeroAbility(true)
+    ..registerTooltipGenerator(tgen)
+
+    ..tooltipStartListen()
+    ..setName("Ember")
+    ..setLevels(3)
+    ..presetCooldown(lvl -> 16. - 2 * lvl)
+    ..presetManaCost((int lvl) -> 80)
+    ..addTooltipProperty("Dash Speed", (int lvl) -> DASH_SPEED)
+    ..addTooltipProperty("Passive Ember Rate (sec)", PASSIVE_EMBER_RATE_FUNCTION)
+    ..addTooltipProperty("Max Distance", lvl -> MAX_DISTANCE)
+    ..addTooltipProperty("Ember Duration", lvl -> DURATION)
+    ..tooltipStopListen(true)
+
+    ..presetDamageTakenIncrease((int lvl) -> 0)
+    ..presetMovementSpeedIncrease((int lvl) -> 0)
+    ..presetButtonPosNormal(2, 2)
+    ..presetButtonPosResearch(2, 0)
+    ..presetHotkey("E")
+    ..presetIcon(Icons.bTNFireBolt)
+    ..presetAttackSpeedIncrease((int lvl) -> 0.)
+    ..presetDurationHero(lvl -> 0.1)
+    ..setLevelSkipRequirement(2)
+
+
+class Ember
+    unit caster
+    vec2 pos
+    effect fx
+    boolean locked
+    boolean callbackInvoked
+    CallbackSingle timeoutCallback
+
+    construct(unit caster, vec2 pos)
+        this.caster = caster
+        this.pos = pos
+        this.fx = addEffect(Abilities.lavaSpawnMissile, pos.withTerrainZ(20.))..setAlpha(155)..setTimeScale(0.25)..setPitch(90..asAngleDegrees().radians)
+        this.locked = false
+        this.callbackInvoked = false
+
+        let embers = EMBERS.get(caster)
+        let tile = pos.getTile()
+
+        embers.put(tile, this)
+
+        this.timeoutCallback = doAfter(DURATION.toReal()) ->
+            this.callbackInvoked = true
+            if not this.locked
+                destroy this
+
+    ondestroy
+        this.fx.destr()
+        EMBERS.get(this.caster).remove(this.pos.getTile())
+        if not this.callbackInvoked
+            destroy this.timeoutCallback
+
+
+class Dash
+    use LinkedListModule
+
+    unit u
+    Ember ember
+    vec2 vel
+    real timeLeft
+
+    construct(unit u, Ember ember)
+        this.u = u..pause()
+        this.ember = ember
+        this.vel = u.getPos().normalizedPointerTo(ember.pos) * ANIMATION_PERIOD * DASH_SPEED.toReal()
+        this.timeLeft = u.getPos().distanceTo(ember.pos) / DASH_SPEED
+        ember.locked = true
+
+        DASH_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.u.unpause()
+        EMBERS.get(this.u).remove(this.ember.pos.getTile())
+        destroy this.ember
+
+    function tick()
+        this.timeLeft -= ANIMATION_PERIOD
+        this.u.setXY(this.u.getPos() + this.vel)
+
+        if this.timeLeft <= 0. or not this.u.isAlive()
+            destroy this
+
+
+init
+    EventListener.onCast(ID_EMBER) caster ->
+        let pos = caster.getPos().polarOffset(caster.getFacingAngle(), -128.)
+        if not EMBERS.has(caster)
+            EMBERS.put(caster, new HashMap<tile, Ember>())
+        if EMBERS.get(caster).has(pos.getTile())
+            ERR_SOUND.playOnPoint(pos.withTerrainZ())
+            caster.addMana(80)
+            caster.resetAbilityCooldown(ID_EMBER)
+        else
+            new Ember(caster, pos)
+
+    EventListener.add(EVENT_PLAYER_UNIT_ISSUED_POINT_ORDER) ->
+        let orderer = EventData.getOrderedUnit()
+        let target = EventData.getOrderPos()
+        let order = EventData.getIssuedOrderId()
+
+        if order == OrderIds.smart and EMBERS.has(orderer)
+            let embers = EMBERS.get(orderer)
+            let tile = target.getTile()
+            let distSq = orderer.getPos().distanceToSq(target)
+            if embers.has(tile) and distSq < MAX_DISTANCE * MAX_DISTANCE and distSq > 150 * 150
+                new Dash(orderer, embers.get(tile))
+
+    DamageEvent.addListener(2) ->
+        let damage = DamageEvent.getAmount()
+        let target = DamageEvent.getTarget()
+        let source = DamageEvent.getSource()
+        let type_ = DamageEvent.getType()
+        let emberLevel = source.getAbilityLevel(ID_EMBER)
+
+        if emberLevel > 0 and damage > 0. and type_ == DamageType.ATTACK
+            if not EMBERS.has(source)
+                EMBERS.put(source, new HashMap<tile, Ember>())
+
+            let cutoff = PASSIVE_EMBER_RATE_FUNCTION.run(emberLevel).toReal().seconds()
+
+            if not (LAST_EMBERS.has(source) and LAST_EMBERS.get(source).durationSince().lessThan(cutoff)) and not target.isType(UNIT_TYPE_STRUCTURE)
+                let pos = target.getPos().moveTowards(source.getPos(), 128)
+                let tile = pos.getTile()
+                if not (EMBERS.has(source) and EMBERS.get(source).has(tile))
+                    new Ember(source, pos)
+                    LAST_EMBERS.put(source, instantNow())

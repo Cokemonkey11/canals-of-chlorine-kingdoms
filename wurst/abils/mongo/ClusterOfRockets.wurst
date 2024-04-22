@@ -84,7 +84,7 @@ class ClusterOfRockets
 
         let hitRef = new Reference(false)
         forUnitsInRange(this.fx.getPos(), 64.) u ->
-            if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and not hitRef.val
+            if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and not hitRef.val and not u.isType(UNIT_TYPE_STRUCTURE)
                 hitRef.val = true
                 this.caster.dealCodeDamage(u, this.damage)
                 createCriticalStrikeTextTag(u, this.damage.toInt())

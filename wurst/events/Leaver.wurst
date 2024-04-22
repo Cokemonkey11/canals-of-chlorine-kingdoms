@@ -17,4 +17,4 @@ init
         pl.updateBoardName(nameLeaver.color(color(155, 155, 155)))
 
         if player_heroes.has(pl)
-            player_heroes.get(pl).remove()
+            player_heroes.get(pl)..hide()..setInvulnerable(true)..pause()
