@@ -44,6 +44,7 @@
 - Braum
 - Nasus
 - Zac
+- Riptor
 
 ### Well-designed casters
 
@@ -67,3 +68,5 @@
 - Caitlyn
 - Jinx
 - Kaisa
+- AWP, AK47
+- Doom Guy

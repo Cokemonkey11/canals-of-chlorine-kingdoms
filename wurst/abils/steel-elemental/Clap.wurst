@@ -19,7 +19,9 @@ constant AOE = 250.
 
 
 @compiletime function gen()
-    let tgen = new AbilityTooltipGenerator("Claps the ground/cheeks, dealing damage that scales with armor, and slowing nearby enemy units.")
+    let tgen = new AbilityTooltipGenerator(
+        "Claps the ground/cheeks, dealing damage that scales with armor, and slowing nearby enemy units."
+    )
     new AbilityDefinitionMountainKingThunderClap(ID_CLAP)
     ..registerTooltipGenerator(tgen)
 

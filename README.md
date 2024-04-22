@@ -9,8 +9,6 @@
     * [ ] Tumble (vayne dash, reset, bonus damage)
     * [ ] Berzerker (Avatar, bonus health, life steal, life regeneration, bonus attack speed)
   - [ ] Tauren Gladiator
-    * [ ] Channeled Megastomp (knocks back all non-stunned enemies)
-    * [ ] Execute (Leap with camera shake, stuns target in the center)
     * [ ] Resurrection (actively cast sepppuku, dies and resurrects actively)
     * [ ] Eviscerate (execute-wurst ability, can only target low HP enemies, channels and stuns while killing the enemy, can be interrupted)
   - [x] Molotov Cockatiel

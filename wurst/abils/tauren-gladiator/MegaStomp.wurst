@@ -1,0 +1,119 @@
+package MegaStomp
+
+import Abilities
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import Knockback3
+import LinkedListModule
+import UnitAnimations
+import UI
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+import Stun
+
+
+public constant ID_MEGA_STOMP = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure DAMAGE_FUNCTION = lvl -> 50 + 50 * lvl
+constant RealLevelClosure CHANNEL_DURATION_FUNCTION = lvl -> 2. - .5 * lvl
+constant MIN_KNOCKBACK_RADIUS = 150.
+constant MAX_KNOCKBACK_RADIUS = 325.
+constant DAMAGE_RADIUS = 325.
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Channels, preparing a war stomp that knocks back and damages nearby enemies. "
+        + "A longer channel results in a wider knock back radius and increased knockback power. "
+        + "Does not knock back stunned targets."
+    )
+    new ChannelAbilityPreset(ID_MEGA_STOMP, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(0, 2)
+    ..presetButtonPosResearch(0, 0)
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetHotkey("Q")
+    ..presetIcon(Icons.bTNWarStomp)
+    ..presetManaCost(_ -> 70)
+
+    ..tooltipStartListen()
+    ..setName("Mega Stomp")
+    ..presetCooldown(lvl -> 10. - lvl)
+    ..presetFollowThroughTime(CHANNEL_DURATION_FUNCTION)
+    ..addTooltipProperty("Damage", DAMAGE_FUNCTION)
+    ..addTooltipProperty("Minimum Knockback Area", lvl -> MIN_KNOCKBACK_RADIUS)
+    ..addTooltipProperty("Maximum Knockback Area", lvl -> MAX_KNOCKBACK_RADIUS)
+    ..tooltipStopListen()
+
+
+class MegaStomp
+    use LinkedListModule
+
+    unit caster
+    real duration
+    int orderId
+    effect innerCircle
+    effect outerCircle
+    real totalDuration
+    real damage
+
+    construct(unit caster)
+        let lvl = caster.getAbilityLevel(ID_MEGA_STOMP)
+        this.caster = caster
+        this.duration = 0.
+        this.orderId = caster.getCurrentOrder()
+        this.innerCircle = addEffect(UI.target, this.caster.getPos3Real())..setScale(MIN_KNOCKBACK_RADIUS / 50)..setTimeScale(0.5)..setZ(this.caster.getPos().getTerrainZ() - 50.)
+        this.outerCircle = addEffect(UI.target, this.caster.getPos3Real())..setScale(MAX_KNOCKBACK_RADIUS / 50)..setTimeScale(0.5)..setZ(this.caster.getPos().getTerrainZ() - 50.)
+        this.totalDuration = CHANNEL_DURATION_FUNCTION.run(lvl)
+        this.damage = DAMAGE_FUNCTION.run(lvl).toReal()
+        this.caster..setAnimation(UnitAnimations.HeroTaurenChieftain.spellSlam.idx)..setTimeScale(0.25)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.innerCircle.destr()
+        this.outerCircle.destr()
+
+        this.caster.setTimeScale(1.)
+
+        if this.caster.isAlive()
+            this.caster.queueAnimation("stand")
+
+
+    function tick()
+        this.duration += ANIMATION_PERIOD
+
+        let knockbackRadius = MIN_KNOCKBACK_RADIUS.lerp(MAX_KNOCKBACK_RADIUS, this.duration / this.totalDuration)
+
+        this.innerCircle.setScale(knockbackRadius / 50)
+
+        if not this.caster.isAlive()
+            destroy this
+            return
+
+        if this.orderId != this.caster.getCurrentOrder() or this.duration >= this.totalDuration
+            let casterPos = this.caster.getPos()
+            flashEffect(Abilities.warStompCaster, casterPos)
+
+            forUnitsInRange(casterPos, MAX_KNOCKBACK_RADIUS) uu ->
+                if uu.isEnemyOf(this.caster) and uu.isAlive() and not uu.isType(UNIT_TYPE_STRUCTURE)
+                    this.caster.dealCodeDamage(uu, this.damage)
+
+                    if uu.isInRange(casterPos, knockbackRadius) and not uu.isStunned()
+                        Knockback3.add(uu, 3. * knockbackRadius, this.caster.getPos().angleTo(uu.getPos()), 80..asAngleDegrees())
+
+            destroy this
+
+
+init
+    EventListener.onCast(ID_MEGA_STOMP) caster ->
+        new MegaStomp(caster)

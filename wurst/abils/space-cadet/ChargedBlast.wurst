@@ -12,6 +12,7 @@ import AbilityTooltipGenerator
 
 import CodeDamage
 import Flash
+import Stun
 
 
 public constant ID_CHARGED_BLAST = compiletime(ABIL_ID_GEN.next())
@@ -111,11 +112,7 @@ class ChargedBlast
             if not this.stable and this.target.isUnit
                 let targ = this.target.u
                 if not targ.isInvulnerable()
-                    let fx = addEffect(Abilities.stasisTotemTarget, targ, "overhead")
-                    targ.pause()
-                    doAfter(STUN_DURATION.toReal()) ->
-                        fx.destr()
-                        targ.unpause()
+                    targ.stun(STUN_DURATION.toReal())
 
             let damage = DAMAGE_FUNCTION.run(this.caster.getAbilityLevel(ID_CHARGED_BLAST)).toReal()
 

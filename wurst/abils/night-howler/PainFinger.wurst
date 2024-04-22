@@ -30,7 +30,7 @@ class PainFinger
     lightning lightningTarget
 
     static function damageFn(int level) returns real
-        return 200. + 50 * level
+        return 250. + 50 * level
 
     function getIntermediateLightningPoints() returns vec3_2
         let start = this.caster.getPos3Real()

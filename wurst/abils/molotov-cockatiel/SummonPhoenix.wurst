@@ -5,6 +5,7 @@ import ClosureForGroups
 import ClosureTimers
 import LinkedListModule
 import Reference
+import Simulate3dSound
 import SoundUtils
 import Time
 import Units
@@ -31,7 +32,7 @@ constant HEAL_PROC_AREA = 500
 constant DAMAGE_AOE = 200.
 
 constant HEAL_SOUND = new SoundDefinition(Sounds.healingWave)
-constant DAMAGE_SOUND = new SoundDefinition(Sounds.alchemistAcidBurnMissileDeath1)
+constant DAMAGE_SOUND_PATH = Sounds.alchemistAcidBurnMissileDeath1
 
 
 @compiletime function gen()
@@ -133,7 +134,7 @@ class Phoenix
                 phoenixHeadPos, targ.polarOffset(2. * angle(2 * PI) / this.timeBlasting, 50.).withTerrainZ(), 0.5, LIGHTNING_FORKED_LIGHTNING
             )
 
-            DAMAGE_SOUND.playOnPoint(this.targ.withTerrainZ()).snd.setVolume(90)
+            bindSoundToPoint(CreateSound(DAMAGE_SOUND_PATH, false, false, false, 12700, 12700, ""), this.targ.x, this.targ.y, 50., 5000., 5000.)
 
             forUnitsInRange(this.targ, DAMAGE_AOE) u ->
                 if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE)

@@ -1,15 +1,15 @@
 package TaurenGladiator
 
-// Channeled Megastomp (knocks back all non-stunned enemies)
-// Execute (Leap with camera shake, stuns target in the center)
-// Resurrection (actively cast sepppuku, dies and resurrects actively)
-// Eviscerate (execute-wurst ability, can only target low HP enemies, channels and stuns while killing the enemy, can be interrupted)
+// Seppuku Sike (actively cast resurrection, dies and resurrects actively)
+// Brain Drill (execute-wurst ability, can only target low HP enemies, channels and stuns while killing the enemy, can be interrupted)
 
 import Assets
 
 import AbilityTooltipGenerator
 
+import Dunk
 import HeroGlow
+import MegaStomp
 
 
 public constant ID_TAUREN_GLADIATOR = compiletime(HERO_ID_GEN.next())
@@ -27,7 +27,7 @@ public constant ID_TAUREN_GLADIATOR = compiletime(HERO_ID_GEN.next())
     ..setModelFile(Units.heroTaurenChieftain1)
     ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
     ..setUnitSoundSet(Soundsets.heroTaurenChieftain)
-    ..setHeroAbilities(commaList(AbilityIds.warStomp1, AbilityIds.wardenBlink, AbilityIds.alchemistHealingSpray, AbilityIds.fingerofDeath))
+    ..setHeroAbilities(commaList(ID_MEGA_STOMP, ID_DUNK, AbilityIds.alchemistHealingSpray, AbilityIds.fingerofDeath))
     ..setIconGameInterface(Icons.bTNHeroTaurenChieftain)
     ..setAnimationCastPoint(0.)
     ..setPropulsionWindowdegrees(90.)

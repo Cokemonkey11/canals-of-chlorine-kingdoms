@@ -16,12 +16,12 @@ constant ID_FOUNTAIN_MANA_REGENERATION = compiletime(ABIL_ID_GEN.next())
     new AbilityDefinitionAuraRegenerationHealingWard(ID_FOUNTAIN_LIFE_REGENERATION)
     ..presetTargetsAllowed((int lvl) -> "ground,air,organic,vuln,invu,friend,neutral")
     ..presetPercentage(lvl -> true)
-    ..presetAmountofHitPointsRegenerated((int lvl) -> .03)
+    ..presetAmountofHitPointsRegenerated((int lvl) -> .04)
 
     new AbilityDefinitionNeutralRegenmanaonly(ID_FOUNTAIN_MANA_REGENERATION)
     ..presetTargetsAllowed((int lvl) -> "ground,air,organic,vuln,invu,friend,neutral")
     ..presetPercentage(lvl -> true)
-    ..presetAmountRegenerated((int lvl) -> .03)
+    ..presetAmountRegenerated((int lvl) -> .04)
 
 
 init

@@ -1,0 +1,137 @@
+package Dunk
+
+import Abilities
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import Knockback3
+import LinkedListModule
+import SoundUtils
+import UnitAnimations
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+import Stun
+
+
+public constant ID_DUNK = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure DAMAGE_FUNCTION = lvl -> 100 + 50 * lvl
+constant DAMAGE_RADIUS = 110.
+constant RANGE = 900.
+constant IntLevelClosure STUN_DURATION_FUNCTION = lvl -> lvl
+constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 15. - 2 * lvl
+constant IntLevelClosure MANA_COST_FUNCTION = lvl -> 200 - 50 * lvl
+
+constant WARNING_SOUND = new SoundDefinition(Sounds.theHornOfCenarius)
+constant GUTS_SOUND = new SoundDefinition(Sounds.artilleryCorpseExplodeDeath1)
+constant ERROR_SOUND = new SoundDefinition(Sounds.error)
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Leaps to the target area, stunning and damaging units at the destination in a fit of joy."
+    )
+    new ChannelAbilityPreset(ID_DUNK, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(1, 2)
+    ..presetButtonPosResearch(1, 0)
+    ..presetTargetTypes(Targettype.POINT)
+    ..presetHotkey("W")
+    ..presetIcon(Icons.bTNSmash)
+
+
+    ..tooltipStartListen()
+    ..presetManaCost(MANA_COST_FUNCTION)
+    ..setName("Dunk")
+    ..presetCooldown(COOLDOWN_FUNCTION)
+    ..presetAreaofEffect((int lvl) -> DAMAGE_RADIUS)
+    ..addTooltipProperty("Damage", DAMAGE_FUNCTION)
+    ..presetCastRange((int lvl) -> RANGE)
+    ..addTooltipProperty("Stun Duration", STUN_DURATION_FUNCTION)
+    ..tooltipStopListen()
+
+    ..presetOption(Option.TARGETIMAGE, true)
+
+
+class Dunk
+    use LinkedListModule
+
+    unit caster
+    vec2 target
+    real damage
+    real stunDuration
+
+    construct(unit caster, vec2 target)
+        let lvl = caster.getAbilityLevel(ID_DUNK)
+        WARNING_SOUND.playOnPoint(caster.getPos3Real()).snd.setDuration(1000)
+        this.caster = caster
+        this.target = target
+        this.damage = DAMAGE_FUNCTION.run(lvl).toReal()
+        this.stunDuration = STUN_DURATION_FUNCTION.run(lvl).toReal()
+        this.caster.pause()
+        this.caster..setAnimation(UnitAnimations.HeroTaurenChieftain.attackSlam.idx)..setTimeScale(0.5)
+
+        // TODO: the groundSpeed seems to be inverted. Higher ground speed actually results in higher... air speed?
+        Knockback3.add(caster, target, caster.getPos().distanceTo(target) * 2.)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.caster..setTimeScale(1.)..unpause()
+
+        if this.caster.isAlive()
+            this.caster.queueAnimation("stand")
+
+
+    function tick()
+        if not this.caster.isAlive()
+            destroy this
+            return
+
+        if Knockback3.getVel(this.caster).z < 0. and this.caster.getFlyHeight() < 10.
+            Knockback3.setVel(this.caster, 0., 0..asAngleDegrees(), 0..asAngleDegrees())
+
+            addEffect(Abilities.warStompCaster, this.caster.getPos())..setAlpha(0)..destr()
+
+            let frc = CreateForce()
+            let owner = this.caster.getOwner()..cameraSetTargetNoise(2., 0.25 * 2.)
+
+            forUnitsInRange(this.caster.getPos(), DAMAGE_RADIUS) uu ->
+                if uu.isEnemyOf(this.caster) and uu.isAlive() and not uu.isType(UNIT_TYPE_STRUCTURE)
+                    frc.addPlayer(uu.getOwner())
+                    uu.getOwner()..cameraSetTargetNoise(2., 0.25 * 6.)
+                    this.caster.dealCodeDamage(uu, this.damage)
+                    uu.stun(this.stunDuration)
+                    GUTS_SOUND.playOnPoint(uu.getPos3Real())
+
+            doAfter(1.) ->
+                owner..cameraClearNoise()
+                for pl from frc
+                    pl..cameraClearNoise()
+                frc.destr()
+
+            destroy this
+
+
+var loc = Location(0., 0.)
+
+init
+    EventListener.onCast(ID_DUNK) caster ->
+        let target = EventData.getAbilityTargetPos()
+        let lvl = caster.getAbilityLevel(ID_DUNK)
+
+        MoveLocation(loc, target.x, target.y)
+        if IsLocationVisibleToPlayer(loc, caster.getOwner())
+            new Dunk(caster, target)
+        else
+            ERROR_SOUND.playForPlayer(caster.getOwner())
+            caster..addMana(MANA_COST_FUNCTION.run(lvl).toReal())
+            caster..resetAbilityCooldown(ID_DUNK)

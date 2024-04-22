@@ -1,0 +1,25 @@
+package Stun
+
+import Abilities
+import ClosureTimers
+import HashSet
+
+
+constant STUN_MAP = new HashSet<unit>()
+
+
+/**
+    TOOD: make multi-instanceable.
+ */
+public function unit.stun(real duration)
+    let fx = addEffect(Abilities.stasisTotemTarget, this, "overhead")
+    this.pause()
+    STUN_MAP.add(this)
+    doAfter(duration) ->
+        fx.destr()
+        this.unpause()
+        STUN_MAP.remove(this)
+
+
+public function unit.isStunned() returns bool
+    return STUN_MAP.has(this)
