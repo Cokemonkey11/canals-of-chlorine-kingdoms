@@ -10,3 +10,4 @@
 - Blizzard Entertainment
 - Dionesiist
 - SGT Phill
+- Black_Stan

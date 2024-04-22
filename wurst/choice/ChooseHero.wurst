@@ -21,6 +21,7 @@ import WhenRevivable
 
 import Flash
 import GameBoard
+import MolotovCockatiel
 import Mongo
 import NightHowler
 import Sorcerer
@@ -59,7 +60,7 @@ public constant all_heroes = CreateGroup()
 
 public constant hero_sounds = new HashMap<int, SoundDefinition>()
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.paladin), new SoundDefinition(Sounds.heroPaladinPissed5))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.taurenchieftain), new SoundDefinition(Sounds.heroTaurenChieftainPissed6))
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.mountainking), new SoundDefinition(Sounds.heroMountainKingPissed7))
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.cryptlord), new SoundDefinition(Sounds.cryptFiendPissed7))
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.alchemist), new SoundDefinition(Sounds.heroAlchemistPissed11))
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.bloodmage), new SoundDefinition(Sounds.bloodElfMagePissed6))
@@ -77,6 +78,7 @@ public constant hero_sounds = new HashMap<int, SoundDefinition>()
 ..put(ID_MONGO, new SoundDefinition(Sounds.abominationPissed6))
 ..put(ID_NIGHT_HOWLER, new SoundDefinition(Sounds.cryptFiendPissed7))
 ..put(ID_SORCERER, new SoundDefinition(Sounds.priestPissed6))
+..put(ID_MOLOTOV_COCKATIEL, new SoundDefinition(Sounds.hippogryphWithRiderPissed4))
 
 
 constant CUSTOM_HERO_ID_MAP = new HashMap<int, int>()
@@ -86,6 +88,7 @@ constant CUSTOM_HERO_ID_MAP = new HashMap<int, int>()
 ..put(UnitIds.carrionscarab1, ID_MONGO)
 ..put(UnitIds.skeletalmage, ID_SORCERER)
 ..put(UnitIds.skeletonwarrior, ID_NIGHT_HOWLER)
+..put(UnitIds.faeriedragon, ID_MOLOTOV_COCKATIEL)
 
 
 init

@@ -103,7 +103,7 @@ class Dash
     real timeLeft
 
     construct(unit u, Ember ember)
-        this.u = u..pause()
+        this.u = u..pause()..setFacing(u.getPos().angleTo(ember.pos))
         this.ember = ember
         this.vel = u.getPos().normalizedPointerTo(ember.pos) * ANIMATION_PERIOD * DASH_SPEED.toReal()
         this.timeLeft = u.getPos().distanceTo(ember.pos) / DASH_SPEED
@@ -120,7 +120,7 @@ class Dash
                     destroy cb
 
     ondestroy
-        this.u.unpause()
+        this.u..unpause()..issueImmediateOrder("stop")
         EMBERS.get(this.u).remove(this.ember.pos.getTile())
         destroy this.ember
 

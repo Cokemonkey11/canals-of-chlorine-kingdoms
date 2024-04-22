@@ -10,7 +10,7 @@ import GameBoard
 import PowerLevelingChamber
 import Teams
 
-import MolotovCockatiel
+import TaurenGladiator
 
 
 init
@@ -30,8 +30,8 @@ init
         addCommand("enemy") (p, _cmd, _args) ->
             createUnit(players[1], 'hfoo')
 
-        addCommand("cockatiel") (p, _cmd, _args) ->
-            createUnit(p, ID_MOLOTOV_COCKATIEL)
+        addCommand("tauren") (p, _cmd, _args) ->
+            createUnit(p, ID_TAUREN_GLADIATOR)
 
         addCommand("generator") (p, _cmd, _args) ->
             enableGenerator()

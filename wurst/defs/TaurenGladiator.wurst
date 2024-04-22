@@ -1,0 +1,34 @@
+package TaurenGladiator
+
+// Channeled Megastomp (knocks back all non-stunned enemies)
+// Execute (Leap with camera shake, stuns target in the center)
+// Resurrection (actively cast sepppuku, dies and resurrects actively)
+// Eviscerate (execute-wurst ability, can only target low HP enemies, channels and stuns while killing the enemy, can be interrupted)
+
+import Assets
+
+import AbilityTooltipGenerator
+
+import HeroGlow
+
+
+public constant ID_TAUREN_GLADIATOR = compiletime(HERO_ID_GEN.next())
+
+
+@compiletime function gen()
+    new HeroDefinition(ID_TAUREN_GLADIATOR, UnitIds.taurenchieftain)
+    ..setName("Tauren Gladiator")
+    ..setProperNames(commaList("Big Guy", "Big Boned", "BMI > 3.0"))
+    ..setProperNamesUsed(3)
+    ..setAttack1DamageBase(34)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)
+    ..setAttack1WeaponType(WeaponType.Normal)
+    ..setModelFile(Units.heroTaurenChieftain1)
+    ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
+    ..setUnitSoundSet(Soundsets.heroTaurenChieftain)
+    ..setHeroAbilities(commaList(AbilityIds.warStomp1, AbilityIds.wardenBlink, AbilityIds.alchemistHealingSpray, AbilityIds.fingerofDeath))
+    ..setIconGameInterface(Icons.bTNHeroTaurenChieftain)
+    ..setAnimationCastPoint(0.)
+    ..setPropulsionWindowdegrees(90.)
+    ..setCollisionSize(32.)

@@ -10,7 +10,7 @@ import UnitObjEditing
 
 public constant CLASSIC_HERO_ID_MAP = new IterableMap<int, int>()
 ..put(UnitIds.paladin, compiletime(HERO_ID_GEN.next()))
-..put(UnitIds.taurenchieftain, compiletime(HERO_ID_GEN.next()))
+..put(UnitIds.mountainking, compiletime(HERO_ID_GEN.next()))
 ..put(UnitIds.cryptlord, compiletime(HERO_ID_GEN.next()))
 ..put(UnitIds.alchemist, compiletime(HERO_ID_GEN.next()))
 ..put(UnitIds.bloodmage, compiletime(HERO_ID_GEN.next()))
