@@ -6,6 +6,7 @@ import ClosureForGroups
 import ClosureTimers
 import Knockback3
 import LinkedListModule
+import Simulate3dSound
 import SoundUtils
 import UnitAnimations
 
@@ -65,7 +66,7 @@ class Dunk
 
     construct(unit caster, vec2 target)
         let lvl = caster.getAbilityLevel(ID_DUNK)
-        WARNING_SOUND.playOnPoint(caster.getPos3Real()).snd.setDuration(1000)
+        bindSoundToPoint(WARNING_SOUND.play().snd, caster.getX(), caster.getY(), 100., 2000., 2500.)
         this.caster = caster
         this.target = target
         this.damage = DAMAGE_FUNCTION.run(lvl).toReal()

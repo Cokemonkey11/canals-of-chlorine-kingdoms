@@ -14,11 +14,11 @@ public constant ID_TURBO_GILLS = compiletime(ABIL_ID_GEN.next())
 
 constant ID_TURBO_GILLS_BUFF = compiletime(BUFF_ID_GEN.next())
 
-public constant DEFAULT_ATTACK_RANGE = 600
+public constant DEFAULT_ATTACK_RANGE = 550
 
-public constant TURBO_GILLS_ATTACK_RANGE = 900.
+public constant TURBO_GILLS_ATTACK_RANGE = 850.
 
-constant DURATION = 8.
+constant RealLevelClosure DURATION_FUNCTION = lvl -> 5. + lvl
 
 constant SHRIEK_SOUND = new SoundDefinition(Sounds.duneWormDeath1)
 
@@ -49,7 +49,7 @@ function unit.setAttackRange(real newRange)
     ..setLevels(3)
     ..presetAttackSpeedIncrease((int lvl) -> .15 + (lvl - 1) * .2)
     ..addTooltipProperty("Bonus Attack Range", (int lvl) -> TURBO_GILLS_ATTACK_RANGE - DEFAULT_ATTACK_RANGE)
-    ..presetDurationHero((int lvl) -> DURATION)
+    ..presetDurationHero(DURATION_FUNCTION)
     ..presetCooldown(lvl -> 16. - 2 * lvl)
     ..presetManaCost((int lvl) -> 70)
     ..tooltipStopListen(true)
@@ -66,13 +66,14 @@ function unit.setAttackRange(real newRange)
 
 init
     EventListener.onCast(ID_TURBO_GILLS) u ->
+        let lvl = u.getAbilityLevel(ID_TURBO_GILLS)
         u.setAttackRange(TURBO_GILLS_ATTACK_RANGE)
         BlzSetUnitWeaponRealField(u, UNIT_WEAPON_RF_ATTACK_PROJECTILE_ARC, 1, 0.3)
         addEffect(Abilities.thornsAura, u, "origin").destr()
         let fx = addEffect(Abilities.generalAuraTarget, u, "origin")
         SHRIEK_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
 
-        doAfter(DURATION) ->
+        doAfter(DURATION_FUNCTION.run(lvl)) ->
             fx.destr()
             u.setAttackRange(DEFAULT_ATTACK_RANGE.toReal())
             BlzSetUnitWeaponRealField(u, UNIT_WEAPON_RF_ATTACK_PROJECTILE_ARC, 1, 0.01)

@@ -6,6 +6,7 @@ import ClosureTimers
 import Doodads
 import ObjectIds
 import ObjectIdGenerator
+import Simulate3dSound
 import SoundUtils
 import UnitAnimations
 import UnitIds
@@ -57,7 +58,8 @@ public function enableGenerator()
                     fx.destr()
 
         if tempAny
-            GEN_SOUND.playOnPoint(generator.getPos3Real())
+            bindSoundToPoint(GEN_SOUND.play().snd, generator.getX(), generator.getY(), 50., 2000., 2500.)
+
 
     addWeather(generator.getPos().withRadiusRect(512. / SquareRoot(2.)), WeatherEffects.raysOfLight)..enable()
 

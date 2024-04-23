@@ -19,18 +19,19 @@ import Teams
 import WhenClose
 import WhenRevivable
 
+import AbilityTooltipGenerator
+
 import Flash
 import GameBoard
 import MolotovCockatiel
 import Mongo
 import NightHowler
+import Shades
 import Sorcerer
 import SpaceCadet
 import SteelElemental
 import TaurenGladiator
 import VoidAnnihilator
-
-import AbilityTooltipGenerator
 
 
 constant ID_STARTER_CIRCLET = compiletime(ITEM_ID_GEN.next())
@@ -63,11 +64,11 @@ public constant hero_sounds = new HashMap<int, SoundDefinition>()
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.paladin), new SoundDefinition(Sounds.heroPaladinPissed5))
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.mountainking), new SoundDefinition(Sounds.heroMountainKingPissed7))
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.cryptlord), new SoundDefinition(Sounds.cryptFiendPissed7))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.alchemist), new SoundDefinition(Sounds.heroAlchemistPissed11))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.bloodmage), new SoundDefinition(Sounds.bloodElfMagePissed6))
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.pitlord), new SoundDefinition(Sounds.pitLordYesAttack3))
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.archmage), new SoundDefinition(Sounds.heroArchmagePissed4))
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.farseer), new SoundDefinition(Sounds.heroFarseerPissed5))
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.keeperofthegrove), new SoundDefinition(Sounds.keeperOfTheGrovePissed6))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.lich), new SoundDefinition(Sounds.heroLichPissed8))
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.seawitch), new SoundDefinition(Sounds.ladyVashjPissed5))
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.priestessofthemoon), new SoundDefinition(Sounds.heroMoonPriestessPissed6))
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.darkranger), new SoundDefinition(Sounds.darkRangerPissed4))
 ..put(CLASSIC_HERO_ID_MAP.get(UnitIds.shadowhunter), new SoundDefinition(Sounds.shadowHunterPissed9))
@@ -100,6 +101,10 @@ init
         close.setPos(where)
         close.getOwner().panCameraToTimed(where, 0.)
         close.getOwner().updateBoardIcon(source.getIcon())
+
+        if close.getTypeId() != ID_SHADE
+            Log.warn(close.getName() + " tried to pick a hero")
+
         let hero = ReplaceUnitBJ(close, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)
         ..onRevivable() which ->
             let owner = which.getOwner()
@@ -113,12 +118,15 @@ init
                 if owner.isIngame() and which.getTypeId() != 0
                     which.revive(where, true)
                     owner.panCameraToTimed(where, 0.)
+                    which.setInvulnerable(true)
+                    doAfter(3.) ->
+                        which.setInvulnerable(false)
 
         player_heroes.put(hero.getOwner(), hero)
         hero.setProperName(hero.getOwner().getName(true))
         all_heroes.add(hero)
 
-        hero..addItemById(ID_STARTER_CIRCLET)..addAbility(ID_RECALL)..addAbility(ID_FLASH)
+        hero..addItemById(ID_STARTER_CIRCLET)..addAbility(ID_RECALL)..addAbility(ID_FLASH)..makeAbilityPermanent(ID_RECALL, true)..makeAbilityPermanent(ID_FLASH, true)
         if hero_sounds.has(hero.getTypeId())
             hero_sounds.get(hero.getTypeId()).playForPlayer(hero.getOwner())
 

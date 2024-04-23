@@ -43,7 +43,7 @@ constant RADIUS = 104.
     ..addTooltipProperty("Duration", DURATION_FUNCTION)
     ..tooltipStopListen()
 
-    ..presetTargetsAllowed((int lvl) -> "friend,ground,self,hero")
+    ..presetTargetsAllowed((int lvl) -> "friend,ground,self,hero,vulnerable,invulnerable")
 
 
 class Immolation

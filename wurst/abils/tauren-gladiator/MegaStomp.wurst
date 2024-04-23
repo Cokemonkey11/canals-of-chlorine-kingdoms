@@ -109,7 +109,7 @@ class MegaStomp
                     this.caster.dealCodeDamage(uu, this.damage)
 
                     if uu.isInRange(casterPos, knockbackRadius) and not uu.isStunned()
-                        Knockback3.add(uu, 3. * knockbackRadius, this.caster.getPos().angleTo(uu.getPos()), 80..asAngleDegrees())
+                        Knockback3.add(uu, 2.5 * knockbackRadius, this.caster.getPos().angleTo(uu.getPos()), 80..asAngleDegrees())
 
             destroy this
 

@@ -8,9 +8,11 @@
     * [ ] Bloodlust (every third attack on the same target bonus when activated)
     * [ ] Tumble (vayne dash, reset, bonus damage)
     * [ ] Berzerker (Avatar, bonus health, life steal, life regeneration, bonus attack speed)
-69. [x] exp sharing
 82. [x] sharing items should not be allowed
 88. [x] no control over leavers
+110. [x] knockback against hover unit completely breaks everything
+113. [x] flash and recall are not permanent
+
 
 ## Road to release candidate (0.9.x)
 
@@ -23,13 +25,13 @@
 ## Backlog
 
 44. [x] spirit wolf is intense cheese
-72. [x] raid boss is OP
 83. [x] cadet's stun can stun invulnerable units
-84. [x] chamber ziggurat sound is global
 90. [ ] it's still possible for tower to chime multiple times overlapping. Maybe fundamental characteristic of targeting in wc3?
 95. [ ] tower range indicators
-96. [x] faster heal in base
 98. [x] Flash does not disjoint charged blast
 99. [ ] ignition starts procing immediately, can't be flashed and hard to maximise the damage
-100. [x] castle HP is too low
 106. [ ] colorise the kill notifications by adding extra colored frames on the sides
+111. [ ] lane creeps aggro is too annoying, make them disengage when hero is not aggro to enemy hero
+114. [x] immolation can't be cast on invulnerable allies
+115. [x] spawn camping is possible
+116. [x] phoenix can fly to hero-repick area
