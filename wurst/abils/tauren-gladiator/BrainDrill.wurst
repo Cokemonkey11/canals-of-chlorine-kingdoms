@@ -1,0 +1,133 @@
+package BrainDrill
+
+import ClosureEvents
+import ClosureTimers
+import LinkedListModule
+import Objects
+import SoundUtils
+import StandardTextTags
+import UnitAnimations
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+
+
+public constant ID_BRAIN_DRILL = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure MAX_HEALTH_PCT_FUNCTION = lvl -> 10 + lvl * 5
+constant DAMAGE_RADIUS = 110.
+constant RealLevelClosure CAST_RANGE_FUNCTION = lvl -> 100. + 100 * lvl
+constant RealLevelClosure CHANNEL_DURATION_FUNCTION = lvl -> 2.5 - .5 * lvl
+constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 75. - 15 * lvl
+constant IntLevelClosure MANA_COST_FUNCTION = lvl -> 200 - 50 * lvl
+
+constant ERROR_SOUND = new SoundDefinition(Sounds.error)
+
+constant BRAIN_DRILL_ICON = "ReplaceableTextures\\CommandButtons\\BTNFireAxe.blp"
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Gouges an enemy hero straight through the eyeball, killing them. "
+        + "Fails if interrupted or cast on enemies that are not low on health."
+    )
+    new ChannelAbilityPreset(ID_BRAIN_DRILL, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(3, 2)
+    ..presetButtonPosResearch(3, 0)
+    ..presetTargetTypes(Targettype.UNIT)
+    ..presetHotkey("R")
+    ..presetIcon(BRAIN_DRILL_ICON)
+    ..setRequiredLevel(6)
+    ..setLevelSkipRequirement(2)
+
+    ..tooltipStartListen()
+    ..presetManaCost(MANA_COST_FUNCTION)
+    ..setName("Brain Drill")
+    ..presetCooldown(COOLDOWN_FUNCTION)
+    ..addTooltipProperty("Max Health (%)", MAX_HEALTH_PCT_FUNCTION)
+    ..presetCastRange(CAST_RANGE_FUNCTION)
+    ..presetFollowThroughTime(CHANNEL_DURATION_FUNCTION)
+    ..tooltipStopListen()
+
+    ..presetDisableOtherAbilities((int lvl) -> true)
+    ..presetTargetsAllowed((int lvl) -> "enemies,ground,vulnerable,hero")
+
+
+class BrainDrill
+    use LinkedListModule
+
+    unit caster
+    unit target
+    real maxTime
+    real timeSpent
+    int orderId
+
+    construct(unit caster, unit target)
+        let lvl = caster.getAbilityLevel(ID_BRAIN_DRILL)
+        this.caster = caster
+        this.target = target..pause()
+        this.maxTime = CHANNEL_DURATION_FUNCTION.run(lvl) - 0.1
+        this.timeSpent = 0.
+        this.orderId = caster.getCurrentOrder()
+        this.caster..setAnimation(UnitAnimations.HeroTaurenChieftain.attack2.idx)..setTimeScale(2.)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.caster..setTimeScale(1.)..unpause()
+        this.target.unpause()
+
+        if this.caster.isAlive()
+            this.caster.queueAnimation("stand")
+
+
+    function tick()
+        this.timeSpent += ANIMATION_PERIOD
+
+        let ang = this.caster.getPos().angleTo(this.target.getPos())
+        this.caster.setFacing(ang)
+
+        if this.caster.getPos().distanceToSq(this.target.getPos()) > 164 * 164
+            this.caster.setXY(this.caster.getPos().polarOffset(ang, 1000 * ANIMATION_PERIOD))
+        else
+            let origin = this.target.getPos3Real() + vec3(0., 0., 75.)
+            addEffect(Objects.humanLargeDeathExplode, origin)..setYaw(ang + 90..asAngleDegrees())..setScale(GetRandomReal(.8, 1.1))..setPitch(angle(PI / 4.))..destr()
+            addEffect(Objects.humanLargeDeathExplode, origin)..setYaw(ang - 90..asAngleDegrees())..setScale(GetRandomReal(.8, 1.1))..setPitch(angle(PI / 4.))..destr()
+
+        if this.timeSpent > 0.25
+            this.caster..setTimeScale(0.1)
+
+        if this.timeSpent >= this.maxTime
+            createCriticalStrikeTextTag(this.caster, 0)..setText("It's a one-hit KO!")
+            this.caster.dealCodeDamage(this.target, 100000)
+            destroy this
+            return
+
+        if not this.caster.isAlive() or this.caster.getCurrentOrder() != this.orderId or this.target.isInvulnerable()
+            createCriticalStrikeTextTag(this.caster, 0)..setText("But it failed!")
+            destroy this
+            return
+
+
+init
+    EventListener.onCast(ID_BRAIN_DRILL) caster ->
+        let target = EventData.getSpellTargetUnit()
+        let lvl = caster.getAbilityLevel(ID_BRAIN_DRILL)
+
+        let maxHealthPct = MAX_HEALTH_PCT_FUNCTION.run(lvl) / 100.
+
+        if target.getHPRatio() < maxHealthPct
+            new BrainDrill(caster, target)
+        else
+            ERROR_SOUND.playForPlayer(caster.getOwner())
+            nullTimer() ->
+                caster..addMana(MANA_COST_FUNCTION.run(lvl).toReal())
+                caster..resetAbilityCooldown(ID_BRAIN_DRILL)

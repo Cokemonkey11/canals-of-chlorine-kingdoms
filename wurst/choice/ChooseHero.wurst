@@ -27,6 +27,7 @@ import NightHowler
 import Sorcerer
 import SpaceCadet
 import SteelElemental
+import TaurenGladiator
 import VoidAnnihilator
 
 import AbilityTooltipGenerator
@@ -79,6 +80,7 @@ public constant hero_sounds = new HashMap<int, SoundDefinition>()
 ..put(ID_NIGHT_HOWLER, new SoundDefinition(Sounds.cryptFiendPissed7))
 ..put(ID_SORCERER, new SoundDefinition(Sounds.priestPissed6))
 ..put(ID_MOLOTOV_COCKATIEL, new SoundDefinition(Sounds.hippogryphWithRiderPissed4))
+..put(ID_TAUREN_GLADIATOR, new SoundDefinition(Sounds.heroTaurenChieftainPissed6))
 
 
 constant CUSTOM_HERO_ID_MAP = new HashMap<int, int>()
@@ -89,6 +91,7 @@ constant CUSTOM_HERO_ID_MAP = new HashMap<int, int>()
 ..put(UnitIds.skeletalmage, ID_SORCERER)
 ..put(UnitIds.skeletonwarrior, ID_NIGHT_HOWLER)
 ..put(UnitIds.faeriedragon, ID_MOLOTOV_COCKATIEL)
+..put(UnitIds.gargoylemorphed, ID_TAUREN_GLADIATOR)
 
 
 init

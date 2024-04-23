@@ -1,15 +1,14 @@
 package TaurenGladiator
 
-// Seppuku Sike (actively cast resurrection, dies and resurrects actively)
-// Brain Drill (execute-wurst ability, can only target low HP enemies, channels and stuns while killing the enemy, can be interrupted)
-
 import Assets
 
 import AbilityTooltipGenerator
 
+import BrainDrill
 import Dunk
 import HeroGlow
 import MegaStomp
+import SeppukuSike
 
 
 public constant ID_TAUREN_GLADIATOR = compiletime(HERO_ID_GEN.next())
@@ -27,7 +26,7 @@ public constant ID_TAUREN_GLADIATOR = compiletime(HERO_ID_GEN.next())
     ..setModelFile(Units.heroTaurenChieftain1)
     ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
     ..setUnitSoundSet(Soundsets.heroTaurenChieftain)
-    ..setHeroAbilities(commaList(ID_MEGA_STOMP, ID_DUNK, AbilityIds.alchemistHealingSpray, AbilityIds.fingerofDeath))
+    ..setHeroAbilities(commaList(ID_MEGA_STOMP, ID_DUNK, ID_SEPPUKU_SIKE, ID_BRAIN_DRILL))
     ..setIconGameInterface(Icons.bTNHeroTaurenChieftain)
     ..setAnimationCastPoint(0.)
     ..setPropulsionWindowdegrees(90.)

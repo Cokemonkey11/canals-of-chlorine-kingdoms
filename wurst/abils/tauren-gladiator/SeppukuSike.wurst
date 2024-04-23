@@ -1,0 +1,105 @@
+package SeppukuSike
+
+import Abilities
+import ClosureEvents
+import ClosureTimers
+import LinkedListModule
+import SoundUtils
+import StandardTextTags
+import UnitAnimations
+
+import AbilityTooltipGenerator
+
+
+public constant ID_SEPPUKU_SIKE = compiletime(ABIL_ID_GEN.next())
+
+constant RealLevelClosure CHANNEL_DURATION_FUNCTION = lvl -> 1.6 - .5 * lvl
+constant IntLevelClosure MANA_FUNCTION = lvl -> 150 - 50 * lvl
+constant IntLevelClosure LIFE_RESTORE_PCT_FUNCTION = lvl -> 55 + 15 * lvl
+constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 70. - 10 * lvl
+constant REVIVE_DURATION = 3.
+
+constant SIKE_SOUND = new SoundDefinition("sike.mp3")
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Feigns suicide, resurrecting with a fraction of total health. "
+        + "If the channel is interrupted, or if the caster dies before completion, the effect is cancelled."
+    )
+    new ChannelAbilityPreset(ID_SEPPUKU_SIKE, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(2, 2)
+    ..presetButtonPosResearch(2, 0)
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetHotkey("E")
+    ..presetIcon(Icons.bTNResurrection)
+    ..presetManaCost(MANA_FUNCTION)
+
+    ..tooltipStartListen()
+    ..setName("Seppuku Sike")
+    ..presetCooldown(COOLDOWN_FUNCTION)
+    ..addTooltipProperty("Channel Duration", CHANNEL_DURATION_FUNCTION)
+    ..addTooltipProperty("Life Restored (%)", LIFE_RESTORE_PCT_FUNCTION)
+    ..tooltipStopListen()
+
+    ..presetFollowThroughTime((int lvl) -> CHANNEL_DURATION_FUNCTION.run(lvl) + .1)
+
+
+class SeppukuSike
+    use LinkedListModule
+
+    unit caster
+    real durationLeft
+    int orderId
+    real lifeToRestore
+    bool invuln
+
+    construct(unit caster)
+        let lvl = caster.getAbilityLevel(ID_SEPPUKU_SIKE)
+        this.caster = caster
+        this.durationLeft = CHANNEL_DURATION_FUNCTION.run(lvl)
+        this.orderId = caster.getCurrentOrder()
+        this.lifeToRestore = caster.getMaxHP() * LIFE_RESTORE_PCT_FUNCTION.run(lvl) / 100.
+        this.caster..setAnimation(UnitAnimations.HeroTaurenChieftain.standVictory.idx)..setTimeScale(1.)
+        this.invuln = false
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.caster..setTimeScale(1.)..setInvulnerable(false)..unpause()
+
+        if this.caster.isAlive()
+            this.caster.queueAnimation("stand")
+
+
+    function tick()
+        this.durationLeft -= ANIMATION_PERIOD
+
+        if not this.caster.isAlive() or (this.orderId != this.caster.getCurrentOrder() and this.durationLeft > 0.)
+            createCriticalStrikeTextTag(this.caster, 0)..setText("Interrupted!")
+            destroy this
+            return
+
+        if this.durationLeft < 0.
+            if this.durationLeft < -REVIVE_DURATION
+                this.caster..setHP(this.lifeToRestore)..setAnimation(UnitAnimations.HeroTaurenChieftain.stand1.idx)
+                SIKE_SOUND.playOnPoint(this.caster.getPos3Real())
+                flashEffect(Abilities.reincarnationTarget, this.caster.getPos())
+                destroy this
+                return
+
+            if not this.invuln
+                this.invuln = true
+                this.caster..setInvulnerable(true)..pause()..setAnimation(UnitAnimations.HeroTaurenChieftain.death.idx)
+
+
+init
+    EventListener.onCast(ID_SEPPUKU_SIKE) caster ->
+        new SeppukuSike(caster)

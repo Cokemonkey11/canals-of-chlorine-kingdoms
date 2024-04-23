@@ -133,5 +133,5 @@ init
             new Dunk(caster, target)
         else
             ERROR_SOUND.playForPlayer(caster.getOwner())
-            caster..addMana(MANA_COST_FUNCTION.run(lvl).toReal())
-            caster..resetAbilityCooldown(ID_DUNK)
+            nullTimer() ->
+                caster..addMana(MANA_COST_FUNCTION.run(lvl).toReal())..resetAbilityCooldown(ID_DUNK)

@@ -2,6 +2,7 @@ package Commands
 
 import ClosureForGroups
 import LinkedList
+import UnitIds
 
 import WurstCommand
 
@@ -9,8 +10,6 @@ import ChooseHero
 import GameBoard
 import PowerLevelingChamber
 import Teams
-
-import TaurenGladiator
 
 
 init
@@ -28,10 +27,7 @@ init
                 if u.isType(UNIT_TYPE_HERO)
                     u.setLevel(u.getLevel() + 1, true)
         addCommand("enemy") (p, _cmd, _args) ->
-            createUnit(players[1], 'hfoo')
-
-        addCommand("tauren") (p, _cmd, _args) ->
-            createUnit(p, ID_TAUREN_GLADIATOR)
+            createUnit(players[1], UnitIds.paladin)
 
         addCommand("generator") (p, _cmd, _args) ->
             enableGenerator()

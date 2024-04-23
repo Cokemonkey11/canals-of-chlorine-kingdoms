@@ -8,10 +8,6 @@
     * [ ] Bloodlust (every third attack on the same target bonus when activated)
     * [ ] Tumble (vayne dash, reset, bonus damage)
     * [ ] Berzerker (Avatar, bonus health, life steal, life regeneration, bonus attack speed)
-  - [ ] Tauren Gladiator
-    * [ ] Resurrection (actively cast sepppuku, dies and resurrects actively)
-    * [ ] Eviscerate (execute-wurst ability, can only target low HP enemies, channels and stuns while killing the enemy, can be interrupted)
-  - [x] Molotov Cockatiel
 69. [x] exp sharing
 82. [x] sharing items should not be allowed
 88. [x] no control over leavers
