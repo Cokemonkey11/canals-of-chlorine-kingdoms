@@ -8,6 +8,7 @@ import WurstCommand
 
 import ChooseHero
 import GameBoard
+import Headbanger
 import PowerLevelingChamber
 import Teams
 
@@ -26,8 +27,12 @@ init
             forUnitsOfPlayer(p) (unit u) ->
                 if u.isType(UNIT_TYPE_HERO)
                     u.setLevel(u.getLevel() + 1, true)
+
         addCommand("enemy") (p, _cmd, _args) ->
             createUnit(players[1], UnitIds.paladin)
+
+        addCommand("headbanger") (p, _cmd, _args) ->
+            createUnit(p, ID_HEADBANGER)
 
         addCommand("generator") (p, _cmd, _args) ->
             enableGenerator()

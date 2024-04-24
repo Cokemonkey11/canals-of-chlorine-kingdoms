@@ -4,8 +4,12 @@
 - lep
 - Petr
 - Overkane
+- DiscoOrc
 - Jaccouille
 - Footman16
+- Krakena
+- I1337h4x0RI
+- WaterKnight
 - looking_for_help
 - Blizzard Entertainment
 - Dionesiist

@@ -1,0 +1,64 @@
+package Impetus
+
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import LinkedListModule
+import Reference
+import Simulate3dSound
+import SoundUtils
+import Time
+import Units
+
+import AbilityTooltipGenerator
+import WurstTempLightning
+
+import CodeDamage
+
+
+public constant ID_IMPETUS = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure BASE_DAMAGE_FUNCTION = lvl -> 50 * lvl
+constant IntLevelClosure DAMAGE_RANGE_BONUS_FUNCTION = lvl -> 1 + lvl
+constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 16. - 4 * lvl
+
+constant MANA_COST = 40
+
+constant MAX_RANGE = 2000
+
+constant MISSILE_SPEED = 800
+
+constant DAMAGE_AOE = 100
+
+constant DAMAGE_SOUND = new SoundDefinition(Sounds.guardTowerMissileHit3)
+
+constant MIN_RANGE = 350
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        Targettype.POINT,
+        "Throws an arcing spear high through the air that deals bonus damage the further it travels."
+    )
+    new ChannelAbilityPreset(ID_IMPETUS, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(0, 2)
+    ..presetButtonPosResearch(0, 0)
+    ..presetHotkey("Q")
+    ..presetIcon(Icons.bTNDryadDispelMagic)
+
+    ..tooltipStartListen()
+    ..presetCastRange((int lvl) -> MAX_RANGE.toReal())
+    ..presetTargetTypes(Targettype.POINT)
+    ..presetManaCost(_ -> MANA_COST)
+    ..setName("Impetus")
+    ..presetCooldown(COOLDOWN_FUNCTION)
+    ..presetAreaofEffect((int lvl) -> DAMAGE_AOE.toReal())
+    ..addTooltipProperty("Base Damage", BASE_DAMAGE_FUNCTION)
+    ..addTooltipProperty("Damage Multiplier At Max Range", DAMAGE_RANGE_BONUS_FUNCTION)
+    ..addTooltipProperty("Minimum Range", lvl -> MIN_RANGE)
+    ..tooltipStopListen()
+
+    ..presetOption(Option.TARGETIMAGE, true)
+
+// WIP

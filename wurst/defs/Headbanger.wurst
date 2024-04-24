@@ -1,0 +1,31 @@
+package Headbanger
+
+// Impetus (area target skillshot with damage scaling with range and power ?)
+// Bloodlust (every third attack on the same target bonus when activated)
+// Tumble (vayne dash, reset, bonus damage)
+// Berzerkorphosis (Avatar, bonus health, life steal, life regeneration, bonus attack speed, use BlzSetUnitSkin)
+
+import Assets
+
+import AbilityTooltipGenerator
+
+import HeroGlow
+
+
+public constant ID_HEADBANGER = compiletime(HERO_ID_GEN.next())
+
+
+@compiletime function genSpaceCadet()
+    new HeroDefinition(ID_HEADBANGER, UnitIds.darkranger)
+    ..setName("Headbanger")
+    ..setProperNames(commaList("Jamaica", "Britney Spear", "Wurst"))
+    ..setProperNamesUsed(3)
+    ..setAttack1DamageBase(34)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)
+    ..setAttack1ProjectileArt(Abilities.huntermissile)
+    ..setModelFile(Units.headhunter1)
+    ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
+    ..setUnitSoundSet(Soundsets.headHunter)
+    ..setHeroAbilities(commaList(AbilityIds.bloodMageFlameStrike, AbilityIds.enduranceAura1, AbilityIds.stormBolt, AbilityIds.avatar))
+    ..setIconGameInterface(Icons.bTNHeadhunter)
