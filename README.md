@@ -4,8 +4,8 @@
 
 57. [ ] third set of custom heroes
   - [ ] Headhunter
-    * [ ] Impetus (unit + point target skillshot with damage scaling with range)
-    * [ ] Bloodlust (every third attack on the same target bonus when activated)
+    * [x] Momentus (unit + point target skillshot with damage scaling with range)
+    * [ ] Bloodlust (every third attack on the same target bonus when activated, maybe something like vayne E)
     * [ ] Tumble (vayne dash, reset, bonus damage)
     * [ ] Berzerker (Avatar, bonus health, life steal, life regeneration, bonus attack speed)
 82. [x] sharing items should not be allowed

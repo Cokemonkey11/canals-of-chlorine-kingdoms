@@ -1,0 +1,139 @@
+package Momentus
+
+import Abilities
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import DummyRecycler
+import Knockback3
+import LinkedListModule
+import SoundUtils
+import StandardTextTags
+import UnitAnimations
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+
+
+public constant ID_MOMENTUS = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure BASE_DAMAGE_FUNCTION = lvl -> 50 + 25 * lvl
+constant RealLevelClosure DAMAGE_RANGE_BONUS_FUNCTION = lvl -> 1 + 0.5 * lvl
+constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 16. - 4 * lvl
+
+constant MANA_COST = 40
+
+constant MAX_RANGE = 1400
+
+constant MISSILE_SPEED = 800
+
+constant DAMAGE_AOE = 100
+
+constant THROW_SOUND = new SoundDefinition(Sounds.guardTowerMissileLaunch3)
+constant DAMAGE_SOUND = new SoundDefinition(Sounds.guardTowerMissileHit3)
+constant ERROR_SOUND = new SoundDefinition(Sounds.error)
+
+constant MIN_RANGE = 350
+
+
+function vec3.narrowToPitch() returns real
+    let groundSpeed = this.toVec2().length()
+    let airSpeed = this.z
+    return Atan2(airSpeed, groundSpeed)
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        Targettype.POINT,
+        "Throws an arcing spear high through the air that deals bonus damage the further it travels."
+    )
+    new ChannelAbilityPreset(ID_MOMENTUS, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(0, 2)
+    ..presetButtonPosResearch(0, 0)
+    ..presetHotkey("Q")
+    ..presetIcon(Icons.bTNDryadDispelMagic)
+
+    ..tooltipStartListen()
+    ..presetCastRange((int lvl) -> MAX_RANGE.toReal())
+    ..presetTargetTypes(Targettype.POINT)
+    ..presetManaCost(_ -> MANA_COST)
+    ..setName("Momentus")
+    ..presetCooldown(COOLDOWN_FUNCTION)
+    ..presetAreaofEffect((int lvl) -> DAMAGE_AOE.toReal())
+    ..addTooltipProperty("Base Damage", BASE_DAMAGE_FUNCTION)
+    ..addTooltipProperty("Damage Multiplier (Max Range)", DAMAGE_RANGE_BONUS_FUNCTION)
+    ..addTooltipProperty("Minimum Range", lvl -> MIN_RANGE)
+    ..tooltipStopListen()
+
+    ..presetOption(Option.TARGETIMAGE, true)
+
+
+class Momentus
+    use LinkedListModule
+
+    unit caster
+    vec2 target
+    unit dummy
+    effect fx
+
+    construct(unit caster, vec2 target)
+        this.caster = caster
+        this.target = target
+        this.dummy = DummyRecycler.get(caster.getPos(), 0..asAngleDegrees())..setFlyHeight(50., 0.)
+        this.fx = addEffect(Abilities.huntermissile, this.caster.getPos())..setYaw(this.caster.getPos().angleTo(target))..setColorByPlayer(caster.getOwner())
+
+        nullTimer() ->
+            caster.setAnimation(UnitAnimations.Headhunter.attackRange.idx)
+
+        Knockback3.add(this.dummy, target, caster.getPos().distanceTo(target) * 1.5)
+
+        THROW_SOUND.playOnPoint(caster.getPos3Real())
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx.destr()
+        DummyRecycler.recycle(this.dummy)
+        Knockback3.forget(this.dummy)
+
+    function tick()
+        this.fx.setPos(this.dummy.getPos3Real())
+
+        let dummyVel = Knockback3.getVel(this.dummy)
+
+        this.fx.setPitch(dummyVel.narrowToPitch().asAngleRadians() * -1.)
+
+        if dummyVel.z < 0. and this.dummy.getFlyHeight() < 50.
+            let lvl = this.caster.getAbilityLevel(ID_MOMENTUS)
+            let baseDamage = BASE_DAMAGE_FUNCTION.run(lvl)
+            let damage = baseDamage.toReal().lerp(
+                baseDamage * (1. + DAMAGE_RANGE_BONUS_FUNCTION.run(lvl)),
+                this.caster.getPos().distanceTo(this.target) / MAX_RANGE
+            )
+            forUnitsInRange(this.target, DAMAGE_AOE.toReal()) u ->
+                if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE)
+                    this.caster.dealCodeDamage(u, damage)
+                    DAMAGE_SOUND.playOnPoint(u.getPos3Real())
+                    createCriticalStrikeTextTag(u, damage.toInt())
+
+            destroy this
+
+
+init
+    EventListener.onCast(ID_MOMENTUS) caster ->
+        let target = EventData.getSpellTargetPos()
+        if caster.getPos().distanceToSq(target) > MIN_RANGE * MIN_RANGE
+            new Momentus(caster, target)
+        else
+            ERROR_SOUND.playForPlayer(caster.getOwner())
+            nullTimer() ->
+                caster.addMana(MANA_COST.toReal())
+                caster.resetAbilityCooldown(ID_MOMENTUS)
