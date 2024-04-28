@@ -1,0 +1,126 @@
+package Faceroll
+
+import ClosureEvents
+import ClosureTimers
+import DamageEvent
+import HashMap
+import LinkedListModule
+import OrderIds
+import SoundUtils
+import StandardTextTags
+import TerrainUtils
+import Units
+
+import AbilityTooltipGenerator
+
+import Flash
+
+
+public constant ID_FACEROLL = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure BONUS_DAMAGE_FUNCTION = lvl -> 10 + 20 * lvl
+
+constant DURATION = 0.35
+
+constant BONUS_DAMAGES = new HashMap<unit, real>()
+
+constant TUMBLE_DISTANCE = 250.
+
+constant CAST_SOUND = new SoundDefinition(Sounds.headHunterWarcry1)
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Tumbles in the dirction of the last right-click, resetting the attack cooldown and granting bonus damage on the next attack."
+    )
+    new AbilityDefinitionBerserk(ID_FACEROLL)
+    ..setHeroAbility(true)
+    ..registerTooltipGenerator(tgen)
+
+    ..tooltipStartListen()
+    ..setName("Faceroll")
+    ..setLevels(3)
+    ..presetCooldown(lvl -> 9. - lvl)
+    ..presetManaCost((int lvl) -> 60)
+    ..addTooltipProperty("Bonus Damage", BONUS_DAMAGE_FUNCTION)
+    ..tooltipStopListen(true)
+
+    ..presetDamageTakenIncrease((int lvl) -> 0)
+    ..presetMovementSpeedIncrease((int lvl) -> 0)
+    ..presetButtonPosNormal(1, 2)
+    ..presetButtonPosResearch(1, 0)
+    ..presetHotkey("W")
+    ..presetIcon(Icons.bTNDrunkenDodge)
+    ..presetAttackSpeedIncrease((int lvl) -> 2.)
+    ..presetDurationHero(lvl -> 0.3)
+    ..setLevelSkipRequirement(2)
+
+
+class Faceroll
+    use LinkedListModule
+
+    unit caster
+    angle angle_
+    effect fx
+    vec2 vel
+    real duration
+
+    construct(unit caster, angle angle_)
+        this.caster..setFacing(angle_)..setVertexColor(colorA(0, 0, 0, 0))..issueImmediateOrderById(OrderIds.stunned)..pause()
+        this.angle_ = angle_
+        this.fx = addEffect(Units.headhunter1, caster.getPos3Real())..setYaw(angle_)..setColorByPlayer(caster.getOwner())..playAnimation(ANIM_TYPE_STAND)
+        this.caster = caster
+        this.vel = ZERO2.polarOffset(angle_, ANIMATION_PERIOD * TUMBLE_DISTANCE / DURATION)
+        this.duration = 0.
+
+        CAST_SOUND.playOnPoint(caster.getPos3Real())
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.caster..setFlyHeight(0., 0.)..setVertexColor(COLOR_WHITE)..unpause()
+        this.fx..setY(-5000.)..destr()
+        BONUS_DAMAGES.put(this.caster, BONUS_DAMAGE_FUNCTION.run(this.caster.getAbilityLevel(ID_FACEROLL)).toReal())
+
+    function tick()
+        this.duration += ANIMATION_PERIOD
+
+        let newPos = this.caster.getPos() + this.vel
+        if newPos.isTerrainWalkable()
+            this.caster.setXY(newPos)
+            let heightOffset = Sin(0..lerp(PI, this.duration / DURATION))
+            let waterOffset = this.caster.getPos().isTerrainShallowWater() ? -32. : 0.
+            let ang0 = 90..asAngleDegrees()
+            let ang1 = ang0 + (2 * PI).asAngleRadians()
+            let faceOffset = 70. * ZERO2.polarOffset(this.angle_, Cos(ang0.radians()..lerp(ang1.radians(), this.duration / DURATION))) // WIP
+            this.fx.setPos(newPos.withRealZ(this.caster) + vec3(faceOffset.x, faceOffset.y, 70. * heightOffset + waterOffset))
+
+        let ang = (0..lerp(2 * PI, this.duration / DURATION)).asAngleRadians()
+        this.fx..setPitch(ang)
+        this.fx..setOrientation(this.angle_, ang, 0..asAngleDegrees())
+
+        if this.duration >= DURATION
+            destroy this
+
+
+init
+    EventListener.onCast(ID_FACEROLL) caster ->
+        new Faceroll(caster, caster.getPos().angleTo(caster.getLastSmart()))
+
+    DamageEvent.addListener(0) ->
+        let source = DamageEvent.getSource()
+        let type_ = DamageEvent.getType()
+
+        if BONUS_DAMAGES.has(source) and type_ == DamageType.ATTACK
+            let target = DamageEvent.getTarget()
+            let bonusDamage = BONUS_DAMAGES.get(source)
+            let newDamage = DamageEvent.getAmount() + bonusDamage
+            DamageEvent.addAmount(bonusDamage)
+            BONUS_DAMAGES.remove(source)
+            createCriticalStrikeTextTag(target, newDamage.toInt())

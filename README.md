@@ -6,7 +6,7 @@
   - [ ] Headhunter
     * [x] Momentus (unit + point target skillshot with damage scaling with range)
     * [ ] Bloodlust (every third attack on the same target bonus when activated, maybe something like vayne E)
-    * [ ] Tumble (vayne dash, reset, bonus damage)
+    * [x] Tumble (vayne dash, reset, bonus damage)
     * [ ] Berzerker (Avatar, bonus health, life steal, life regeneration, bonus attack speed)
 82. [x] sharing items should not be allowed
 88. [x] no control over leavers

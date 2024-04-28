@@ -26,6 +26,10 @@ public function unit.getDisjointState() returns int
     return 0
 
 
+public function unit.getLastSmart() returns vec2
+    return (lastSmarts.has(this) ? lastSmarts.get(this) : ZERO2.getTile()).toVec2()
+
+
 function unit.incrDisjointState()
     if FLASH_DISJOINTS.has(this)
         FLASH_DISJOINTS.put(this, FLASH_DISJOINTS.get(this))
@@ -68,7 +72,7 @@ init
             lastSmarts.put(orderer, target.getTile())
 
     EventListener.onCast(ID_FLASH) (unit caster) ->
-        let whereTo = (lastSmarts.has(caster) ? lastSmarts.get(caster) : ZERO2.getTile()).toVec2()
+        let whereTo = caster.getLastSmart()
         let casterPos = caster.getPos()
 
         let ang = casterPos.angleTo(whereTo)
