@@ -7,6 +7,7 @@ import ClosureTimers
 import DummyRecycler
 import Knockback3
 import LinkedListModule
+import Simulate3dSound
 import SoundUtils
 import StandardTextTags
 import UnitAnimations
@@ -89,7 +90,7 @@ class Momentus
 
         Knockback3.add(this.dummy, target, caster.getPos().distanceTo(target) * 1.5)
 
-        THROW_SOUND.playOnPoint(caster.getPos3Real())
+        bindSoundToUnit(THROW_SOUND.play().snd, caster, 50, 1500, 2000)
 
         if size == 1
             doPeriodically(ANIMATION_PERIOD) cb ->
@@ -121,7 +122,7 @@ class Momentus
             forUnitsInRange(this.target, DAMAGE_AOE.toReal()) u ->
                 if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE)
                     this.caster.dealCodeDamage(u, damage)
-                    DAMAGE_SOUND.playOnPoint(u.getPos3Real())
+                    bindSoundToUnit(DAMAGE_SOUND.play().snd, u, 50, 1500, 2000)
                     createCriticalStrikeTextTag(u, damage.toInt())
 
             destroy this

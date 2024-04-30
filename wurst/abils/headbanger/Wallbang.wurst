@@ -1,0 +1,197 @@
+package Wallbang
+
+import Assets
+import ClosureEvents
+import ClosureTimers
+import LinkedListModule
+import SoundUtils
+import TerrainUtils
+import UnitAnimations
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+import Stun
+
+
+public constant ID_WALLBANG = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure BASE_DAMAGE_FUNCTION = lvl -> 50 + 25 * lvl
+constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 16. - 2 * lvl
+
+constant STUN_DURATION = 2.5
+
+constant MANA_COST = 90
+
+constant MAX_RANGE = 600
+
+constant KNOCKBACK_DISTANCE = 350
+
+constant MISSILE_SPEED = 1800
+
+constant KNOCKBACK_SPEED = MISSILE_SPEED
+
+constant THROW_SOUND = new SoundDefinition(Sounds.catapultAttack11)
+constant WALLBANG_SOUND = new SoundDefinition(Sounds.catapultDeath1)
+
+constant ANIMATION_DURATION = 0.35
+
+
+function vec3.narrowToPitch() returns angle
+    let groundSpeed = this.toVec2().length()
+    let airSpeed = this.z
+    return Atan2(airSpeed, groundSpeed).asAngleRadians()
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        Targettype.UNIT,
+        "Looses a salvo of spears at a target, toppling it backwards. "
+        + "If the target strikes a wall or other immobile terrain, it's stunned."
+    )
+    new ChannelAbilityPreset(ID_WALLBANG, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(2, 2)
+    ..presetButtonPosResearch(2, 0)
+    ..presetHotkey("E")
+    ..presetIcon(Icons.bTNOrcBattleStandard)
+
+    ..tooltipStartListen()
+    ..presetCastRange((int lvl) -> MAX_RANGE.toReal())
+    ..presetTargetTypes(Targettype.UNIT)
+    ..presetManaCost(_ -> MANA_COST)
+    ..setName("Wallbang")
+    ..presetCooldown(COOLDOWN_FUNCTION)
+    ..addTooltipProperty("Damage", BASE_DAMAGE_FUNCTION)
+    ..addTooltipProperty("Knocback Distance", lvl -> KNOCKBACK_DISTANCE)
+    ..addTooltipProperty("Stun Duration", lvl -> STUN_DURATION)
+    ..tooltipStopListen()
+
+
+class WallbangAnimation
+    use LinkedListModule
+
+    effect fx
+    vec3 vel
+    real durationLeft
+
+    construct(unit source, vec2 target)
+        let perturbedTarget = target.withTerrainZ(30.) + vec3(GetRandomReal(-40., 40.), GetRandomReal(-40., 40.), GetRandomReal(-40., 40.))
+        let sourcePos = source.getPos3Real() + vec3(0., 0., 50.)
+        let pointer = sourcePos.normalizedPointerTo(perturbedTarget)
+        let pitch = pointer.narrowToPitch()
+        this.fx = addEffect(Abilities.huntermissile, sourcePos)
+            ..setOrientation(source.getPos().angleTo(target), pitch, 0..asAngleDegrees())
+            ..setColorByPlayer(source.getOwner())
+
+        this.vel = pointer * MISSILE_SPEED.toReal() * ANIMATION_PERIOD
+        this.durationLeft = ANIMATION_DURATION
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx.destr()
+
+    function tick()
+        this.durationLeft -= ANIMATION_PERIOD
+
+        this.fx.setPos(this.fx.getPos3() + this.vel)
+
+        if this.durationLeft <= 0.
+            destroy this
+
+
+class Wallbang
+    use LinkedListModule
+
+    unit caster
+    vec2 target
+    real timeLeft
+
+    construct(unit caster, unit target)
+        this.caster = caster
+        this.target = target.getPos()
+        this.timeLeft = ANIMATION_DURATION
+
+        nullTimer() ->
+            caster..setAnimation(UnitAnimations.Headhunter.attackRange.idx)..setTimeScale(5.)..pause()
+
+        THROW_SOUND.playOnPoint(caster.getPos3Real())
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.caster..setAnimation("stand")..setTimeScale(1.)..unpause()
+
+    function tick()
+        this.timeLeft -= ANIMATION_PERIOD
+
+        new WallbangAnimation(this.caster, this.target)
+
+        if this.timeLeft <= 0. or not this.caster.isAlive()
+            destroy this
+
+
+class WallbangKnockback
+    use LinkedListModule
+
+    unit target
+    vec2 vel
+    real durationLeft
+
+    construct(unit caster, unit target)
+        this.target = target
+        this.vel = caster.getPos().normalizedPointerTo(target.getPos()) * KNOCKBACK_SPEED.toReal() * ANIMATION_PERIOD
+        this.durationLeft = KNOCKBACK_DISTANCE / KNOCKBACK_SPEED
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        skip
+
+    function tick()
+        this.durationLeft -= ANIMATION_PERIOD
+
+        let newPos = this.target.getPos() + this.vel
+
+        if newPos.isTerrainWalkable()
+            addEffect(Abilities.absorbManaBirthMissile, newPos)..setAlpha(127)..setTimeScale(1.25)..destr()
+            this.target.setPos(newPos)
+        else
+            this.target.stun(STUN_DURATION)
+            WALLBANG_SOUND.playOnPoint(this.target.getPos3Real())
+            destroy this
+            return
+
+        if this.durationLeft <= 0. or not this.target.isAlive()
+            destroy this
+
+
+init
+    EventListener.onCast(ID_WALLBANG) caster ->
+        let target = EventData.getSpellTargetUnit()
+        new Wallbang(caster, target)
+
+        doAfter(ANIMATION_DURATION) ->
+            let lvl = caster.getAbilityLevel(ID_WALLBANG)
+            caster.dealCodeDamage(target, BASE_DAMAGE_FUNCTION.run(lvl).toReal())
+            if target.isAlive()
+                new WallbangKnockback(caster, target)

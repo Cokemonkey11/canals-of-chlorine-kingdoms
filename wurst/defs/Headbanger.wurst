@@ -1,15 +1,14 @@
 package Headbanger
 
-// Wallbang
-// Berzerkorphosis (Avatar, bonus health, life steal, life regeneration, bonus attack speed, use BlzSetUnitSkin) Bloodlust (every third attack on the same target bonus when activated)
-
 import Assets
 
 import AbilityTooltipGenerator
 
+import BerzerkerForm
 import Faceroll
 import HeroGlow
 import Momentus
+import Wallbang
 
 
 public constant ID_HEADBANGER = compiletime(HERO_ID_GEN.next())
@@ -27,5 +26,5 @@ public constant ID_HEADBANGER = compiletime(HERO_ID_GEN.next())
     ..setModelFile(Units.headhunter1)
     ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
     ..setUnitSoundSet(Soundsets.headHunter)
-    ..setHeroAbilities(commaList(ID_MOMENTUS, ID_FACEROLL, AbilityIds.stormBolt, AbilityIds.avatar))
+    ..setHeroAbilities(commaList(ID_MOMENTUS, ID_FACEROLL, ID_WALLBANG, ID_BERZERKER_FORM))
     ..setIconGameInterface(Icons.bTNHeadhunter)

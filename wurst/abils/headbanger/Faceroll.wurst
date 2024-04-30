@@ -6,6 +6,7 @@ import DamageEvent
 import HashMap
 import LinkedListModule
 import OrderIds
+import Simulate3dSound
 import SoundUtils
 import StandardTextTags
 import TerrainUtils
@@ -73,7 +74,7 @@ class Faceroll
         this.vel = ZERO2.polarOffset(angle_, ANIMATION_PERIOD * TUMBLE_DISTANCE / DURATION)
         this.duration = 0.
 
-        CAST_SOUND.playOnPoint(caster.getPos3Real())
+        bindSoundToUnit(CAST_SOUND.play().snd, this.caster, 10, 1500, 2000)
 
         if size == 1
             doPeriodically(ANIMATION_PERIOD) cb ->

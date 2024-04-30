@@ -2,12 +2,7 @@
 
 ## Road to beta (0.1.x)
 
-57. [ ] third set of custom heroes
-  - [ ] Headhunter
-    * [x] Momentus (unit + point target skillshot with damage scaling with range)
-    * [ ] Bloodlust (every third attack on the same target bonus when activated, maybe something like vayne E)
-    * [x] Tumble (vayne dash, reset, bonus damage)
-    * [ ] Berzerker (Avatar, bonus health, life steal, life regeneration, bonus attack speed)
+57. [x] third set of custom heroes
 82. [x] sharing items should not be allowed
 88. [x] no control over leavers
 110. [x] knockback against hover unit completely breaks everything
@@ -21,6 +16,7 @@
 103. [ ] clarity, equtiy, or removal of wc3 melee heroes
 104. [ ] in-game communication of more design principals, especially the carry/caster/tank roles
 105. [ ] more stats for nerds
+106. [ ] ? better hero selection experience
 
 ## Backlog
 

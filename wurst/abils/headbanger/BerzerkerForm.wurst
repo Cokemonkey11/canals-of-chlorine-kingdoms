@@ -1,0 +1,127 @@
+package BerzerkerForm
+
+import Abilities
+import BuffIds
+import ClosureEvents
+import ClosureTimers
+import DamageEvent
+import HashMap
+import InstantDummyCaster
+import OrderIds
+import Reference
+import SoundUtils
+import UnitIds
+
+import AbilityTooltipGenerator
+
+import HeroGlow
+
+
+tuple unit_and_count(unit which, int count)
+
+public constant ID_BERZERKER_FORM = compiletime(ABIL_ID_GEN.next())
+
+constant ID_BONUS_HEALTH_REGEN = compiletime(ABIL_ID_GEN.next())
+
+constant ID_BLOODLUST = compiletime(ABIL_ID_GEN.next())
+
+constant MANA_COST = 80
+
+constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 60. - 10 * lvl
+
+constant HEALTH_REGENERATION = 10
+
+constant DAMAGE_REDUCTION = 10
+
+constant IntLevelClosure DURATION_FUNCTION = lvl -> 4 + 4 * lvl
+
+constant BLOODLUST_COUNTS = new HashMap<unit, Reference<unit_and_count>>()
+
+constant BLOODLUST_SOUND = new SoundDefinition(Sounds.bloodlustTarget)
+
+constant BLOODLUST_DURATION = 5.
+
+
+@compiletime function gen()
+    new AbilityDefinitionRegenLife(ID_BONUS_HEALTH_REGEN)
+    ..presetHitPointsRegeneratedPerSecond((int lvl) -> HEALTH_REGENERATION)
+
+    new AbilityDefinitionBloodlust(ID_BLOODLUST)
+    ..presetAttackSpeedIncrease((int lvl) -> 0.4)
+    ..presetMovementSpeedIncrease((int lvl) -> 0.25)
+    ..presetScalingFactor((int lvl) -> 0.)
+    ..presetBuffs(lvl -> commaList(BuffIds.bloodlust))
+    ..presetCastRange(lvl -> 92083)
+    ..presetManaCost((int lvl) -> 0)
+    ..presetCooldown((int lvl) -> 0.)
+    ..presetDurationHero((int lvl) -> BLOODLUST_DURATION)
+    ..setArtTarget("")
+    ..setTargetAttachmentPoint1("")
+    ..setTargetAttachmentPoint2("")
+    ..setTargetAttachments(0)
+
+
+    let tgen = new AbilityTooltipGenerator(
+        Targettype.NONE,
+        "Takes the form of a Berzerker, granting significant health regeneration and damage reduction. "
+        + "While in Berzerker form, attacking the same target 3 times in succession grants Bloodlust."
+    )
+    new ChannelAbilityPreset(ID_BERZERKER_FORM, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(3, 2)
+    ..presetButtonPosResearch(3, 0)
+    ..presetHotkey("R")
+    ..presetIcon(Icons.bTNHeadHunterBerserker)
+    ..setLevelSkipRequirement(2)
+    ..setRequiredLevel(6)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetManaCost(_ -> MANA_COST)
+    ..setName("Berzerker Form")
+    ..presetCooldown(COOLDOWN_FUNCTION)
+    ..addTooltipProperty("Bonus Health Regeneration", lvl -> HEALTH_REGENERATION)
+    ..addTooltipProperty("Damage Reduction (%)", lvl -> DAMAGE_REDUCTION)
+    ..addTooltipProperty("Duration", DURATION_FUNCTION)
+    ..tooltipStopListen()
+
+
+init
+    EventListener.onCast(ID_BERZERKER_FORM) caster ->
+        flashEffect(Abilities.monsoonBoltTarget, caster.getPos())
+        BlzSetUnitSkin(caster, UnitIds.berserker)
+        caster..addAbility(ID_BONUS_HEALTH_REGEN)..removeAbility(ID_HERO_GLOW)..addAbility(ID_HERO_GLOW)..makeAbilityPermanent(ID_HERO_GLOW, true)
+
+        doAfter(DURATION_FUNCTION.run(caster.getAbilityLevel(ID_BERZERKER_FORM)).toReal()) ->
+            BlzSetUnitSkin(caster, UnitIds.headhunter)
+            caster..removeAbility(ID_BONUS_HEALTH_REGEN)..removeAbility(ID_HERO_GLOW)..addAbility(ID_HERO_GLOW)..makeAbilityPermanent(ID_HERO_GLOW, true)..setScale(1.)..removeAbility(BuffIds.bloodlust)
+            flashEffect(Abilities.feralspirittarget, caster.getPos())
+
+    DamageEvent.addListener(0) ->
+        let target = DamageEvent.getTarget()
+        let source = DamageEvent.getSource()
+
+        if target.getAbilityLevel(ID_BONUS_HEALTH_REGEN) > 0
+            DamageEvent.setAmount(DamageEvent.getAmount() * ((100. - DAMAGE_REDUCTION) / 100))
+
+        if source.getAbilityLevel(ID_BONUS_HEALTH_REGEN) > 0 and DamageEvent.getType() == DamageType.ATTACK
+            if not BLOODLUST_COUNTS.has(source)
+                BLOODLUST_COUNTS.put(source, new Reference(unit_and_count(target, 0)))
+
+            let curr = BLOODLUST_COUNTS.get(source)
+            if curr.val.which == target
+                curr.val = unit_and_count(target, curr.val.count + 1)
+            else
+                curr.val = unit_and_count(target, 1)
+
+            if curr.val.count % 3 == 0
+                InstantDummyCaster.castTarget(source.getOwner(), ID_BLOODLUST, 1, OrderIds.bloodlust, source)
+                BLOODLUST_SOUND.playOnPoint(source.getPos3Real())
+                source.setScale(1.3)
+
+                let fx1 = addEffect(Abilities.bloodLustTarget, source, "hand,left")
+                let fx2 = addEffect(Abilities.bloodLustSpecial, source, "hand,right")
+
+                doAfter(BLOODLUST_DURATION) ->
+                    fx1.destr()
+                    fx2.destr()
