@@ -4,17 +4,18 @@
 
 101. [ ] assist gold
 102. [ ] 4th set of custom heroes
-103. [ ] ! clarity, equtiy, or removal of wc3 melee heroes
+103. [ ] !! clarity, equtiy, or removal of wc3 melee heroes
 104. [ ] in-game communication of more design principals, especially the carry/caster/tank roles
 105. [ ] more stats for nerds
-106. [ ] ? better hero selection experience
-111. [ ] lane creeps aggro is too annoying, make them disengage when hero is not aggro to enemy hero
+106. [x] better hero selection experience
+111. [ ] ! lane creeps aggro is too annoying, make them disengage when hero is not aggro to enemy hero
 121. [ ] flash-disjoinint charged blast does not seem to work - I got stunned
 123. [ ] stackttrace with dark binding
 125. [ ] flash doesn't go through wall
 126. [ ] you can flash while rooted by entagle animation
 127. [ ] void annihilator ult is too strong, maybe cooldown just too short
 128. [ ] creeps should re-aggro to creeps when attacking heroes that are not being aggressive
+135. [ ] tauren seppuku sike is overpowered at level 3
 
 ## Road to GA (1.0)
 
@@ -27,10 +28,8 @@
 119. [ ] naga hotkey collision
 120. [ ] mongo seems weak with W cast animation
 124. [x] dark binding collision too small
-
 128. [ ] wallbang can target allied units
 129. [ ] ? headbanger is underpowered
-130. [ ] give shade longer vision radius
 132. [ ] use phoenix egg for the asset for cockatiel shard
 133. [ ] visibility should be higher for momentus
 

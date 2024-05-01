@@ -19,9 +19,10 @@ init
     forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
         if u.getTypeId() == UnitIds.peasant
             let cop = ReplaceUnitBJ(u, UnitIds.circleofpower, bj_UNIT_STATE_METHOD_DEFAULTS)
-            ..whenCloseStatic() close ->
+            ..whenCloseStatic(100.) close ->
                 close.setPos(mortarPos)
                 close.getOwner().panCameraToTimed(mortarPos, 0.)
                 close.issueImmediateOrder("stop")
 
-            staticTextTag("Wc3 Melee heroes (beginner)", cop.getPos())
+            staticTextTag("Warcraft 3 Melee Heroes", cop.getPos() + vec2(-220., 32.))
+            staticTextTag("(For Beginners)", cop.getPos() + vec2(-130., -32.))..setColor(COLOR_GOLD)

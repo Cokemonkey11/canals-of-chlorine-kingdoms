@@ -33,7 +33,7 @@ init
             staticTextTag(ctrCopy == 0 ? "str" : (ctrCopy == 1 ? "int" : "agi"), u.getPos())
             let pos = ctrCopy == 0 ? priestPos : (ctrCopy == 1 ? sorceressPos : spellBreakerPos)
             ReplaceUnitBJ(u, UnitIds.circleofpower, bj_UNIT_STATE_METHOD_DEFAULTS)
-            ..whenCloseStatic() close ->
+            ..whenCloseStatic(100.) close ->
                 close.setPos(pos)
                 close.getOwner().panCameraToTimed(pos, 0.)
                 close.issueImmediateOrder("stop")

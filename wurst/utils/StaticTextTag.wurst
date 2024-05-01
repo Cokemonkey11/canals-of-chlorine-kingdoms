@@ -8,4 +8,4 @@ public function staticTextTag(string text, vec2 pos) returns texttag
     ..setText(text)
     ..setPermanent(true)
     ..setVelocity(ZERO2)
-    ..setPos(pos.withZ(0.))
+    ..setPos(pos.withTerrainZ())

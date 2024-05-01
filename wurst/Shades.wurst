@@ -1,21 +1,42 @@
 package Shades
 
-import AbilityIds
-import ObjectIds
-import ObjectIdGenerator
+import ClosureEvents
 import UnitIds
-import UnitObjEditing
+
+import AbilityTooltipGenerator
+
+import ChooseHero
 
 
 public constant ID_SHADE = compiletime(UNIT_ID_GEN.next())
 
+constant ID_CHOOSE = compiletime(ABIL_ID_GEN.next())
+
 
 @compiletime function genShade()
+    new ChannelAbilityPreset(ID_CHOOSE, 1, true)
+    ..setHeroAbility(false)
+    ..presetTargetTypes(Targettype.UNIT)
+    ..presetManaCost((int lvl) -> 0)
+    ..presetCooldown((int lvl) -> 1.)
+    ..presetTooltipNormalExtended((int lvl) -> "Select a hero to play with. You cannot re-pick. Get close to a hero for more information before you choose.")
+    ..presetTooltipNormal(lvl -> "Select Hero")
+    ..presetIcon(Icons.bTNSelectHeroOn)
+    ..presetButtonPosNormal(0, 2)
+    ..presetTargetsAllowed((int lvl) -> commaList("neutral,hero"))
+    ..presetCastRange((int lvl) -> 256.)
+    ..presetHotkey("Q")
+
     new UnitDefinition(ID_SHADE, UnitIds.shade)
-    ..setNormalAbilities(commaList(AbilityIds.ghost))
+    ..setNormalAbilities(commaList(AbilityIds.ghost, ID_CHOOSE))
+    ..setSightRadiusDay(2000)
+    ..setSightRadiusNight(2000)
 
 
 init
     for i = 2 to 9
         if players[i].isIngame()
             createUnit(players[i], ID_SHADE, players[i].getStartLocation())
+
+    EventListener.onCast(ID_CHOOSE) caster ->
+        onSelectionStatic(caster, EventData.getSpellTargetUnit())

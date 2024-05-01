@@ -27,7 +27,6 @@ import Headbanger
 import MolotovCockatiel
 import Mongo
 import NightHowler
-import Shades
 import Sorcerer
 import SpaceCadet
 import SteelElemental
@@ -98,52 +97,93 @@ constant CUSTOM_HERO_ID_MAP = new HashMap<int, int>()
 ..put(UnitIds.gargoylemorphed, ID_TAUREN_GLADIATOR)
 
 
-init
-    UnitUnitAction whenCloseStaticFn = (close, source) ->
-        let where = forceWest.containsPlayer(close.getOwner()) ? players[0].getStartLocation() : players[1].getStartLocation()
-        close.setPos(where)
-        close.getOwner().panCameraToTimed(where, 0.)
-        close.getOwner().updateBoardIcon(source.getIcon())
+constant HERO_INFO = new HashMap<int, string>()
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.paladin), "Obnoxious hero, can cast divine shield.")
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.mountainking), "Overpowered hero, can permastun.")
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.cryptlord), "Tanky hero, can stun multiple targets in a line.")
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.pitlord), "Tanky hero, can cast howl of terror.")
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.archmage), "Pushing hero, can teleport across the map.")
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.farseer), "Beginner-friendly hero, can cast chain lightning to farm.")
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.keeperofthegrove), "Unlikely hero, only really has one useful ability.")
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.seawitch), "Supportive hero, can slow enemies with frost arrows.")
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.priestessofthemoon), "Scouty hero, can summon an owl scout.")
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.darkranger), "Disruptive hero, can cast silence.")
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.shadowhunter), "Reggae hero, can cast hex.")
+..put(CLASSIC_HERO_ID_MAP.get(UnitIds.firelord), "Fire hero, can fire.")
 
-        if close.getTypeId() != ID_SHADE
-            Log.warn(close.getName() + " tried to pick a hero")
+..put(ID_SPACE_CADET, "Ranged carry, can cast divine shield. Abilities mostly augment basic attack.")
+..put(ID_NIGHT_HOWLER, "Ranged carry, can instagib low-health targets.")
+..put(ID_HEADBANGER, "Ranged carry, can throw long-ranged spears.")
 
-        let hero = ReplaceUnitBJ(close, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)
-        ..onRevivable() which ->
-            let owner = which.getOwner()
-            let reviveDuration = (1. + which.getLevel()).seconds()
-            let reviveWhen = reviveDuration.fromNow()
-            printTimedToPlayer("You'll be revived in " + (reviveDuration.seconds.toInt()).toString() + " seconds.", 10., owner)
+..put(ID_STEEL_ELEMENTAL, "Bursty tank, can dash and multi-stomp.")
+..put(ID_TAUREN_GLADIATOR, "Bruiser tank, can leap and stun starting at level 1.")
+..put(ID_MONGO, "Supportive tank, can hook enemies.")
+
+..put(ID_SORCERER, "Scaling caster, can multi-cast with abilities that deal scaling damage.")
+..put(ID_MOLOTOV_COCKATIEL, "Agile caster, can dash and retreat with some setup.")
+..put(ID_VOID_ANNIHILATOR, "Supportive caster, can teleport and lock down enemies with a skillshot.")
+
+
+function unit.printInfoForPlayer(player forWhom)
+    if not HERO_INFO.has(this.getTypeId())
+        Log.warn("Tried to query info about " + this.getName())
+        return
+
+    let message = this.getName().color(COLOR_GOLD) + ": " + HERO_INFO.get(this.getTypeId())
+
+    printTimedToPlayerClear(message, 30., forWhom)
+
+
+public function onSelectionStatic(unit chooser, unit source)
+    let where = forceWest.containsPlayer(chooser.getOwner()) ? players[0].getStartLocation() : players[1].getStartLocation()
+    chooser.setPos(where)
+    chooser.getOwner().panCameraToTimed(where, 0.)
+    chooser.getOwner().updateBoardIcon(source.getIcon())
+
+    if localPlayer == chooser.getOwner()
+        ClearTextMessages()
+
+    let hero = ReplaceUnitBJ(chooser, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)
+    ..onRevivable() which ->
+        let owner = which.getOwner()
+        let reviveDuration = (1. + which.getLevel()).seconds()
+        let reviveWhen = reviveDuration.fromNow()
+        printTimedToPlayer("You'll be revived in " + (reviveDuration.seconds.toInt()).toString() + " seconds.", 10., owner)
+        owner.updateReviveInCell(reviveWhen)
+        doPeriodicallyTimed(1., reviveDuration.seconds + 1.) cb ->
             owner.updateReviveInCell(reviveWhen)
-            doPeriodicallyTimed(1., reviveDuration.seconds + 1.) cb ->
-                owner.updateReviveInCell(reviveWhen)
-            doAfter(reviveDuration.seconds) ->
-                if owner.isIngame() and which.getTypeId() != 0
-                    which.revive(where, true)
-                    owner.panCameraToTimed(where, 0.)
-                    which.setInvulnerable(true)
-                    doAfter(3.) ->
-                        which.setInvulnerable(false)
+        doAfter(reviveDuration.seconds) ->
+            if owner.isIngame() and which.getTypeId() != 0
+                which.revive(where, true)
+                owner.panCameraToTimed(where, 0.)
+                which.setInvulnerable(true)
+                doAfter(3.) ->
+                    which.setInvulnerable(false)
 
-        player_heroes.put(hero.getOwner(), hero)
-        hero.setProperName(hero.getOwner().getName(true))
-        all_heroes.add(hero)
+    player_heroes.put(hero.getOwner(), hero)
+    hero.setProperName(hero.getOwner().getName(true))
+    all_heroes.add(hero)
 
-        hero..addItemById(ID_STARTER_CIRCLET)..addAbility(ID_RECALL)..addAbility(ID_FLASH)..makeAbilityPermanent(ID_RECALL, true)..makeAbilityPermanent(ID_FLASH, true)
-        if hero_sounds.has(hero.getTypeId())
-            hero_sounds.get(hero.getTypeId()).playForPlayer(hero.getOwner())
+    hero..addItemById(ID_STARTER_CIRCLET)..addAbility(ID_RECALL)..addAbility(ID_FLASH)..makeAbilityPermanent(ID_RECALL, true)..makeAbilityPermanent(ID_FLASH, true)
+    if hero_sounds.has(hero.getTypeId())
+        hero_sounds.get(hero.getTypeId()).playForPlayer(hero.getOwner())
+
+
+init
+    UnitUnitAction whenCloseStaticFn = (unit close, unit source) ->
+        source.printInfoForPlayer(close.getOwner())
 
     forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
         if u.isType(UNIT_TYPE_HERO)
             if CLASSIC_HERO_ID_MAP.has(u.getTypeId())
                 ReplaceUnitBJ(u, CLASSIC_HERO_ID_MAP.get(u.getTypeId()), bj_UNIT_STATE_METHOD_DEFAULTS)
-                ..whenCloseStatic(whenCloseStaticFn)
+                ..whenCloseStatic(150., whenCloseStaticFn)
             else
                 nullTimer() ->
                     error("Encountered a hero that isn't initialized" + u.getTypeId().toRawCode())
         else if CUSTOM_HERO_ID_MAP.has(u.getTypeId())
             ReplaceUnitBJ(u, CUSTOM_HERO_ID_MAP.get(u.getTypeId()), bj_UNIT_STATE_METHOD_DEFAULTS)
-            ..whenCloseStatic(whenCloseStaticFn)
+            ..whenCloseStatic(150., whenCloseStaticFn)
 
     EventListener.onCast(ID_CLICK_STARTER_CIRCLET) caster ->
         let dBox = new DialogBox("Choose your starter item")
