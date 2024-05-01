@@ -15,8 +15,8 @@ import CodeDamage
 
 public constant ID_CLUSTER_OF_ROCKETS = compiletime(ABIL_ID_GEN.next())
 
-constant IntLevelClosure DAMAGE_FUNCTION = lvl -> 25 * lvl
-constant IntLevelClosure DURATION_FUNCTION = lvl -> 7 + lvl
+constant IntLevelClosure DAMAGE_FUNCTION = lvl -> 35 * lvl
+constant IntLevelClosure DURATION_FUNCTION = lvl -> 8 + lvl
 
 constant RADIUS = 128.
 
@@ -35,9 +35,9 @@ constant RADIUS = 128.
 
     ..tooltipStartListen()
     ..presetTargetTypes(Targettype.NONE)
-    ..presetManaCost(_ -> 75)
+    ..presetManaCost(_ -> 50)
     ..setName("Cluster of Rockets")
-    ..presetCooldown(lvl -> 15. - (1. * lvl))
+    ..presetCooldown(lvl -> 13. - (1. * lvl))
     ..addTooltipProperty("Rocket Count", (int lvl) -> 3.)
     ..addTooltipProperty("Damage (per rocket)", DAMAGE_FUNCTION)
     ..addTooltipProperty("Duration", DURATION_FUNCTION)

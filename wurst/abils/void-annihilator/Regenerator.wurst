@@ -4,6 +4,7 @@ import Abilities
 import ClosureEvents
 import ClosureTimers
 import LinkedListModule
+import Simulate3dSound
 import SoundUtils
 
 import AbilityTooltipGenerator
@@ -63,7 +64,7 @@ class Regenerator
         this.fx1 = addEffect(Abilities.manaDrainCaster, caster.getPos())
         this.fx2 = null
 
-        CAST_SOUND.playOnPoint(this.caster.getPos3Real()).snd.setVolume(127)
+        bindSoundToUnit(CAST_SOUND.play().snd, this.caster, 200, 2000, 2000)
 
         if size == 1
             doPeriodically(ANIMATION_PERIOD) cb ->
@@ -92,7 +93,7 @@ class Regenerator
                 this.caster.addHP(this.healthPerSecond * ANIMATION_PERIOD)
 
                 if this.fx2 == null
-                    UPGRADE_SOUND.playOnPoint(this.caster.getPos3Real()).snd.setVolume(127)
+                    bindSoundToUnit(UPGRADE_SOUND.play().snd, this.caster, 200, 2000, 2000)
                     this.healthPerSecond = caster.getMaxHP() * 0.01
                     this.fx2 = addEffect(Abilities.manaDrainTarget, caster.getPos())..setZ(50.)
 

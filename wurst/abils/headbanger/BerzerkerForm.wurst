@@ -120,7 +120,7 @@ init
                 source.setScale(1.3)
 
                 let fx1 = addEffect(Abilities.bloodLustTarget, source, "hand,left")
-                let fx2 = addEffect(Abilities.bloodLustSpecial, source, "hand,right")
+                let fx2 = addEffect(Abilities.bloodLustTarget, source, "hand,right")
 
                 doAfter(BLOODLUST_DURATION) ->
                     fx1.destr()

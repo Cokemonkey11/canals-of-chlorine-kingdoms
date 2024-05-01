@@ -12,7 +12,7 @@ import VoidAnnihilator
 import CodeDamage
 
 
-constant COLLISION_SIZE_PROJECTILE = 64.
+constant COLLISION_SIZE_PROJECTILE = 80.
 
 constant MISSILE_SPEED = 700.
 

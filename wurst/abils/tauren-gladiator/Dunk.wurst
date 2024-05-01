@@ -66,7 +66,7 @@ class Dunk
 
     construct(unit caster, vec2 target)
         let lvl = caster.getAbilityLevel(ID_DUNK)
-        bindSoundToPoint(WARNING_SOUND.play().snd, caster.getX(), caster.getY(), 100., 2000., 2500.)
+        bindSoundToPoint(WARNING_SOUND.play().snd, caster.getX(), caster.getY(), 50., 1500., 2000.)
         this.caster = caster
         this.target = target
         this.damage = DAMAGE_FUNCTION.run(lvl).toReal()
