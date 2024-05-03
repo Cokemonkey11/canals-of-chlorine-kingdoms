@@ -38,6 +38,22 @@ public function player.getLastPlayerAttackerSince(instant cutoff) returns maybe_
     return maybe_player(best_player_val, best_player_val != players[PLAYER_NEUTRAL_PASSIVE])
 
 
+function player.forEachPotentialAssist(IMItrClosure<player, instant> closure)
+    ASSIST_TIMESTAMPS.get(this).forEach(closure)
+
+
+public interface Supplier<T>
+    function run(T t)
+
+
+public function player.forEachAssist(player killer, duration threshold, Supplier<player> closure)
+    this.forEachPotentialAssist() (player key, instant value) ->
+        if key != killer and key.isEnemyOf(this) and value.isOlderThan(threshold.ago())
+            closure.run(key)
+
+    destroy closure
+
+
 init
     DamageEvent.addListener(2) ->
         let attacker = DamageEvent.getSource()

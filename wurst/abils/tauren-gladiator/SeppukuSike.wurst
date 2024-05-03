@@ -13,7 +13,7 @@ import AbilityTooltipGenerator
 
 public constant ID_SEPPUKU_SIKE = compiletime(ABIL_ID_GEN.next())
 
-constant RealLevelClosure CHANNEL_DURATION_FUNCTION = lvl -> 1.6 - .5 * lvl
+constant RealLevelClosure CHANNEL_DURATION_FUNCTION = lvl -> 2. - .5 * lvl
 constant IntLevelClosure MANA_FUNCTION = lvl -> 150 - 50 * lvl
 constant IntLevelClosure LIFE_RESTORE_PCT_FUNCTION = lvl -> 55 + 15 * lvl
 constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 70. - 10 * lvl

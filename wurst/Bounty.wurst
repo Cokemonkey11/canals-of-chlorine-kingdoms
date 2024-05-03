@@ -26,6 +26,7 @@ constant bounties = new HashMap<int, int>()
 ..put(UnitIds.spiritwolf3, 1)
 
 constant HERO_BOUNTY = 10
+constant HERO_ASSIST_BOUNTY = 5
 
 constant TOWER_BOUNTY = 10
 
@@ -73,12 +74,18 @@ init
             if dying_unit.isType(UNIT_TYPE_HERO)
                 if player_heroes.has(dying_player)
                     dying_player.addDeath()
+
                 if dying_player.isEnemyOf(killing_player)
                     if player_heroes.has(killing_player)
                         killing_player.addKill()
                         killing_player.addGold(HERO_BOUNTY)
                         createGoldBountyTextTag(dying_unit, HERO_BOUNTY, killing_player)
                         killing_unit.notifyKilledTarget(dying_unit)
+
+                        dying_player.forEachAssist(killing_player, 8..seconds()) (player tt) ->
+                            tt.addAssist()
+                            tt.addGold(HERO_ASSIST_BOUNTY)
+                            createGoldBountyTextTag(dying_unit, HERO_ASSIST_BOUNTY, tt)
                     else
                         let bestAssist = dying_player.getLastPlayerAttackerSince(ASSIST_CUTOFF.ago())
                         if bestAssist.has
@@ -86,6 +93,11 @@ init
                             bestAssist.who.addGold(HERO_BOUNTY)
                             createGoldBountyTextTag(dying_unit, HERO_BOUNTY, bestAssist.who)
                             player_heroes.get(bestAssist.who).notifyKilledTarget(dying_unit)
+
+                            dying_player.forEachAssist(bestAssist.who, 8..seconds()) (player tt) ->
+                                tt.addAssist()
+                                tt.addGold(HERO_ASSIST_BOUNTY)
+                                createGoldBountyTextTag(dying_unit, HERO_ASSIST_BOUNTY, tt)
                         else
                             killing_unit.notifyKilledTarget(dying_unit)
                 else

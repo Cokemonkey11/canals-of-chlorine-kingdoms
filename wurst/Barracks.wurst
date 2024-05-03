@@ -3,7 +3,9 @@ package Barracks
 import ClosureTimers
 import ClosureForGroups
 import LinkedList
+import TerrainUtils
 import UnitIds
+
 import Creeps
 import Teams
 
@@ -57,9 +59,11 @@ init
     ..addAction() ->
         let tu = GetEnteringUnit()
         if tu.getOwner() == players[0] and tu.getPos().x > 0.
-            tu.issuePointOrder("attack", players[1].getStartLocation())
+            let pos = players[1].getStartLocation()
+            tu..updateCreepTarget(pos.getTile())..issuePointOrder("attack", pos)
         else if tu.getOwner() == players[1] and tu.getPos().x < 0.
-            tu.issuePointOrder("attack", players[0].getStartLocation())
+            let pos = players[0].getStartLocation()
+            tu..updateCreepTarget(pos.getTile())..issuePointOrder("attack", pos)
 
     doAfter(30) ->
         doPeriodically(30., (_cb) -> begin
@@ -69,16 +73,24 @@ init
                     rax.spawnCaptain = true
 
                 if rax.spawnCaptain
-                    createUnit(rax.owner, ID_CAPTAIN, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
+                    createUnit(rax.owner, ID_CAPTAIN, rax.spawnPos)
+                        ..updateCreepTarget(rax.targetPos.getTile())
+                        ..issuePointOrder("attack", rax.targetPos)
 
                 doPeriodicallyCounted(0.5, 3) (CallbackCounted cb) ->
-                    createUnit(rax.owner, ID_FOOTMAN, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
+                    createUnit(rax.owner, ID_FOOTMAN, rax.spawnPos)
+                        ..updateCreepTarget(rax.targetPos.getTile())
+                        ..issuePointOrder("attack", rax.targetPos)
 
                 doAfter(3 * 0.5) ->
                     doPeriodicallyCounted(0.5, 3) (CallbackCounted cb) ->
-                        createUnit(rax.owner, ID_ARCHER, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
+                        createUnit(rax.owner, ID_ARCHER, rax.spawnPos)
+                            ..updateCreepTarget(rax.targetPos.getTile())
+                            ..issuePointOrder("attack", rax.targetPos)
 
                 if typOrNull != 0
                     doAfter(7 * 0.5) ->
-                        createUnit(rax.owner, typOrNull, rax.spawnPos)..issuePointOrder("attack", rax.targetPos)
+                        createUnit(rax.owner, typOrNull, rax.spawnPos)
+                            ..updateCreepTarget(rax.targetPos.getTile())
+                            ..issuePointOrder("attack", rax.targetPos)
         end)

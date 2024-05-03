@@ -5,6 +5,7 @@ import ClosureEvents
 import ClosureForGroups
 import ClosureTimers
 import LinkedListModule
+import Reference
 import SoundUtils
 
 import VoidAnnihilator
@@ -40,8 +41,9 @@ class BlackBinding
         else
             this.fx.setPos(this.fx.getPos() + this.vel)
 
+            let hit = new Reference(false)
             forUnitsInRange(this.fx.getPos(), COLLISION_SIZE_PROJECTILE) u ->
-                if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE)
+                if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE) and not hit.val
                     this.caster.dealCodeDamage(u, damageFn(this.caster.getAbilityLevel(ID_BLACK_BINDING)))
 
                     // Playing a sound twice seems to make it louder.
@@ -56,7 +58,10 @@ class BlackBinding
                         u..setMoveSpeed(u.getDefaultMovespeed())..setPropWindow(u.getDefaultPropWindow())
                         fx..setTimeScale(1.)..destr()
 
-                    destroy this
+                    hit.val = true
+
+            if hit.into()
+                destroy this
 
     construct(unit caster, vec2 target)
         let angl = caster.getPos().angleTo(target)

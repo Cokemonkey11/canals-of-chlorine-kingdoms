@@ -32,13 +32,17 @@ public function unit.getLastSmart() returns vec2
 
 function unit.incrDisjointState()
     if FLASH_DISJOINTS.has(this)
-        FLASH_DISJOINTS.put(this, FLASH_DISJOINTS.get(this))
+        FLASH_DISJOINTS.put(this, FLASH_DISJOINTS.get(this) + 1)
     else
-        FLASH_DISJOINTS.put(this, 0)
+        FLASH_DISJOINTS.put(this, 1)
 
 
 @compiletime function gen()
-    let tgen2 = new AbilityTooltipGenerator("Blinks a short distance in the direction of the " + "last".color(color(170, 0, 0)) + " |cff919191right-click.|r")
+    let tgen2 = new AbilityTooltipGenerator(
+        "Blinks a short distance in the direction of the "
+        + "last".color(color(170, 0, 0))
+        + " |cff919191right-click.|r"
+    )
     new AbilityDefinitionWindWalk(ID_FLASH)
     ..registerTooltipGenerator(tgen2)
     ..setIconNormal(Icons.bTNBearBlink)

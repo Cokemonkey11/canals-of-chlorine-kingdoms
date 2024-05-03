@@ -1,0 +1,114 @@
+package Quests
+
+import ClosureTimers
+import Icons
+import Quest
+
+
+init
+    new Quest(true)
+    ..setTitle("How to win")
+    ..setIcon(Icons.bTNHumanCaptureFlag)
+    ..setDescription(
+        "If you're reading this, you might have a rough game. MOBAs (also known as AoS) have been around for a long time and have a steep learning curve. \n"
+        + " \n"
+        + "Not to worry -- the game only takes about 20-30 minutes, so if you don't win this time, you can play again soon. \n"
+        + " \n"
+        + "To win the game, be the first team to destroy the opposing team's " + "castle".color(COLOR_GOLD) + ", in the heart of their base. "
+        + "The castle is invulnerable until at least one arcane sanctum is destroyed. "
+        + "With an arcane sanctum destroyed, your lane will spawn an additional creep, providing gentle pushing power and awarding no bounty to the opposing team. \n"
+        + " \n"
+        + "The team that obtains the most " + "gold".color(COLOR_GOLD) + " will have a significant advantage. "
+        + "Obtain gold by killing the automatically spawning creeps, killing enemy heroes, killing enemy towers, and by assisting in kills obtained by your allies."
+    )
+
+    new Quest(true)
+    ..setTitle("Items")
+    ..setIcon(Icons.bTNChestOfGold)
+    ..setDescription(
+        "There are only two kinds of items in Canals of Chlorine Kingdoms. \n"
+        + " \n"
+        + "Starter".color(COLOR_GOLD) + " items can only be obtained once (by clicking on your Starter Circlet). "
+        + "These items have minor effects but can affect your playstyle throughout the game. \n"
+        + " \n"
+        + "Expensive".color(COLOR_GOLD) + " items all cost 100 gold. "
+        + "With no gold pooling or item sharing, these items provide a significant power spike and can often cause a snowball effect for whichever team gets an item first. \n"
+        + " \n"
+        + "This puts significant emphasis on " + "last-hitting".color(COLOR_GOLD) + ". "
+        + "Also note the significant value in killing towers -- " + "10".color(COLOR_GOLD) + " gold for " + "each".color(COLOR_GOLD) + " player on a team."
+    )
+
+    new Quest(true)
+    ..setTitle("Roles")
+    ..setIcon(Icons.bTNSupportBeam)
+    ..setDescription(
+        "As a matter of design, all of the heroes in Canals of Chlorine Kingdoms fit into one of three roles: \n"
+        + "\n-".color(COLOR_GOLD) + " Casters are ranged supportive heroes that are good at farming, pushing, and augmenting a carry's ability to win fights."
+        + "\n-".color(COLOR_GOLD) + " Tanks are melee supportive heroes that are good at disrupting, tanking damage, and challenging a carry's ability to focus their damage."
+        + "\n-".color(COLOR_GOLD) + " Carries are fragile ranged heroes that have the highest damage potential. \n"
+        + " \n"
+        + "Unlike other MOBAs, all heroes fit into one of these three descriptions. "
+        + "There are no melee carries, there are no assassins, there is no invisibility, and there are no casters designed to carry. \n"
+        + " \n"
+        + "As a matter of design, the intent is to enable " + "the most skilled carry".color(COLOR_GOLD) + " to always have the potential to wipe out the opposing team. "
+        + "In practice, that is a difficult design goal to achieve, so inevitably this is a heavily team-focused game."
+    )
+
+    new Quest(false)
+    ..setTitle("Power-leveling chamber")
+    ..setIcon(Icons.bTNBookOfSummoning)
+    ..setDescription(
+        "After " + "9 minutes".color(COLOR_GOLD) + " of game time, the power-leveling chamber in the north of the map is enabled. \n"
+        + " \n"
+        + "Heroes which stand in the power-leveling chamber will be granted experience up until a level cap. \n"
+        + " \n"
+        + "The experience rate is 36/second and the cap is determined by the highest-level player at the point that the chamber turns on. "
+        + "For example, if the highest level player is level 6, the chamber is enabled at level 9. "
+        + "This grants all players a guaranteed way to reach level 9 if they can control the power-leveling chamber area."
+    )
+
+    new Quest(false)
+    ..setTitle("Common values/data")
+    ..setIcon(Icons.bTNTome)
+    ..setDescription(
+        "- Maximum level".color(COLOR_GOLD) + ": 12 \n"
+        + "- Experience per creep".color(COLOR_GOLD) + ": 24 (shared uniformly by players in the area) \n"
+        + "- Experience radius ".color(COLOR_GOLD) + ": 1500 \n"
+        + "- Hero bounty".color(COLOR_GOLD) + ": 10 gold\n"
+        + "- Hero assist bounty".color(COLOR_GOLD) + ": 5 gold\n"
+        + "- Creep bounty".color(COLOR_GOLD) + ": 1 gold\n"
+        + "- Tower bounty".color(COLOR_GOLD) + ": 10 gold (awarded to all players) \n"
+        + "- Power-leveling chamber enabled".color(COLOR_GOLD) + ": 9 minutes \n"
+        + "- Power-leveling chamber exp rate ".color(COLOR_GOLD) + ": 36/sec \n"
+        + "- Power-leveling chamber max level".color(COLOR_GOLD) + ": Highest level player + 3 \n"
+        + " \n"
+        + "- Damage per primary attribute".color(COLOR_GOLD) + ": 1 \n"
+        + "- Regen per str".color(COLOR_GOLD) + ": 0.05 \n"
+        + "- HP per str".color(COLOR_GOLD) + ": 20 \n"
+        + "- Attack speed per agi".color(COLOR_GOLD) + ": 0.02 \n"
+        + "- Defense base".color(COLOR_GOLD) + ": 0.0 \n"
+        + "- Defense per agi".color(COLOR_GOLD) + ": 0.00001 \n"
+        + "- Movespeed per agi".color(COLOR_GOLD) + ": 0.1 \n"
+        + "- Mana per int".color(COLOR_GOLD) + ": 20 \n"
+        + "- Mana regen per int".color(COLOR_GOLD) + ": 0.1 \n"
+    )
+
+    new Quest(false)
+    ..setTitle("Community")
+    ..setIcon(Icons.bTNMarketPlace)
+    ..setDescription(
+        "Join our battle-net community of play-testers to discuss Canals of Chlorine Kingdoms and for play-test notifications: \n"
+        + " \n"
+        + "https://blizzard.com/invite/wWMvEyMCZnV".color(COLOR_GOLD)
+        + " \n"
+        + " \n"
+        + "Join the wurstlang chat to discuss map development: \n"
+        + "\n"
+        + "https://wurstlang.org".color(COLOR_GOLD)
+    )
+
+    nullTimer() ->
+        BlzFrameClick(BlzGetFrameByName("UpperButtonBarQuestsButton", 0))
+        BlzFrameClick(BlzGetFrameByName("QuestAcceptButton", 0))
+        BlzFrameSetSize(BlzGetFrameByName("QuestItemListContainer", 0), 0.01, 0.01)
+        BlzFrameSetSize(BlzGetFrameByName("QuestItemListScrollBar", 0), 0.001, 0.001)

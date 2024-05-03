@@ -131,7 +131,7 @@ class Phoenix
         let phoenixHeadPos = this.fx.getPos3().polarProject(100., this.ang, 70..asAngleDegrees())
         if this.timeBlasting > 0.5 and not this.timeBlasting > AOE_DURATION - 1.
             new TempLightning(
-                phoenixHeadPos, targ.polarOffset(2. * angle(2 * PI) / this.timeBlasting, 50.).withTerrainZ(), 0.5, LIGHTNING_FORKED_LIGHTNING
+                phoenixHeadPos, targ.polarOffset(2. * angle(2 * PI) / this.timeBlasting, 50.).withTerrainZ(), 0.5, LIGHTNING_FINGER_OF_DEATH
             )
 
             let snd = DAMAGE_SOUND.play()

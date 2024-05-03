@@ -1,9 +1,7 @@
 package ChooseHero
 
 import ClosureEvents
-import ClosureForGroups
 import DialogBox
-import ErrorHandling
 import HashMap
 import ItemIds
 import ItemObjEditing
@@ -12,7 +10,6 @@ import Time
 import UnitIds
 
 import Castles
-import ClassicHeroes
 import ClosureTimers
 import Recall
 import Teams
@@ -38,8 +35,10 @@ constant ID_STARTER_CIRCLET = compiletime(ITEM_ID_GEN.next())
 
 constant ID_CLICK_STARTER_CIRCLET = compiletime(ABIL_ID_GEN.next())
 
+constant ID_CIRCLE = compiletime(UNIT_ID_GEN.next())
 
-@compiletime function genStarterCirclet()
+
+@compiletime function gen()
     new AbilityDefinitionItemHealAoe(ID_CLICK_STARTER_CIRCLET)
     ..presetHitPointsGained((int lvl) -> 0)
     ..setArtTarget("")
@@ -56,24 +55,14 @@ constant ID_CLICK_STARTER_CIRCLET = compiletime(ABIL_ID_GEN.next())
     ..setTooltipExtended("Click this item to transform it into a better one.".color(COLOR_GOLD))
     ..setActivelyUsed(true)
 
+    new BuildingDefinition(ID_CIRCLE, UnitIds.circleofpower)
+    ..setPathingMap("")
+
 
 public constant player_heroes = new HashMap<player, unit>()
 public constant all_heroes = CreateGroup()
 
 public constant hero_sounds = new HashMap<int, SoundDefinition>()
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.paladin), new SoundDefinition(Sounds.heroPaladinPissed5))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.mountainking), new SoundDefinition(Sounds.heroMountainKingPissed7))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.cryptlord), new SoundDefinition(Sounds.cryptFiendPissed7))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.pitlord), new SoundDefinition(Sounds.pitLordYesAttack3))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.archmage), new SoundDefinition(Sounds.heroArchmagePissed4))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.farseer), new SoundDefinition(Sounds.heroFarseerPissed5))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.keeperofthegrove), new SoundDefinition(Sounds.keeperOfTheGrovePissed6))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.seawitch), new SoundDefinition(Sounds.ladyVashjPissed5))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.priestessofthemoon), new SoundDefinition(Sounds.heroMoonPriestessPissed6))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.darkranger), new SoundDefinition(Sounds.darkRangerPissed4))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.shadowhunter), new SoundDefinition(Sounds.shadowHunterPissed9))
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.firelord), new SoundDefinition(Sounds.heroFirelordPissed11))
-
 ..put(ID_SPACE_CADET, new SoundDefinition(Sounds.peasantPissed5))
 ..put(ID_STEEL_ELEMENTAL, new SoundDefinition(Sounds.rockGolemPissed2))
 ..put(ID_VOID_ANNIHILATOR, new SoundDefinition(Sounds.acolytePissed8))
@@ -85,32 +74,22 @@ public constant hero_sounds = new HashMap<int, SoundDefinition>()
 ..put(ID_TAUREN_GLADIATOR, new SoundDefinition(Sounds.heroTaurenChieftainPissed6))
 
 
-constant CUSTOM_HERO_ID_MAP = new HashMap<int, int>()
-..put(UnitIds.sentryward, ID_STEEL_ELEMENTAL)
-..put(UnitIds.stasistraptotem, ID_VOID_ANNIHILATOR)
-..put(UnitIds.healingward, ID_SPACE_CADET)
-..put(UnitIds.carrionscarab1, ID_MONGO)
-..put(UnitIds.skeletalmage, ID_SORCERER)
-..put(UnitIds.skeletonwarrior, ID_NIGHT_HOWLER)
-..put(UnitIds.bandit, ID_HEADBANGER)
-..put(UnitIds.faeriedragon, ID_MOLOTOV_COCKATIEL)
-..put(UnitIds.gargoylemorphed, ID_TAUREN_GLADIATOR)
+constant CUSTOM_HERO_ID_MAP = new IterableMap<int, int>()
+..put(ID_SPACE_CADET, 0)
+..put(ID_NIGHT_HOWLER, 0)
+..put(ID_HEADBANGER, 0)
 
+..put(ID_STEEL_ELEMENTAL, 1)
+..put(ID_TAUREN_GLADIATOR, 1)
+..put(ID_MONGO, 1)
+
+..put(ID_VOID_ANNIHILATOR, 2)
+..put(ID_SORCERER, 2)
+..put(ID_MOLOTOV_COCKATIEL, 2)
+
+constant tmpOffsetsBuffer = [0..asAngleDegrees(), 0..asAngleDegrees(), 0..asAngleDegrees()]
 
 constant HERO_INFO = new HashMap<int, string>()
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.paladin), "Obnoxious hero, can cast divine shield.")
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.mountainking), "Overpowered hero, can permastun.")
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.cryptlord), "Tanky hero, can stun multiple targets in a line.")
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.pitlord), "Tanky hero, can cast howl of terror.")
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.archmage), "Pushing hero, can teleport across the map.")
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.farseer), "Beginner-friendly hero, can cast chain lightning to farm.")
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.keeperofthegrove), "Unlikely hero, only really has one useful ability.")
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.seawitch), "Supportive hero, can slow enemies with frost arrows.")
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.priestessofthemoon), "Scouty hero, can summon an owl scout.")
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.darkranger), "Disruptive hero, can cast silence.")
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.shadowhunter), "Reggae hero, can cast hex.")
-..put(CLASSIC_HERO_ID_MAP.get(UnitIds.firelord), "Fire hero, can fire.")
-
 ..put(ID_SPACE_CADET, "Ranged carry, can cast divine shield. Abilities mostly augment basic attack.")
 ..put(ID_NIGHT_HOWLER, "Ranged carry, can instagib low-health targets.")
 ..put(ID_HEADBANGER, "Ranged carry, can throw long-ranged spears.")
@@ -146,9 +125,9 @@ public function onSelectionStatic(unit chooser, unit source)
     let hero = ReplaceUnitBJ(chooser, source.getTypeId(), bj_UNIT_STATE_METHOD_DEFAULTS)
     ..onRevivable() which ->
         let owner = which.getOwner()
-        let reviveDuration = (1. + which.getLevel()).seconds()
+        let reviveDuration = (2. + which.getLevel()).seconds()
         let reviveWhen = reviveDuration.fromNow()
-        printTimedToPlayer("You'll be revived in " + (reviveDuration.seconds.toInt()).toString() + " seconds.", 10., owner)
+        printTimedToPlayer("You'll be revived in " + (reviveDuration.seconds.toInt()).toString() + " seconds.", reviveDuration.seconds, owner)
         owner.updateReviveInCell(reviveWhen)
         doPeriodicallyTimed(1., reviveDuration.seconds + 1.) cb ->
             owner.updateReviveInCell(reviveWhen)
@@ -173,17 +152,17 @@ init
     UnitUnitAction whenCloseStaticFn = (unit close, unit source) ->
         source.printInfoForPlayer(close.getOwner())
 
-    forUnitsOfPlayer(players[PLAYER_NEUTRAL_PASSIVE]) (unit u) ->
-        if u.isType(UNIT_TYPE_HERO)
-            if CLASSIC_HERO_ID_MAP.has(u.getTypeId())
-                ReplaceUnitBJ(u, CLASSIC_HERO_ID_MAP.get(u.getTypeId()), bj_UNIT_STATE_METHOD_DEFAULTS)
-                ..whenCloseStatic(150., whenCloseStaticFn)
-            else
-                nullTimer() ->
-                    error("Encountered a hero that isn't initialized" + u.getTypeId().toRawCode())
-        else if CUSTOM_HERO_ID_MAP.has(u.getTypeId())
-            ReplaceUnitBJ(u, CUSTOM_HERO_ID_MAP.get(u.getTypeId()), bj_UNIT_STATE_METHOD_DEFAULTS)
-            ..whenCloseStatic(150., whenCloseStaticFn)
+    CUSTOM_HERO_ID_MAP.forEach() (integer heroTypeId, integer roleIndex) ->
+        let offsets = tmpOffsetsBuffer[roleIndex]
+        tmpOffsetsBuffer[roleIndex] = offsets + 20..asAngleDegrees()
+
+        let angle_ = 0..asAngleDegrees() + (360..asAngleDegrees() / 3) * roleIndex.toReal() + offsets
+        let pos = players[2].getStartLocation().polarOffset(angle_, 128. * 5.)
+        let innerPos = players[2].getStartLocation().polarOffset(angle_, 128. * 4.)
+        let xx = createUnit(players[PLAYER_NEUTRAL_PASSIVE], heroTypeId, pos, pos.angleTo(players[2].getStartLocation()))
+        createUnit(players[PLAYER_NEUTRAL_PASSIVE], ID_CIRCLE, innerPos, innerPos.angleTo(players[2].getStartLocation()))
+        ..setXY(innerPos)
+        ..whenCloseStatic(150., (unit close, unit source) -> whenCloseStaticFn.run(close, xx))
 
     EventListener.onCast(ID_CLICK_STARTER_CIRCLET) caster ->
         let dBox = new DialogBox("Choose your starter item")

@@ -78,12 +78,14 @@ class Momentus
     vec2 target
     unit dummy
     effect fx
+    effect fx2
 
     construct(unit caster, vec2 target)
         this.caster = caster
         this.target = target
         this.dummy = DummyRecycler.get(caster.getPos(), 0..asAngleDegrees())..setFlyHeight(50., 0.)
-        this.fx = addEffect(Abilities.huntermissile, this.caster.getPos())..setYaw(this.caster.getPos().angleTo(target))..setColorByPlayer(caster.getOwner())
+        this.fx = addEffect(Abilities.huntermissile, this.caster.getPos())..setYaw(this.caster.getPos().angleTo(target))..setColorByPlayer(caster.getOwner())..setScale(1.1)
+        this.fx2 = addEffect("GeneralHeroGlow.mdl", this.dummy, "origin")..setColorByPlayer(caster.getOwner())
 
         nullTimer() ->
             caster.setAnimation(UnitAnimations.Headhunter.attackRange.idx)
@@ -102,6 +104,7 @@ class Momentus
 
     ondestroy
         this.fx.destr()
+        this.fx2.destr()
         DummyRecycler.recycle(this.dummy)
         Knockback3.forget(this.dummy)
 

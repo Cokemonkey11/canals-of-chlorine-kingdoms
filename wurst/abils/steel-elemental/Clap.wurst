@@ -54,5 +54,5 @@ init
         createCriticalStrikeTextTag(caster, damage.toInt())
 
         forUnitsInRange(caster.getPos(), AOE) u ->
-            if u.isEnemyOf(caster) and u.isAlive() and not u.isInvulnerable()
+            if u.isEnemyOf(caster) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE)
                 caster.dealCodeDamage(u, damage)

@@ -74,7 +74,7 @@ class Dunk
         this.caster.pause()
         this.caster..setAnimation(UnitAnimations.HeroTaurenChieftain.attackSlam.idx)..setTimeScale(0.5)
 
-        // TODO: the groundSpeed seems to be inverted. Higher ground speed actually results in higher... air speed?
+        // Upstream: the groundSpeed seems to be inverted. Higher ground speed actually results in higher... air speed?
         Knockback3.add(caster, target, caster.getPos().distanceTo(target) * 2.)
 
         if size == 1

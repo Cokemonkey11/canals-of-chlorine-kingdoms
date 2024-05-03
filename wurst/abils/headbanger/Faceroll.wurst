@@ -99,7 +99,7 @@ class Faceroll
             let waterOffset = this.caster.getPos().isTerrainShallowWater() ? -32. : 0.
             let ang0 = 90..asAngleDegrees()
             let ang1 = ang0 + (2 * PI).asAngleRadians()
-            let faceOffset = 70. * ZERO2.polarOffset(this.angle_, Cos(ang0.radians()..lerp(ang1.radians(), this.duration / DURATION))) // WIP
+            let faceOffset = 70. * ZERO2.polarOffset(this.angle_, Cos(ang0.radians()..lerp(ang1.radians(), this.duration / DURATION)))
             this.fx.setPos(newPos.withRealZ(this.caster) + vec3(faceOffset.x, faceOffset.y, 70. * heightOffset + waterOffset))
 
         let ang = (0..lerp(2 * PI, this.duration / DURATION)).asAngleRadians()

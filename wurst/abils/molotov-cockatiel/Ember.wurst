@@ -1,6 +1,5 @@
 package Ember
 
-import Abilities
 import ClosureEvents
 import ClosureTimers
 import DamageEvent
@@ -9,6 +8,7 @@ import LinkedListModule
 import OrderIds
 import SoundUtils
 import TerrainUtils
+import Units
 import Time
 
 import AbilityTooltipGenerator
@@ -34,7 +34,9 @@ constant DURATION = 30
 
 @compiletime function gen()
     let tgen = new AbilityTooltipGenerator(
-        "Passively, causes attacks to occasionally leave behind a glowing ember. Actively, leaves a glowing ember near the caster. Glowing embers can be right-clicked to dash to them."
+        "Passively, causes attacks to occasionally leave behind a glowing ember. "
+        + "Actively, leaves a glowing ember near the caster. "
+        + "Glowing embers can be right-clicked to dash to them."
     )
     new AbilityDefinitionBerserk(ID_EMBER)
     ..setHeroAbility(true)
@@ -73,7 +75,7 @@ class Ember
     construct(unit caster, vec2 pos)
         this.caster = caster
         this.pos = pos
-        this.fx = addEffect(Abilities.lavaSpawnMissile, pos.withTerrainZ(20.))..setAlpha(155)..setTimeScale(0.25)..setPitch(90..asAngleDegrees().radians)
+        this.fx = addEffect(Units.phoenixEgg, pos.withTerrainZ(10.))..setAlpha(155)..setTimeScale(0.25)
         this.locked = false
         this.callbackInvoked = false
 

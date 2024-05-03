@@ -14,7 +14,7 @@ import Wallbang
 public constant ID_HEADBANGER = compiletime(HERO_ID_GEN.next())
 
 
-@compiletime function genSpaceCadet()
+@compiletime function gen()
     new HeroDefinition(ID_HEADBANGER, UnitIds.darkranger)
     ..setName("Headbanger")
     ..setProperNames(commaList("Jamaica", "Britney Spear", "Wurst"))
@@ -24,6 +24,7 @@ public constant ID_HEADBANGER = compiletime(HERO_ID_GEN.next())
     ..setAttack1DamageSidesperDie(1)
     ..setAttack1ProjectileArt(Abilities.huntermissile)
     ..setModelFile(Units.headhunter1)
+    ..setAttack1AnimationDamagePoint(.5)
     ..setNormalAbilities(commaList(AbilityIds.inventory, ID_HERO_GLOW))
     ..setUnitSoundSet(Soundsets.headHunter)
     ..setHeroAbilities(commaList(ID_MOMENTUS, ID_FACEROLL, ID_WALLBANG, ID_BERZERKER_FORM))

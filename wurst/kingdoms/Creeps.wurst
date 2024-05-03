@@ -1,8 +1,15 @@
 package Creeps
 
+import DamageEvent
+import HashMap
 import ObjectIdGenerator
+import OrderIds
+import TerrainUtils
+import Time
 import UnitIds
 import UnitObjEditing
+
+import HeroAggro
 
 
 public constant ID_CAPTAIN = compiletime(UNIT_ID_GEN.next())
@@ -68,3 +75,29 @@ constant COLLISION_SIZE = 16.
     ..setHitPointsMaximumBase(1000)
     ..setArmorType(ArmorType.Fortified)
     ..setUpgradesUsed("")
+
+
+constant CREEP_TARGETS = new HashMap<unit, tile>()
+
+
+function unit.isCreep() returns bool
+    let id = this.getTypeId()
+
+    return id == ID_CAPTAIN or id == ID_FOOTMAN or id == ID_ARCHER or id == ID_MORTAR_TEAM
+
+
+public function unit.updateCreepTarget(tile pos)
+    CREEP_TARGETS.put(this, pos)
+
+
+function unit.tryReaquireCreepPath()
+    this..issueImmediateOrderById(OrderIds.stunned)..issuePointOrder("attack", CREEP_TARGETS.get(this).toVec2())
+
+
+init
+    DamageEvent.addListener(2) ->
+        let source = DamageEvent.getSource()
+        let target = DamageEvent.getTarget()
+
+        if target.isType(UNIT_TYPE_HERO) and source.isCreep() and target.isAggressiveHero(4..seconds())
+            source.tryReaquireCreepPath()

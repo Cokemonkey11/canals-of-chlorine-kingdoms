@@ -1,0 +1,21 @@
+package HeroAggro
+
+import DamageEvent
+import HashMap
+import Time
+
+
+constant HERO_AGGRESSIONS = new HashMap<unit, instant>()
+
+
+public function unit.isAggressiveHero(duration cutoff) returns bool
+    return HERO_AGGRESSIONS.has(this) and HERO_AGGRESSIONS.get(this).isNewerThan(cutoff.ago())
+
+
+init
+    DamageEvent.addListener(0) ->
+        let source = DamageEvent.getSource()
+        let target = DamageEvent.getTarget()
+
+        if source.isType(UNIT_TYPE_HERO) and target.isType(UNIT_TYPE_HERO)
+            HERO_AGGRESSIONS.put(source, instantNow())

@@ -9,7 +9,7 @@ import Time
 import Teams
 
 
-public constant BOARD = new Board("Stats", 0.26)
+public constant BOARD = new Board("Stats", 0.3016)
 
 public constant PLAYER_CELLS = new HashMap<player, NamedDynamicCells>()
 
@@ -17,28 +17,36 @@ public constant PLAYER_CELLS = new HashMap<player, NamedDynamicCells>()
 class NamedDynamicCells
     DynamicCellValue<string> nameCell
     DynamicCellValue<int> killsCell
+    DynamicCellValue<int> assistsCell
     DynamicCellValue<int> deathsCell
     DynamicCellValue<int> creepScoreCell
     DynamicCellValue<instant> reviveInCell
 
     int kills
+    int assists
     int deaths
     int creepScore
 
     construct(player pl)
         this.nameCell = dynamicCell<string>(pl.getNameColored(true), ss -> ss)
         this.killsCell = dynamicCell<int>(0, ii -> ii.toString())
+        this.assistsCell = dynamicCell<int>(0, ii -> ii.toString())
         this.deathsCell = dynamicCell<int>(0, ii -> ii.toString())
         this.creepScoreCell = dynamicCell<int>(0, ii -> ii.toString())
         this.reviveInCell = dynamicCell<instant>(instant(-60.), ii -> ii.isInTheFuture() ? (ii.durationUntil().seconds + 1).toInt().toString() : " ")
 
         this.kills = 0
+        this.assists = 0
         this.deaths = 0
         this.creepScore = 0
 
     function addKill()
         this.kills += 1
         this.killsCell.updateValue(this.kills)
+
+    function addAssist()
+        this.assists += 1
+        this.assistsCell.updateValue(this.assists)
 
     function addDeath()
         this.deaths += 1
@@ -54,7 +62,7 @@ class NamedDynamicCells
 
 function addRowForPlayer(player pl)
     let playerCells = PLAYER_CELLS.get(pl)
-    BOARD.addRow()..addDynamic(playerCells.nameCell)..addDynamic(playerCells.killsCell)..addDynamic(playerCells.deathsCell)..addDynamic(playerCells.creepScoreCell)..addDynamic(playerCells.reviveInCell)
+    BOARD.addRow()..addDynamic(playerCells.nameCell)..addDynamic(playerCells.killsCell)..addDynamic(playerCells.assistsCell)..addDynamic(playerCells.deathsCell)..addDynamic(playerCells.creepScoreCell)..addDynamic(playerCells.reviveInCell)
 
 
 public function player.updateBoardName(string st)
@@ -67,6 +75,10 @@ public function player.updateBoardIcon(string icon)
 
 public function player.addKill()
     PLAYER_CELLS.get(this).addKill()
+
+
+public function player.addAssist()
+    PLAYER_CELLS.get(this).addAssist()
 
 
 public function player.addDeath()
@@ -84,14 +96,15 @@ public function player.updateReviveInCell(instant when)
 init
     nullTimer() ->
         BOARD.getBoard().setTitle(" ")
-        BOARD.columns(asList(new BoardColumn(" ", 0.4), new BoardColumn("Kills", 0.16), new BoardColumn("Deaths", 0.17), new BoardColumn("Creeps", 0.22), new BoardColumn(" ", 0.05)))
+        // https://chat.openai.com/share/6e425352-b7b3-4430-a346-9e2c94c9c728
+        BOARD.columns(asList(new BoardColumn(" ", 0.3448), new BoardColumn("Kills", 0.1379), new BoardColumn("Assists", 0.1379), new BoardColumn("Deaths", 0.1466), new BoardColumn("Creeps", 0.1897), new BoardColumn(" ", 0.0431)))
 
         for pl in forceWest
             if pl.isIngame()
                 PLAYER_CELLS.put(pl, new NamedDynamicCells(pl))
                 addRowForPlayer(pl)
 
-        BOARD.addRow()..addCell(" ")..addCell(" ")..addCell(" ")..addCell(" ")..addCell(" ")
+        BOARD.addRow()..addCell(" ")..addCell(" ")..addCell(" ")..addCell(" ")..addCell(" ")..addCell(" ")
 
         for pl in forceEast
             if pl.isIngame()
