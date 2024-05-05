@@ -3,6 +3,8 @@ package ItemOwners
 import ClosureEvents
 import HashMap
 
+import Events
+
 
 constant ITEM_MAP = new HashMap<item, player>()
 
@@ -16,3 +18,4 @@ init
             uu.dropItemPoint(item_, item_.getPos())
         else
             ITEM_MAP.put(item_, uu.getOwner())
+            uu.getOwner().eventItem(item_)

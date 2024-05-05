@@ -3,6 +3,7 @@ package Leaver
 import ClosureEvents
 
 import ChooseHero
+import Events
 import GameBoard
 
 
@@ -10,6 +11,8 @@ init
     EventListener.add(EVENT_PLAYER_LEAVE) ->
         let pl = EventData.getTriggerPlayer()
         Log.info(pl.getNameColored(true) + " has left the game (sadge)")
+
+        pl.eventLeave()
 
         let name = pl.getName(true)
         let nameFragment = name.length() > 9 ? name.substring(0, 5) + "..." : name

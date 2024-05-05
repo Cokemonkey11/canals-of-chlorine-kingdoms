@@ -119,7 +119,7 @@ class Momentus
             let lvl = this.caster.getAbilityLevel(ID_MOMENTUS)
             let baseDamage = BASE_DAMAGE_FUNCTION.run(lvl)
             let damage = baseDamage.toReal().lerp(
-                baseDamage * (1. + DAMAGE_RANGE_BONUS_FUNCTION.run(lvl)),
+                baseDamage * (DAMAGE_RANGE_BONUS_FUNCTION.run(lvl)),
                 this.caster.getPos().distanceTo(this.target) / MAX_RANGE
             )
             forUnitsInRange(this.target, DAMAGE_AOE.toReal()) u ->

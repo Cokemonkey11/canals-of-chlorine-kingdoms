@@ -2,8 +2,10 @@ package GameBoard
 
 import Board
 import ClosureTimers
+import Events
 import HashMap
 import LinkedList
+import ObjectIds
 import Time
 
 import Teams
@@ -11,7 +13,7 @@ import Teams
 
 public constant BOARD = new Board("Stats", 0.3016)
 
-public constant PLAYER_CELLS = new HashMap<player, NamedDynamicCells>()
+public constant PLAYER_CELLS = new IterableMap<player, NamedDynamicCells>()
 
 
 class NamedDynamicCells
@@ -93,6 +95,18 @@ public function player.updateReviveInCell(instant when)
     PLAYER_CELLS.get(this).updateReviveInCell(when)
 
 
+public function getStatSnapshot() returns string
+    let cumu = new LinkedList<string>()
+    PLAYER_CELLS.forEach() (player key, NamedDynamicCells value) ->
+        cumu.add("p" + key.getId().toString())
+        cumu.add(value.kills.toString())
+        cumu.add(value.assists.toString())
+        cumu.add(value.deaths.toString())
+        cumu.add(value.creepScore.toString())
+
+    return commaList(cumu)
+
+
 init
     nullTimer() ->
         BOARD.getBoard().setTitle(" ")
@@ -119,3 +133,6 @@ init
             ? "Game Start in " + duration(-theTime.durationSince().seconds).displayVerbose()
             : theTime.durationSince().displayVerbose()
         BOARD.getBoard().setTitle(text)
+
+    doPeriodically(60.) (CallbackPeriodic cb) ->
+        localPlayer.eventStatSnapshot(getStatSnapshot())

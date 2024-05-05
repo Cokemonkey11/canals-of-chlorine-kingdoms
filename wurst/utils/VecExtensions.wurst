@@ -1,0 +1,9 @@
+package VecExtensions
+
+
+var loc = Location(0., 0.)
+
+
+public function vec2.isVisibileToPlayer(player pl) returns bool
+    MoveLocation(loc, this.x, this.y)
+    return IsLocationVisibleToPlayer(loc, pl)

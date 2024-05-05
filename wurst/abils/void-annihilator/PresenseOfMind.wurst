@@ -13,7 +13,7 @@ constant ID_PRESENSE_OF_MIND_DASH = compiletime(ABIL_ID_GEN.next())
 constant IntLevelClosure MANA_COST_FUNCTION = lvl -> 110 - 10 * lvl
 
 constant RealLevelClosure CAST_RANGE_FUNCTION = lvl -> 500. * lvl
-constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 35. - 5 * lvl
+constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 55. - 5 * lvl
 
 
 @compiletime function gen()

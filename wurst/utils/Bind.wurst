@@ -1,0 +1,25 @@
+package Bind
+
+import Abilities
+import ClosureTimers
+import HashSet
+
+
+constant BIND_MAP = new HashSet<unit>()
+
+
+/**
+    TOOD: make multi-instanceable.
+ */
+public function unit.bind(real duration)
+    let fx = addEffect(Abilities.roots1, this, "origin")..setScale(0.8)..setTimeScale(3.)
+    this..setMoveSpeed(0.)..setPropWindow(angle(0.))
+    BIND_MAP.add(this)
+    doAfter(duration) ->
+        fx.destr()
+        this..setMoveSpeed(this.getDefaultMovespeed())..setPropWindow(this.getDefaultPropWindow())
+        BIND_MAP.remove(this)
+
+
+public function unit.isBinded() returns bool
+    return BIND_MAP.has(this)

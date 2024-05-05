@@ -14,6 +14,7 @@ import AbilityTooltipGenerator
 
 import CodeDamage
 import Stun
+import VecExtensions
 
 
 public constant ID_DUNK = compiletime(ABIL_ID_GEN.next())
@@ -122,15 +123,14 @@ class Dunk
             destroy this
 
 
-var loc = Location(0., 0.)
+
 
 init
     EventListener.onCast(ID_DUNK) caster ->
         let target = EventData.getAbilityTargetPos()
         let lvl = caster.getAbilityLevel(ID_DUNK)
 
-        MoveLocation(loc, target.x, target.y)
-        if IsLocationVisibleToPlayer(loc, caster.getOwner())
+        if target.isVisibileToPlayer(caster.getOwner())
             new Dunk(caster, target)
         else
             ERROR_SOUND.playForPlayer(caster.getOwner())

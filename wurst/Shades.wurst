@@ -6,6 +6,7 @@ import UnitIds
 import AbilityTooltipGenerator
 
 import ChooseHero
+import Events
 
 
 public constant ID_SHADE = compiletime(UNIT_ID_GEN.next())
@@ -37,6 +38,7 @@ init
     for i = 2 to 9
         if players[i].isIngame()
             createUnit(players[i], ID_SHADE, players[i].getStartLocation())
+            players[i]..eventIdentify()
 
     EventListener.onCast(ID_CHOOSE) caster ->
         onSelectionStatic(caster, EventData.getSpellTargetUnit())

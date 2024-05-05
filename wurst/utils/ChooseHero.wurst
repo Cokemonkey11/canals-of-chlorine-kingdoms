@@ -18,6 +18,7 @@ import WhenRevivable
 
 import AbilityTooltipGenerator
 
+import Events
 import Flash
 import GameBoard
 import Headbanger
@@ -143,6 +144,8 @@ public function onSelectionStatic(unit chooser, unit source)
     hero.setProperName(hero.getOwner().getName(true))
     all_heroes.add(hero)
 
+    chooser.getOwner()..eventChooseHero(hero)
+
     hero..addItemById(ID_STARTER_CIRCLET)..addAbility(ID_RECALL)..addAbility(ID_FLASH)..makeAbilityPermanent(ID_RECALL, true)..makeAbilityPermanent(ID_FLASH, true)
     if hero_sounds.has(hero.getTypeId())
         hero_sounds.get(hero.getTypeId()).playForPlayer(hero.getOwner())
@@ -161,8 +164,8 @@ init
         let innerPos = players[2].getStartLocation().polarOffset(angle_, 128. * 4.)
         let xx = createUnit(players[PLAYER_NEUTRAL_PASSIVE], heroTypeId, pos, pos.angleTo(players[2].getStartLocation()))
         createUnit(players[PLAYER_NEUTRAL_PASSIVE], ID_CIRCLE, innerPos, innerPos.angleTo(players[2].getStartLocation()))
-        ..setXY(innerPos)
-        ..whenCloseStatic(150., (unit close, unit source) -> whenCloseStaticFn.run(close, xx))
+            ..setXY(innerPos)
+            ..whenCloseStatic(150., (unit close, unit source) -> whenCloseStaticFn.run(close, xx))
 
     EventListener.onCast(ID_CLICK_STARTER_CIRCLET) caster ->
         let dBox = new DialogBox("Choose your starter item")

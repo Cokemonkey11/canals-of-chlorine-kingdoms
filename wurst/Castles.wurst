@@ -11,6 +11,9 @@ import ObjectIds
 import ObjectIdGenerator
 import UnitIds
 
+import Damage
+import Events
+import GameBoard
 import Teams
 
 
@@ -51,7 +54,7 @@ constant ID_NATURAL_FORCE = compiletime(ITEM_ID_GEN.next()) // 1000 HP, 10 armor
 public constant ID_EXASPERATION_SPELL_SHIELD = 'ANss'
 public constant EXASPERATION_SPELL_SHIELD_COOLDOWN = 40.
 
-unit array castles
+public unit array castles
 
 
 class BaseItem extends ItemDefinition
@@ -205,6 +208,11 @@ init
             let dyingUnitOwnerId = GetDyingUnit().getOwner().getId()
             print("The game ended after " + instantNow().displayVerbose())
             PauseGame(true)
+
+            players[1 - dyingUnitOwnerId]..eventTeamWin()
+            localPlayer..eventDamageSnapshot(getDamageSnapshot())
+            localPlayer..eventStatSnapshot(getStatSnapshot())
+            localPlayer..eventDump()
 
             doAfter(10.) ->
                 if dyingUnitOwnerId == 0

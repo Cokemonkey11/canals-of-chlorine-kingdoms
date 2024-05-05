@@ -1,0 +1,57 @@
+package WriteOnlyFileIo
+
+import public ChunkedString
+import ErrorHandling
+import SafetyChecks
+
+
+constant GENERATED_PRELOAD_CALL_TERMINATOR = "\")\n//"
+
+
+public class WriteOnlyFile
+    string filename
+
+    construct(string filename)
+        this.filename = filename.endsWith(".pld") ? filename : filename + ".pld"
+
+    function write(player p, string content)
+        let buffer = new ChunkedString()
+        buffer.append(content)
+        write(p, buffer)
+        destroy buffer
+
+    function write(player p, ChunkedString buffer)
+        if SAFETY_CHECKS_ENABLED
+            for i = 0 to buffer.getChunkCount() - 1
+                let str = buffer.getChunk(i)
+                if validateInput(str) != null
+                    error("FileIO(" + filename + ") ERROR: Invalid character |cffffcc00" + validateInput(str) + "|r")
+
+        writePreload(p, buffer)
+
+    function close()
+        destroy this
+
+    private function writePreload(player p, ChunkedString buffer)
+        if localPlayer == p
+            PreloadGenClear()
+            PreloadGenStart()
+
+            for i = 0 to buffer.getChunkCount() - 1
+                let chunk = buffer.getChunk(i)
+                Preload(
+                    GENERATED_PRELOAD_CALL_TERMINATOR
+                    + chunk
+                )
+
+            // Removed the endfunction because preload-file is write-only.
+
+            PreloadGenEnd(this.filename)
+
+    private static function validateInput(string content) returns string
+        for char in content
+            if (char == "\\")
+                return char
+            else if (char == "\"")
+                return char
+        return null

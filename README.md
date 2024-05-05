@@ -7,14 +7,11 @@
   - [ ] ! Centaur Worldbender - Controllable Rain of Fire, Non-channeling Volcano, Non-channeling earthquake, Telekensis multi-click unit throwing
   - [ ] Breast Master - Summon Breast (11-item spellbook), TLC grants bonus armor and regeneration, Growth grants permanent bonus damage to a friendly unit, Permanence makes a creep permanent
   - [ ] Frost Elemental - Slow Projectile Speed, In-Flight missiles have purge effect, siege tank barrage temporarily, super AS boost while stationary
-103. [x] !! clarity, equtiy, or removal of wc3 melee heroes
 104. [x] in-game communication of more design principals, especially the carry/caster/tank roles
 105. [ ] more stats for nerds
 121. [x] flash-disjoint charged blast does not seem to work - I got stunned
 123. [x] stackttrace with black binding
-125. [ ] flash doesn't go through wall
-126. [ ] you can flash while rooted by entagle animation of black binding
-127. [ ] void annihilator ult is too strong, maybe the cooldown is just too low
+127. [x] void annihilator ult is too strong, maybe the cooldown is just too low
 135. [x] tauren seppuku sike is overpowered at level 3
 136. [ ] thw submission template
 

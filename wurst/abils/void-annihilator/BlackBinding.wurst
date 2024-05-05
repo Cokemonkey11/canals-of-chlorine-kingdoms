@@ -10,6 +10,7 @@ import SoundUtils
 
 import VoidAnnihilator
 
+import Bind
 import CodeDamage
 
 
@@ -43,19 +44,24 @@ class BlackBinding
 
             let hit = new Reference(false)
             forUnitsInRange(this.fx.getPos(), COLLISION_SIZE_PROJECTILE) u ->
-                if u.isEnemyOf(this.caster) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE) and not hit.val
+                if (
+                    u.isEnemyOf(this.caster)
+                    and u.isAlive()
+                    and not u.isInvulnerable()
+                    and not u.isType(UNIT_TYPE_STRUCTURE)
+                    and not hit.val
+                )
                     this.caster.dealCodeDamage(u, damageFn(this.caster.getAbilityLevel(ID_BLACK_BINDING)))
 
                     // Playing a sound twice seems to make it louder.
                     HIT_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
                     HIT_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
-                    flashEffect(Abilities.roots1, u.getPos())
 
-                    u..setMoveSpeed(0.)..setPropWindow(angle(0.))
+                    u..bind(4.)
+
                     let fx = this.fx..setAlpha(127)
                     this.fx = null
                     doAfter(4.) ->
-                        u..setMoveSpeed(u.getDefaultMovespeed())..setPropWindow(u.getDefaultPropWindow())
                         fx..setTimeScale(1.)..destr()
 
                     hit.val = true
@@ -68,7 +74,11 @@ class BlackBinding
         this.caster = caster
         this.vel = ZERO2.polarOffset(angl, MISSILE_SPEED * ANIMATION_PERIOD)
         this.timeLeft = MAX_DISTANCE / MISSILE_SPEED
-        this.fx = addEffect(Abilities.carrionSwarmMissile, this.caster.getPos())..setYaw(angl)..setTime(0.15)..setTimeScale(0.)..setScale(0.8)
+        this.fx = addEffect(Abilities.carrionSwarmMissile, this.caster.getPos())
+            ..setYaw(angl)
+            ..setTime(0.15)
+            ..setTimeScale(0.)
+            ..setScale(0.8)
 
         if size == 1
             doPeriodically(ANIMATION_PERIOD) cb ->

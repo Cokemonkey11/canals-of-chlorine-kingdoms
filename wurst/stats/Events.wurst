@@ -1,0 +1,175 @@
+package Events
+
+import WriteOnlyFileIo
+import Time
+
+
+constant WORDS = [
+    "Ablaze",
+    "Brisk",
+    "Croon",
+    "Dusk",
+    "Ebb",
+    "Flit",
+    "Gleam",
+    "Hovel",
+    "Ire",
+    "Joust",
+    "Keen",
+    "Lush",
+    "Mirth",
+    "Nook",
+    "Ogle",
+    "Pith",
+    "Quirk",
+    "Ruse",
+    "Swank",
+    "Taut",
+    "Urge",
+    "Veer",
+    "Wilt",
+    "Yarn",
+    "Zeal",
+    "Amble",
+    "Bask",
+    "Chide",
+    "Dawdle",
+    "Elf",
+    "Fjord",
+    "Glib",
+    "Heft",
+    "Ink",
+    "Jinx",
+    "Knoll",
+    "Loom",
+    "Murk",
+    "Niche",
+    "Opal",
+    "Prune",
+    "Quaff",
+    "Rift",
+    "Svelte",
+    "Trove",
+    "Upend",
+    "Vex",
+    "Wisp",
+    "Yoke",
+    "Zest",
+    "Agog",
+    "Bluff",
+    "Crisp",
+    "Dank",
+    "Exude",
+    "Fleck",
+    "Grime",
+    "Husk",
+    "Imp",
+    "Jaunt",
+    "Knead",
+    "Lilt",
+    "Molt",
+    "Nudge",
+    "Oust",
+    "Pluck",
+    "Quell",
+    "Roost",
+    "Scry",
+    "Twine",
+    "Unfurl",
+    "Vie",
+    "Warp",
+    "Yelp",
+    "Zephyr",
+    "Arch",
+    "Bile",
+    "Churn",
+    "Droit",
+    "Eerie",
+    "Flume",
+    "Gorge",
+    "Hive",
+    "Idol",
+    "Joust",
+    "Knack",
+    "Loam",
+    "Minx",
+    "Nexus",
+    "Opaque",
+    "Ploy",
+    "Quaint",
+    "Ravel",
+    "Shard",
+    "Tether",
+    "Umber",
+    "Vista",
+    "Wane",
+    "Yearn",
+    "Zenith"
+]
+
+
+enum EventId
+    None
+    ChooseHero
+    Identify
+    Win
+    TowerDeath
+    DamageSnapshot
+    StatSnapshot
+    PlayerLeave
+    GetItem
+
+
+constant GAME_NAME = "Chlorine/chlorine-stats-"
+    + WORDS[GetRandomInt(0, 100)]
+    + "-"
+    + WORDS[GetRandomInt(0, 100)]
+    + "-"
+    + WORDS[GetRandomInt(0, 100)]
+    + "-"
+    + GetRandomInt(100, 999).toString()
+
+constant SCHEMA_VERSION = "v0"
+
+constant serializedEvents = new ChunkedString()..append(SCHEMA_VERSION)
+
+
+function serializeEvent(EventId eventId, string context)
+    serializedEvents.append(instant(0.).durationSince().display() + (eventId castTo int).toString() + context)
+
+
+public function player.eventDump()
+    new WriteOnlyFile(GAME_NAME + "-" + this.getId().toString())..write(this, serializedEvents)..close()
+    Log.info("Game stats written to " + GAME_NAME.color(COLOR_GOLD))
+
+
+public function player.eventChooseHero(unit hero)
+    serializeEvent(EventId.ChooseHero, "p" + this.getId().toString() + "," + hero.getName())
+
+
+public function player.eventIdentify()
+    serializeEvent(EventId.Identify, "p" + this.getId().toString() + "," + this.getName(false))
+
+
+public function player.eventTowerDeath()
+    serializeEvent(EventId.TowerDeath, "p" + this.getId().toString())
+
+
+public function player.eventTeamWin()
+    serializeEvent(EventId.Win, "p" + this.getId().toString())
+
+
+public function player.eventDamageSnapshot(string snapshot)
+    serializeEvent(EventId.DamageSnapshot, snapshot)
+
+
+public function player.eventStatSnapshot(string snapshot)
+    serializeEvent(EventId.StatSnapshot, snapshot)
+
+
+public function player.eventLeave()
+    serializeEvent(EventId.PlayerLeave, "p" + this.getId().toString())
+
+
+public function player.eventItem(item item_)
+    serializeEvent(EventId.GetItem, "p" + this.getId().toString() + "," + item_.getName())

@@ -1,11 +1,16 @@
 package Flash
 
 import ClosureEvents
+import ClosureTimers
 import HashMap
 import OrderIds
+import SoundUtils
 import TerrainUtils
 
 import AbilityTooltipGenerator
+
+import Bind
+import VecExtensions
 
 
 public constant ID_FLASH = compiletime(ABIL_ID_GEN.next())
@@ -15,6 +20,8 @@ constant FLASH_DISJOINTS = new HashMap<unit, int>()
 constant lastSmarts = new HashMap<unit, tile>()
 
 constant FLASH_DISTANCE = 400.
+
+constant ERROR_SOUND = new SoundDefinition(Sounds.error)
 
 
 public function unit.getDisjointState() returns int
@@ -78,15 +85,23 @@ init
     EventListener.onCast(ID_FLASH) (unit caster) ->
         let whereTo = caster.getLastSmart()
         let casterPos = caster.getPos()
-
+        let casterPosZ = casterPos.getTerrainZ()
         let ang = casterPos.angleTo(whereTo)
-        let offsIter = ZERO2.polarOffset(ang, 16.)
 
-        var offs = 0.
-        var testPos = casterPos
-        while offs <= FLASH_DISTANCE and testPos.isTerrainWalkable()
-            testPos += offsIter
-            offs += 16.
+        if caster.isBinded()
+            ERROR_SOUND.playForPlayer(caster.getOwner())
+            nullTimer() ->
+                caster.resetAbilityCooldown(ID_FLASH)
+        else
+            var testPos = casterPos.polarOffset(ang, FLASH_DISTANCE)
+            let offsIter = ZERO2.polarOffset(ang, 16.)
+            var offs = FLASH_DISTANCE
 
-        caster.setXY(testPos)
-        caster.incrDisjointState()
+            while offs >= 0. and (not testPos.isTerrainWalkable() or not testPos.isVisibileToPlayer(caster.getOwner()) or (casterPosZ - (testPos.getTerrainZ())).abs() > 80.)
+                offs -= 16.
+                testPos -= offsIter
+
+            caster..setXY(testPos)..incrDisjointState()
+
+            if caster.getCurrentOrder() == OrderIds.smart
+                caster.issueImmediateOrderById(OrderIds.stunned)

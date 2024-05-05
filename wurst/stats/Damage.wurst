@@ -1,0 +1,85 @@
+package Damage
+
+import ClosureTimers
+import DamageEvent
+import Events
+import HashMap
+import ObjectIds
+
+constant DAMAGE = new HashMap<player, real>()
+constant HERO_DAMAGE = new HashMap<player, real>()
+
+
+public function getDamageSnapshot() returns string
+    return commaList(
+        "p0",
+        DAMAGE.get(players[0]).toInt().toString(),
+        HERO_DAMAGE.get(players[0]).toInt().toString()
+    )
+    + commaList(
+        "p1",
+        DAMAGE.get(players[1]).toInt().toString(),
+        HERO_DAMAGE.get(players[1]).toInt().toString()
+    )
+    + commaList(
+        "p2",
+        DAMAGE.get(players[2]).toInt().toString(),
+        HERO_DAMAGE.get(players[2]).toInt().toString()
+    )
+    + commaList(
+        "p3",
+        DAMAGE.get(players[3]).toInt().toString(),
+        HERO_DAMAGE.get(players[3]).toInt().toString()
+    )
+    + commaList(
+        "p4",
+        DAMAGE.get(players[4]).toInt().toString(),
+        HERO_DAMAGE.get(players[4]).toInt().toString()
+    )
+    + commaList(
+        "p5",
+        DAMAGE.get(players[5]).toInt().toString(),
+        HERO_DAMAGE.get(players[5]).toInt().toString()
+    )
+    + commaList(
+        "p6",
+        DAMAGE.get(players[6]).toInt().toString(),
+        HERO_DAMAGE.get(players[6]).toInt().toString()
+    )
+    + commaList(
+        "p7",
+        DAMAGE.get(players[7]).toInt().toString(),
+        HERO_DAMAGE.get(players[7]).toInt().toString()
+    )
+    + commaList(
+        "p8",
+        DAMAGE.get(players[8]).toInt().toString(),
+        HERO_DAMAGE.get(players[8]).toInt().toString()
+    )
+    + commaList(
+        "p9",
+        DAMAGE.get(players[9]).toInt().toString(),
+        HERO_DAMAGE.get(players[9]).toInt().toString()
+    )
+
+
+init
+    for i = 0 to 9
+        DAMAGE.put(players[i], 0.)
+        HERO_DAMAGE.put(players[i], 0.)
+
+    DamageEvent.addListener(2) ->
+        let source = DamageEvent.getSource()
+        let target = DamageEvent.getTarget()
+        let targetIsHero = target.isType(UNIT_TYPE_HERO)
+        let sourceOwner = source.getOwner()
+
+        if targetIsHero or sourceOwner.getId() > 1
+            let damage = DamageEvent.getAmount()
+            DAMAGE.put(sourceOwner, DAMAGE.get(sourceOwner) + damage)
+
+            if targetIsHero
+                HERO_DAMAGE.put(sourceOwner, HERO_DAMAGE.get(sourceOwner) + damage)
+
+    doPeriodically(30.) (CallbackPeriodic cb) ->
+        localPlayer.eventDamageSnapshot(getDamageSnapshot())

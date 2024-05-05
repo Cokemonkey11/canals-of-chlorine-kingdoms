@@ -11,6 +11,7 @@ import Barracks
 import ChooseHero
 import CodeDamage
 import Creeps
+import Events
 import GameBoard
 import KillNotifications
 import Teams
@@ -104,6 +105,8 @@ init
                     killing_unit.notifyKilledTarget(dying_unit)
 
             if dying_unit_type == ID_CANNON_TOWER
+                dying_player.eventTowerDeath()
+
                 siegeQueue.add(ID_MORTAR_TEAM)
                 for pl in dying_player.getForce().opposingForce()
                     createGoldBountyTextTag(dying_unit, TOWER_BOUNTY, pl)

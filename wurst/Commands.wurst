@@ -6,7 +6,11 @@ import UnitIds
 
 import WurstCommand
 
+import Bind
+import Castles
 import ChooseHero
+import Events
+import Flash
 import GameBoard
 import PowerLevelingChamber
 import Teams
@@ -26,6 +30,22 @@ init
             forUnitsOfPlayer(p) (unit u) ->
                 if u.isType(UNIT_TYPE_HERO)
                     u.setLevel(u.getLevel() + 1, true)
+
+        addCommand("flash") (p, _cmd, _args) ->
+            forUnitsOfPlayer(p) (unit u) ->
+                if u.isType(UNIT_TYPE_HERO)
+                    u..resetAbilityCooldown(ID_FLASH)
+
+        addCommand("bind") (p, _cmd, _args) ->
+            forUnitsOfPlayer(p) (unit u) ->
+                if u.isType(UNIT_TYPE_HERO)
+                    u..bind(4.)
+
+        addCommand("win") (p, _cmd, _args) ->
+            castles[1].kill()
+
+        addCommand("dump") (p, _cmd, _args) ->
+            p.eventDump()
 
         addCommand("enemy") (p, _cmd, _args) ->
             createUnit(players[1], UnitIds.paladin)
