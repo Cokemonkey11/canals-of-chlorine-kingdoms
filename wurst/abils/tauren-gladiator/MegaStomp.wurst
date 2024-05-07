@@ -108,7 +108,7 @@ class MegaStomp
                 if uu.isEnemyOf(this.caster) and uu.isAlive() and not uu.isType(UNIT_TYPE_STRUCTURE)
                     this.caster.dealCodeDamage(uu, this.damage)
 
-                    if uu.isInRange(casterPos, knockbackRadius) and not uu.isStunned()
+                    if uu.isInRange(casterPos, knockbackRadius) and not uu.isStunned() and not uu.getFlyHeight() > 50.
                         Knockback3.add(uu, 2.5 * knockbackRadius, this.caster.getPos().angleTo(uu.getPos()), 80..asAngleDegrees())
 
             destroy this

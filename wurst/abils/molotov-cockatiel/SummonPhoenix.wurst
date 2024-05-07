@@ -134,6 +134,7 @@ class Phoenix
                 phoenixHeadPos, targ.polarOffset(2. * angle(2 * PI) / this.timeBlasting, 50.).withTerrainZ(), 0.5, LIGHTNING_FINGER_OF_DEATH
             )
 
+            // TODO: debounce this sound.
             let snd = DAMAGE_SOUND.play()
             bindSoundToPoint(snd.snd, this.targ.x, this.targ.y, 50., 5000., 5000.)
 

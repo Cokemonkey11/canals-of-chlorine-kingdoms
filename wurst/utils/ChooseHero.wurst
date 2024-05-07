@@ -30,6 +30,7 @@ import SpaceCadet
 import SteelElemental
 import TaurenGladiator
 import VoidAnnihilator
+import CentaurWorldbender
 
 
 constant ID_STARTER_CIRCLET = compiletime(ITEM_ID_GEN.next())
@@ -73,6 +74,7 @@ public constant hero_sounds = new HashMap<int, SoundDefinition>()
 ..put(ID_SORCERER, new SoundDefinition(Sounds.priestPissed6))
 ..put(ID_MOLOTOV_COCKATIEL, new SoundDefinition(Sounds.hippogryphWithRiderPissed4))
 ..put(ID_TAUREN_GLADIATOR, new SoundDefinition(Sounds.heroTaurenChieftainPissed6))
+..put(ID_CENTAUR_WORLDBENDER, new SoundDefinition(Sounds.centaurArcherPissed2))
 
 
 constant CUSTOM_HERO_ID_MAP = new IterableMap<int, int>()
@@ -87,6 +89,7 @@ constant CUSTOM_HERO_ID_MAP = new IterableMap<int, int>()
 ..put(ID_VOID_ANNIHILATOR, 2)
 ..put(ID_SORCERER, 2)
 ..put(ID_MOLOTOV_COCKATIEL, 2)
+..put(ID_CENTAUR_WORLDBENDER, 2)
 
 constant tmpOffsetsBuffer = [0..asAngleDegrees(), 0..asAngleDegrees(), 0..asAngleDegrees()]
 
@@ -102,6 +105,7 @@ constant HERO_INFO = new HashMap<int, string>()
 ..put(ID_SORCERER, "Scaling caster, can multi-cast with abilities that deal scaling damage.")
 ..put(ID_MOLOTOV_COCKATIEL, "Agile caster, can dash and retreat with some setup.")
 ..put(ID_VOID_ANNIHILATOR, "Supportive caster, can teleport and lock down enemies with a skillshot.")
+..put(ID_CENTAUR_WORLDBENDER, "Disurptive caster, can zone, silence, and levitate enemies.")
 
 
 function unit.printInfoForPlayer(player forWhom)
@@ -134,9 +138,8 @@ public function onSelectionStatic(unit chooser, unit source)
             owner.updateReviveInCell(reviveWhen)
         doAfter(reviveDuration.seconds) ->
             if owner.isIngame() and which.getTypeId() != 0
-                which.revive(where, true)
+                which..revive(where, true)..setInvulnerable(true)..setMana(which.getMaxMana())
                 owner.panCameraToTimed(where, 0.)
-                which.setInvulnerable(true)
                 doAfter(3.) ->
                     which.setInvulnerable(false)
 

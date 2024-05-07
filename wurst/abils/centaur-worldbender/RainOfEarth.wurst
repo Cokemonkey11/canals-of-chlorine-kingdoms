@@ -1,0 +1,183 @@
+package RainOfEarth
+
+import Abilities
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import DamageEvent
+import HashMap
+import HashSet
+import LinkedListModule
+import TerrainUtils
+import Time
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+
+
+public constant ID_RAIN_OF_EARTH = compiletime(ABIL_ID_GEN.next())
+
+constant MANA_COST = 80
+
+constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 10. - lvl
+
+constant IntLevelClosure DURATION_FUNCTION = lvl -> 4 + lvl
+
+constant IntLevelClosure DAMAGE_FUNCTION = lvl -> 30 + 10 * lvl
+
+constant RAIN_OF_EARTH_MISSILES = new HashMap<unit, HashSet<Missile>>()
+
+constant RADIUS = 150
+
+constant LOCUS_SPEED = 125.
+
+constant MISSILE_START_HEIGHT = 1000.
+
+constant MISSILE_FALL_DURATION = 0.8
+
+// TODO: use reference-counting to be MUI
+constant LAST_HIT_BY_EARTH = new HashMap<unit, instant>()
+
+constant UNIT_TARGETS = new HashMap<unit, tile>()
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        Targettype.NONE,
+        "Hurls earth from the sky for a time. "
+        + "The locus of the earth missiles slowly moves towards the last position attacked by the caster."
+    )
+    new ChannelAbilityPreset(ID_RAIN_OF_EARTH, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(0, 2)
+    ..presetButtonPosResearch(0, 0)
+    ..presetHotkey("Q")
+    ..presetIcon(Icons.bTNEarthquake)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetManaCost(_ -> MANA_COST)
+    ..setName("Rain of Earth")
+    ..presetCooldown(COOLDOWN_FUNCTION)
+    ..addTooltipProperty("Damage (per wave)", DAMAGE_FUNCTION)
+    ..addTooltipProperty("Duration", DURATION_FUNCTION)
+    ..addTooltipProperty("Radius", lvl -> RADIUS)
+    ..tooltipStopListen()
+
+
+class RainOfEarth
+    use LinkedListModule
+
+    unit caster
+    vec2 pos
+    real duration
+    real maxDuration
+    int waveCount
+
+    construct(unit caster)
+        this.caster = caster
+        let target = caster.getLastTarget()
+        this.pos = caster.getPos().distanceToSq(target) < RADIUS * RADIUS ? target : caster.getPos().polarOffset(caster.getPos().angleTo(target), RADIUS.toReal())
+        this.duration = 0.
+        this.maxDuration = DURATION_FUNCTION.run(caster.getAbilityLevel(ID_RAIN_OF_EARTH)).toReal()
+        this.waveCount = 0
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        skip
+
+    function tick()
+        this.duration += ANIMATION_PERIOD
+
+        if (this.duration.toInt() * 2) + 1 > this.waveCount
+            this.waveCount += 1
+
+            for i = 0 to 4
+                new Missile(this.caster, this.pos.polarOffset(angle(2. * PI) * i.toReal() / 5, RADIUS / 2))
+
+        let target = this.caster.getLastTarget()
+        this.pos = this.pos.polarOffset(this.pos.angleTo(target), LOCUS_SPEED * ANIMATION_PERIOD)
+
+        if this.duration >= this.maxDuration
+            destroy this
+
+
+class Missile
+    use LinkedListModule
+
+    unit caster
+    effect fx
+    vec2 vel
+    real timeLeft
+
+    construct(unit caster, vec2 pos)
+        this.caster = caster
+        this.fx = addEffect(Abilities.rockBoltMissile, pos.withTerrainZ(MISSILE_START_HEIGHT))..setYaw(GetRandomReal(0., 360.).asAngleDegrees())
+        this.vel = ZERO2
+        this.timeLeft = MISSILE_FALL_DURATION
+
+        if not RAIN_OF_EARTH_MISSILES.has(this.caster)
+            RAIN_OF_EARTH_MISSILES.put(this.caster, new HashSet<Missile>())
+
+        RAIN_OF_EARTH_MISSILES.get(this.caster).add(this)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx.destr()
+
+        RAIN_OF_EARTH_MISSILES.get(this.caster).remove(this)
+
+    function tick()
+        this.timeLeft -= ANIMATION_PERIOD
+
+        this.fx.setPos(this.fx.getPos().toVec3() + this.vel.withTerrainZ(0..lerp(MISSILE_START_HEIGHT, this.timeLeft / MISSILE_FALL_DURATION)))
+
+        if this.timeLeft <= 0.
+            let damage = DAMAGE_FUNCTION.run(this.caster.getAbilityLevel(ID_RAIN_OF_EARTH))
+            forUnitsInRange(this.fx.getPos(), RADIUS / 2) uu ->
+                if uu.isEnemyOf(this.caster) and uu.isAlive() and not uu.isInvulnerable() and not uu.isType(UNIT_TYPE_STRUCTURE) and uu.lastHitByEarth().isOlderThan(0.5.secondsAgo())
+                    LAST_HIT_BY_EARTH.put(uu, instantNow())
+                    this.caster.dealCodeDamage(uu, damage.toReal())
+
+            destroy this
+
+
+function unit.getLastTarget() returns vec2
+    if not UNIT_TARGETS.has(this)
+        return ZERO2
+
+    return UNIT_TARGETS.get(this).toVec2()
+
+
+function unit.lastHitByEarth() returns instant
+    if not LAST_HIT_BY_EARTH.has(this)
+        return instant(0.)
+
+    return LAST_HIT_BY_EARTH.get(this)
+
+
+init
+    EventListener.onCast(ID_RAIN_OF_EARTH) caster ->
+        new RainOfEarth(caster)
+
+    DamageEvent.addListener(0) ->
+        let target = DamageEvent.getTarget()
+        let source = DamageEvent.getSource()
+
+        if source.getAbilityLevel(ID_RAIN_OF_EARTH) > 0
+            UNIT_TARGETS.put(source, target.getPos().getTile())

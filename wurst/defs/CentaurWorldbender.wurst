@@ -1,0 +1,30 @@
+package CentaurWorldbender
+
+import Assets
+
+import AbilityTooltipGenerator
+
+import GalaxyBlast
+import RainOfEarth
+import Static
+import Telekenesis
+
+
+public constant ID_CENTAUR_WORLDBENDER = compiletime(HERO_ID_GEN.next())
+
+
+@compiletime function gen()
+    new HeroDefinition(ID_CENTAUR_WORLDBENDER, UnitIds.archmage)
+    ..setAttack1DamageBase(34)
+    ..setName("Centaur Worldbender")
+    ..setProperNames(commaList("Bender", "Small Business Owner", "Horsing Around"))
+    ..setProperNamesUsed(3)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)
+    ..setAttack1WeaponType(WeaponType.Missile)
+    ..setAttack1ProjectileArt(Abilities.volcanoMissile)
+    ..setModelFile("CentaurFlamecaller.mdl")
+    ..setNormalAbilities(commaList(AbilityIds.inventory))
+    ..setUnitSoundSet(Soundsets.centaur)
+    ..setHeroAbilities(commaList(ID_RAIN_OF_EARTH, ID_GALAXY_BLAST, ID_STATIC, ID_TELEKENESIS))
+    ..setIconGameInterface(Icons.bTNCentaurKhan)

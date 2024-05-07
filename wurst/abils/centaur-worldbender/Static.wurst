@@ -1,0 +1,102 @@
+package Static
+
+import Abilities
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import LinkedListModule
+
+import AbilityTooltipGenerator
+
+
+public constant ID_STATIC = compiletime(ABIL_ID_GEN.next())
+
+constant RealLevelClosure DURATION_FUNCTION = lvl -> 2 + 0.5 * lvl
+constant IntLevelClosure AOE_FUNCTION = lvl -> 200 + 100 * lvl
+constant IntLevelClosure MS_FUNCTION = lvl -> 40 + 20 * lvl
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Provides a burst of movement speed to the caster and nearby allied heroes."
+    )
+    new AbilityDefinitionBerserk(ID_STATIC)
+    ..setHeroAbility(true)
+    ..registerTooltipGenerator(tgen)
+
+    ..tooltipStartListen()
+    ..setName("Static")
+    ..setLevels(3)
+    ..presetCooldown(lvl -> 10. - lvl)
+    ..presetManaCost((int lvl) -> 90 - 10 * lvl)
+    ..addTooltipProperty("Boost Duration", DURATION_FUNCTION)
+    ..addTooltipProperty("Area of Effect", AOE_FUNCTION)
+    ..addTooltipProperty("Movespeed bonus (Initial)", MS_FUNCTION)
+    ..tooltipStopListen(true)
+
+    ..presetDamageTakenIncrease((int lvl) -> 0)
+    ..presetMovementSpeedIncrease((int lvl) -> 0)
+    ..presetButtonPosNormal(2, 2)
+    ..presetButtonPosResearch(2, 0)
+    ..presetHotkey("E")
+    ..presetIcon(Icons.bTNPurge)
+    ..presetAttackSpeedIncrease((int lvl) -> 0.)
+    ..presetDurationHero(lvl -> 0.1)
+    ..setLevelSkipRequirement(2)
+
+
+class Static
+    use LinkedListModule
+
+    unit boosted
+    real duration
+    real totalDuration
+    real ms
+    real totalMs
+
+    construct(unit boosted, real duration, real ms)
+        this.boosted = boosted
+        this.duration = duration
+        this.totalDuration = duration
+        this.ms = 0.
+        this.totalMs = ms
+
+        let fx = addEffect(Abilities.purgeBuffTarget, boosted.getPos3Real() + vec3(0., 0., 100.))..setPitch(180..asAngleDegrees())
+
+        doAfter(1.) ->
+            fx.destr()
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    function clearMovespeedBonus()
+        this.boosted.setMoveSpeed(this.boosted.getMoveSpeed() - this.ms)
+        this.ms = 0.
+
+    function setMovespeedBonus()
+        this.ms = 0..lerp(this.totalMs, this.duration / this.totalDuration)
+        this.boosted.setMoveSpeed(this.boosted.getMoveSpeed() + this.ms)
+
+    ondestroy
+        this.clearMovespeedBonus()
+
+    function tick()
+        this.duration -= ANIMATION_PERIOD
+
+        this.clearMovespeedBonus()
+        this.setMovespeedBonus()
+
+        if this.duration <= 0.
+            destroy this
+
+init
+    EventListener.onCast(ID_STATIC) caster ->
+        let lvl = caster.getAbilityLevel(ID_STATIC)
+        forUnitsInRange(caster.getPos(), AOE_FUNCTION.run(lvl).toReal()) uu ->
+            if uu.isAllyOf(caster) and uu.isType(UNIT_TYPE_HERO) and uu.isAlive()
+                new Static(uu, DURATION_FUNCTION.run(lvl), MS_FUNCTION.run(lvl).toReal())

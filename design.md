@@ -70,3 +70,13 @@
 - Kaisa
 - AWP, AK47
 - Doom Guy
+
+## Designs
+
+- Invoker
+- Nephilim
+- Draven
+- Aphelios
+- Lee Sin
+- Medivh
+- Orianna

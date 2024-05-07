@@ -8,6 +8,7 @@ import WurstCommand
 
 import Bind
 import Castles
+import CentaurWorldbender
 import ChooseHero
 import Events
 import Flash
@@ -49,6 +50,9 @@ init
 
         addCommand("enemy") (p, _cmd, _args) ->
             createUnit(players[1], UnitIds.paladin)
+
+        addCommand("worldbender") (p, _cmd, _args) ->
+            createUnit(players[2], ID_CENTAUR_WORLDBENDER)
 
         addCommand("generator") (p, _cmd, _args) ->
             enableGenerator()

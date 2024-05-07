@@ -1,38 +1,32 @@
 # TODO
 
-## Road to release candidate (0.9.x)
+## Road to late beta (0.9.x)
 
-101. [x] assist gold
 102. [ ] 4th set of custom heroes
-  - [ ] ! Centaur Worldbender - Controllable Rain of Fire, Non-channeling Volcano, Non-channeling earthquake, Telekensis multi-click unit throwing
   - [ ] Breast Master - Summon Breast (11-item spellbook), TLC grants bonus armor and regeneration, Growth grants permanent bonus damage to a friendly unit, Permanence makes a creep permanent
   - [ ] Frost Elemental - Slow Projectile Speed, In-Flight missiles have purge effect, siege tank barrage temporarily, super AS boost while stationary
-104. [x] in-game communication of more design principals, especially the carry/caster/tank roles
-105. [ ] more stats for nerds
-121. [x] flash-disjoint charged blast does not seem to work - I got stunned
-123. [x] stackttrace with black binding
 127. [x] void annihilator ult is too strong, maybe the cooldown is just too low
 135. [x] tauren seppuku sike is overpowered at level 3
 136. [ ] thw submission template
+139. [ ] sanctum-kill event for stats
+140. [ ] NPE when lep used dunk on me
+141. [ ] headhunter knockback catapult sound is global
+142. [ ] damage stats are messed up by one-hit-KO abils
+143. [ ] stats are messed up and seem to indicate victory happening before tower deaths and last damage verices
+144. [ ] increase dunk camera shake
+145. [ ] healing wave sound in phoenix is global
+146. [ ] check: description on tauren gladiator ult
+147. [ ] ice blast can hit towers
 
 ## Road to GA (1.0)
 
 90. [ ] it's still possible for tower to chime multiple times overlapping. Maybe fundamental characteristic of targeting in wc3?
 99. [ ] ignition starts procing immediately, can't be flashed and hard to maximise the damage
 106. [ ] colorise the kill notifications by adding extra colored frames on the sides
-117. [x] "mana shield life drain" can be heard across the map
-118. [x] "I can hear furion horn every time tauren jumps from across the map"
-119. [x] naga hotkey collision
 120. [ ] mongo seems weak with W cast animation
-124. [x] dark binding collision too small
-128. [x] wallbang can target allied units
-129. [x] ? headbanger is underpowered
-132. [x] use phoenix egg for the asset for cockatiel shard
-133. [x] visibility should be higher for momentus
+137. [ ] 5th, 6th, 7th, and 8th set of custom heroes
+138. [ ] Evidence-based balance
 
 ## Backlog
 
 95. [ ] tower range indicators
-114. [x] immolation can't be cast on invulnerable allies
-131. [ ] make revive next to fountain
-134. [x] make the phoenix R lightning use finger of death lightning instead of forked lightning lightning

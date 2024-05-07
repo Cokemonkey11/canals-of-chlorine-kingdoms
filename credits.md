@@ -12,7 +12,9 @@
 - WaterKnight
 - looking_for_help
 - Blizzard Entertainment
+- hiveworkshop.com
 - Dionesiist
 - SGT Phill
 - Black_Stan
 - The D3ath
+- Deolrin

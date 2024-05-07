@@ -1,0 +1,359 @@
+package Telekenesis
+
+import Abilities
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import Doodads
+import DummyRecycler
+import HashMap
+import HashSet
+import Knockback3
+import LinkedListModule
+import Objects
+import Reference
+import SoundUtils
+import StandardTextTags
+import TerrainUtils
+import Time
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+// import RainOfEarth
+import VecExtensions
+
+
+public constant ID_TELEKENESIS = compiletime(ABIL_ID_GEN.next())
+
+constant MANA_COST_HERO = 100
+constant MANA_COST_UNIT = 50
+constant MANA_COST_THROW = 50
+
+constant TELEKENESIS_DURATION_HERO = 2.5
+constant TELEKENESIS_DURATION_UNIT = 5.
+
+constant RealLevelClosure COOLDOWN_FUNCTION = lvl -> 3.5 - lvl
+
+constant PROJECTILE_FIND_RADIUS = 550.
+
+constant RealLevelClosure PROJECTILE_CREATE_PERIOD = lvl -> 20. - 5 * lvl
+
+constant RealLevelClosure PROJECTILE_DAMAGE_HIT = lvl -> 100. + 50 * lvl
+
+constant ERROR_SOUND = new SoundDefinition(Sounds.error)
+
+constant PROJECTILE_CREATION_INSTANTS = new HashMap<unit, instant>()
+constant TELEKENETIC_UNITS = new HashSet<unit>()
+
+constant TELEKENESIS_TARGET_HEROS = new IterableMap<unit, TelekenesisUnit>()
+constant TELEKENESIS_TARGET_UNITS = new IterableMap<unit, TelekenesisUnit>()
+constant TELEKENESIS_TARGET_ROCKS = new IterableMap<unit, TelekenesisProjectile>()
+// TODO: make it use rain of fire too
+
+constant DAMAGE_RADIUS = 125.
+
+constant LEVITATING_FLY_HEIGHT = 300.
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        Targettype.POINTUNIT,
+        "Manipulates the environment, causing different effects depending on the target. "
+        + "If the target is a unit or hero, the unit is immobilised and levitated into the air. "
+        + "If the target is a point, the highest priority levitated unit is thrown towards that point. "
+        + "Passively, rocks are levitated into the air in the nearby area. "
+        + "The mana cost depends on the target type."
+    )
+    new ChannelAbilityPreset(ID_TELEKENESIS, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(3, 2)
+    ..presetButtonPosResearch(3, 0)
+    ..presetHotkey("R")
+    ..presetIcon(Icons.bTNGauntletsOfOgrePower)
+    ..setLevelSkipRequirement(2)
+    ..setRequiredLevel(6)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.POINTUNIT)
+    ..setName("Telekenesis")
+    ..presetCooldown(COOLDOWN_FUNCTION)
+    ..addTooltipProperty("Mana Cost (Hero target)", lvl -> MANA_COST_HERO)
+    ..addTooltipProperty("Mana Cost (Unit target)", lvl -> MANA_COST_UNIT)
+    ..addTooltipProperty("Mana Cost (Throwing)", lvl -> MANA_COST_THROW)
+    ..addTooltipProperty("Duration (Hero target)", lvl -> TELEKENESIS_DURATION_HERO)
+    ..addTooltipProperty("Duration (Unit target)", lvl -> TELEKENESIS_DURATION_UNIT)
+    ..addTooltipProperty("Projectile 'Find' Radius", lvl -> PROJECTILE_FIND_RADIUS)
+    ..addTooltipProperty("Projectile 'Create' Period (s)", PROJECTILE_CREATE_PERIOD)
+    ..addTooltipProperty("Damage (Projectile)", PROJECTILE_DAMAGE_HIT)
+    ..tooltipStopListen()
+
+    ..presetTargetsAllowed((int lvl) -> "enemies,ground,vulnerable")
+    ..presetManaCost(_ -> 0)
+
+
+class TelekenesisUnit
+    use LinkedListModule
+
+    unit caster
+    unit target
+    real timeLeft
+    real timeSpent
+    bool thrown
+    effect fx
+
+    construct(unit caster, unit target)
+        this.caster = caster
+        this.target = target
+        this.timeLeft = caster.isType(UNIT_TYPE_HERO) ? TELEKENESIS_DURATION_HERO : TELEKENESIS_DURATION_UNIT
+        this.timeSpent = 0.
+        this.thrown = false
+        this.fx = addEffect(Abilities.web_AirTarget, target, "origin")
+
+        (caster.isType(UNIT_TYPE_HERO) ? TELEKENESIS_TARGET_HEROS : TELEKENESIS_TARGET_UNITS).put(target, this)
+
+        target..setPropWindow(0..asAngleDegrees())..setMoveSpeed(0.)
+
+        if target.addAbility(HEIGHT_ENABLER)
+            target.removeAbility(HEIGHT_ENABLER)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx.destr()
+        TELEKENESIS_TARGET_HEROS.remove(this.target)
+        TELEKENESIS_TARGET_UNITS.remove(this.target)
+        if not this.thrown
+            Knockback3.setVel(this.target, 0., 0..asAngleDegrees(), 0..asAngleDegrees())
+
+    function tick()
+        this.timeLeft -= ANIMATION_PERIOD
+        this.timeSpent += ANIMATION_PERIOD
+
+        if not this.thrown and this.timeLeft > 0. and this.timeSpent < 0.5 and this.target.isAlive() and this.target.getFlyHeight() < LEVITATING_FLY_HEIGHT
+            this.target.setFlyHeight(this.target.getFlyHeight() + LEVITATING_FLY_HEIGHT * 2. * ANIMATION_PERIOD, 0.)
+
+        if this.thrown or this.timeLeft <= 0. or not this.target.isAlive()
+            destroy this
+
+
+class TelekenesisProjectile
+    use LinkedListModule
+
+    unit dummy
+    real timeLeft
+    real timeSpent
+    bool thrown
+    effect fx
+
+    construct(unit caster)
+        this.dummy = DummyRecycler.get(caster.getPos().polarOffset(GetRandomReal(0., 360.).asAngleDegrees(), GetRandomReal(100., 450.)), 0..asAngleDegrees())..setFlyHeight(0., 0.)
+        this.timeLeft = 10.
+        this.timeSpent = 0.
+        this.thrown = false
+        this.fx = addEffect(Doodads.outland_FloatingChunks0, this.dummy, "origin")..setTimeScale(0.1)..setScale(0.25)
+
+        TELEKENESIS_TARGET_ROCKS.put(this.dummy, this)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        TELEKENESIS_TARGET_ROCKS.remove(this.dummy)
+        if not this.thrown
+            Knockback3.setVel(this.dummy, 0., 0..asAngleDegrees(), 0..asAngleDegrees())
+            let dummy = this.dummy
+            let fx = this.fx
+            doAfter(1.) ->
+                DummyRecycler.recycle(dummy)
+                fx.destr()
+
+
+    function tick()
+        this.timeLeft -= ANIMATION_PERIOD
+        this.timeSpent += ANIMATION_PERIOD
+
+        if not this.thrown and this.timeLeft > 0. and this.timeSpent < 0.5 and this.dummy.getFlyHeight() < LEVITATING_FLY_HEIGHT
+            this.dummy.setFlyHeight(this.dummy.getFlyHeight() + LEVITATING_FLY_HEIGHT * 2. * ANIMATION_PERIOD, 0.)
+
+        if this.thrown or this.timeLeft <= 0. or not this.dummy.isAlive()
+            destroy this
+
+
+function unit.getLastProjectileCreationInstant() returns instant
+    if not PROJECTILE_CREATION_INSTANTS.has(this)
+        PROJECTILE_CREATION_INSTANTS.put(this, instant(-30.))
+
+    return PROJECTILE_CREATION_INSTANTS.get(this)
+
+
+tuple maybe_telekenesis_unit_or_projectile(int variant, unit tu, effect tp) // 0 is empty, 1 for unit, 2 for dummy + fx
+
+
+function maybe_telekenesis_unit_or_projectile.getUnit() returns unit
+    if this.variant == 1
+        return this.tu
+
+    if this.variant == 2
+        return this.tu
+
+    Log.error("Tried to get the unit of a telekenesis but there was none")
+
+    return null
+
+
+function maybe_telekenesis_unit_or_projectile.cleanup()
+    if this.variant == 1
+        Knockback3.setVel(this.tu, 0., 0..asAngleDegrees(), 0..asAngleDegrees())
+        return
+
+    if this.variant == 2
+        Knockback3.setVel(this.tu, 0., 0..asAngleDegrees(), 0..asAngleDegrees())
+        let dummy = this.tu
+        let fx = this.tp
+        doAfter(1.) ->
+            DummyRecycler.recycle(dummy)
+            fx.destr()
+
+
+function find_maybe_telekenesis_unit_or_projectile(unit caster, vec2 point) returns maybe_telekenesis_unit_or_projectile
+    let found = new Reference<unit>(null)
+    let foundVal = new Reference<TelekenesisUnit>(null)
+    TELEKENESIS_TARGET_HEROS.forEach() (unit key, TelekenesisUnit value) ->
+        if found.val == null and not value.thrown and key.isInRange(caster.getPos(), PROJECTILE_FIND_RADIUS) or key.isInRange(point, PROJECTILE_FIND_RADIUS)
+            found.val = key
+            foundVal.val = value
+
+    if foundVal.val != null
+        found.into()
+        foundVal.val.thrown = true
+        return maybe_telekenesis_unit_or_projectile(1, foundVal.into().target, null)
+
+    TELEKENESIS_TARGET_UNITS.forEach() (unit key, TelekenesisUnit value) ->
+        if found.val == null and not value.thrown and key.isInRange(caster.getPos(), PROJECTILE_FIND_RADIUS) or key.isInRange(point, PROJECTILE_FIND_RADIUS)
+            found.val = key
+            foundVal.val = value
+
+    if foundVal.val != null
+        found.into()
+        foundVal.val.thrown = true
+        return maybe_telekenesis_unit_or_projectile(1, foundVal.into().target, null)
+
+    let foundVal2 = new Reference<TelekenesisProjectile>(null)
+    TELEKENESIS_TARGET_ROCKS.forEach() (unit key, TelekenesisProjectile value) ->
+        if found.val == null and not value.thrown and key.isInRange(caster.getPos(), PROJECTILE_FIND_RADIUS) or key.isInRange(point, PROJECTILE_FIND_RADIUS)
+            found.val = key
+            foundVal2.val = value
+
+    if foundVal2.val != null
+        found.into()
+        let val = foundVal2.into()
+        val.thrown = true
+        return maybe_telekenesis_unit_or_projectile(2, val.dummy, val.fx)
+
+    found.into()
+    foundVal.into()
+    foundVal2.into()
+
+    return maybe_telekenesis_unit_or_projectile(0, null, null)
+
+
+class TelekenesisPoint
+    use LinkedListModule
+
+    unit caster
+    vec2 target
+    maybe_telekenesis_unit_or_projectile subject
+    real damage
+
+    construct(unit caster, vec2 target, maybe_telekenesis_unit_or_projectile subject)
+        let lvl = caster.getAbilityLevel(ID_TELEKENESIS)
+        this.caster = caster
+        this.target = target
+        this.subject = subject
+        this.damage = PROJECTILE_DAMAGE_HIT.run(lvl)
+
+        Knockback3.add(subject.getUnit(), target, subject.getUnit().getPos().distanceTo(target) * 2.)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.subject.cleanup()
+
+
+    function tick()
+        if (
+            (Knockback3.getVel(this.subject.getUnit()).z < 0. and this.subject.getUnit().getFlyHeight() < 10.)
+            or not this.subject.getUnit().getPos().isTerrainWalkable()
+        )
+            Knockback3.setVel(this.subject.getUnit(), 0., 0..asAngleDegrees(), 0..asAngleDegrees())
+
+            addEffect(Objects.impaleTargetDust, this.subject.getUnit().getPos())..setAlpha(0)..destr()
+
+            forUnitsInRange(this.subject.getUnit().getPos(), DAMAGE_RADIUS) uu ->
+                if uu.isEnemyOf(this.caster) and uu.isAlive() and not uu.isType(UNIT_TYPE_STRUCTURE)
+                    this.caster.dealCodeDamage(uu, this.damage)
+                    createCriticalStrikeTextTag(uu, this.damage.toInt())
+
+            destroy this
+
+
+init
+    EventListener.onCast(ID_TELEKENESIS) caster ->
+        let target = EventData.getSpellTargetUnit()
+        let point = EventData.getAbilityTargetPos()
+
+        if target != null and target.getTypeId() != 0
+            let manaCost = target.isType(UNIT_TYPE_HERO) ? MANA_COST_HERO : MANA_COST_UNIT
+
+            if (caster.getMana() < manaCost or TELEKENESIS_TARGET_HEROS.has(target) or TELEKENESIS_TARGET_UNITS.has(target))
+                ERROR_SOUND.playForPlayer(caster.getOwner())
+                caster.resetAbilityCooldown(ID_TELEKENESIS)
+            else
+                caster.subMana(manaCost.toReal())
+                new TelekenesisUnit(caster, target)
+                flashEffect(Abilities.tomeOfRetrainingCaster, caster.getPos())
+                flashEffect(Abilities.tomeOfRetrainingCaster, target.getPos())
+        else
+            let manaCost2 = MANA_COST_THROW
+            if not (caster.getMana() >= manaCost2 and point.isVisibileToPlayer(caster.getOwner()))
+                ERROR_SOUND.playForPlayer(caster.getOwner())
+                caster.resetAbilityCooldown(ID_TELEKENESIS)
+            else
+                let maybe_subject = find_maybe_telekenesis_unit_or_projectile(caster, point)
+                if maybe_subject.variant == 0
+                    ERROR_SOUND.playForPlayer(caster.getOwner())
+                    caster.resetAbilityCooldown(ID_TELEKENESIS)
+                else
+                    caster.subMana(manaCost2.toReal())
+                    new TelekenesisPoint(caster, point, maybe_subject)
+
+    doPeriodically(1.) cb ->
+        TELEKENETIC_UNITS.forEach() uu ->
+            if uu.getLastProjectileCreationInstant().isOlderThan(PROJECTILE_CREATE_PERIOD.run(uu.getAbilityLevel(ID_TELEKENESIS)).secondsAgo()) and uu.isAlive()
+                PROJECTILE_CREATION_INSTANTS.put(uu, instantNow())
+                new TelekenesisProjectile(uu)
+
+    CreateTrigger()..registerAnyUnitEvent(EVENT_PLAYER_HERO_SKILL)..addAction() ->
+        let u = GetLearningUnit()
+        let sk = GetLearnedSkill()
+
+        if sk == ID_TELEKENESIS and not TELEKENETIC_UNITS.has(u)
+            TELEKENETIC_UNITS.add(u)

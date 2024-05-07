@@ -1,0 +1,205 @@
+package GalaxyBlast
+
+import Abilities
+import BuffIds
+import BuffObjEditing
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import InstantDummyCaster
+import LinkedListModule
+import OrderIds
+import SoundUtils
+import StandardTextTags
+import Units
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+
+
+public constant ID_GALAXY_BLAST = compiletime(ABIL_ID_GEN.next())
+
+constant ID_GALAXY_BLAST_SILENCE = compiletime(ABIL_ID_GEN.next())
+
+constant ID_GALAXY_BLAST_SILENCE_BUFF = compiletime(BUFF_ID_GEN.next())
+
+constant MIN_RADIUS = 100. / 2.
+constant RADIUS =  200. / 2.
+constant MIN_RANGE = 700.
+constant RANGE = 1200.
+constant IntLevelClosure DAMAGE_FUNCTION = (int lvl) -> 50 + lvl * 100
+constant CHANNEL_DURATION = 2.
+
+constant LOOP_SOUND = new SoundDefinition(Sounds.cycloneLoop1, true, true)
+constant HIT_SOUND = new SoundDefinition(Sounds.carrionSwarmLaunch1, false, true)
+
+constant MISSILE_SPEED = 750.
+
+constant RealLevelClosure SILENCE_DURATION = lvl -> 2 + 0.5 * lvl
+
+
+@compiletime function gen()
+    new BuffDefinition(ID_GALAXY_BLAST_SILENCE_BUFF, BuffIds.soulBurn)
+    ..setIcon(Icons.bTNSilence)
+    ..setArtTarget(Abilities.silenceTarget)
+    ..setTooltipNormal("Silenced")
+    ..setTooltipNormalExtended("This unit is silenced. It cannot cast spells.")
+
+    new AbilityDefinitionFirelordSoulBurn(ID_GALAXY_BLAST_SILENCE)
+    ..setHeroAbility(false)
+    ..setLevels(1)
+    ..presetDamageAmount((int lvl) -> 0.)
+    ..presetDamagePenalty((int lvl) -> 0.)
+    ..presetCastRange((int lvl) -> 10000.)
+    ..presetCooldown((int lvl) -> 0.)
+    ..presetDurationHero(SILENCE_DURATION)
+    ..presetDurationNormal(SILENCE_DURATION)
+    ..presetManaCost((int lvl) -> 0)
+    ..presetBuffs((int lvl) -> commaList(ID_GALAXY_BLAST_SILENCE_BUFF))
+
+    let tgen = new AbilityTooltipGenerator(
+        "Looses a blast of darkness in the target direction, damaging and silencing enemies in a line. "
+        + "Damage, radius, and max range increase with channel duration."
+    )
+    new ChannelAbilityPreset(ID_GALAXY_BLAST, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(1, 2)
+    ..presetButtonPosResearch(1, 0)
+    ..presetHotkey("W")
+    ..presetIcon(Icons.bTNDarkSummoning)
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.POINT)
+    ..presetManaCost(_ -> 100)
+    ..setName("Galaxy Blast")
+    ..presetCooldown(lvl -> 20. - (2. * lvl))
+    ..addTooltipProperty("Max Damage", DAMAGE_FUNCTION)
+    ..addTooltipProperty("Max Channel Duration", lvl -> CHANNEL_DURATION)
+    ..addTooltipProperty("Min Radius", lvl -> MIN_RADIUS)
+    ..addTooltipProperty("Max Radius", lvl -> RADIUS)
+    ..addTooltipProperty("Min Range", lvl -> MIN_RANGE)
+    ..addTooltipProperty("Max Range", lvl -> RANGE)
+    ..addTooltipProperty("Silence Duration", SILENCE_DURATION)
+    ..tooltipStopListen()
+
+    ..presetFollowThroughTime(lvl -> CHANNEL_DURATION + .1)
+    ..presetCastRange((int lvl) -> RANGE)
+
+
+class GalaxyBlast
+    use LinkedListModule
+
+    unit caster
+    real scale
+    vec2 centroid
+    vec2 vel
+    effect fx1
+    effect fx2
+    angle fxAngle
+    group hitGroup
+    real distanceLeft
+
+    construct(unit caster, vec2 centroid, effect fx1, effect fx2, vec2 target, real duration)
+        this.caster = caster
+        this.scale = duration / CHANNEL_DURATION
+        this.centroid = centroid
+        let angle = caster.getPos().angleTo(target)
+        this.vel = ZERO2.polarOffset(angle, MISSILE_SPEED * ANIMATION_PERIOD)
+        this.fx1 = fx1
+        this.fx2 = fx2
+        this.fxAngle = angle
+        this.hitGroup = CreateGroup()
+        this.distanceLeft = MIN_RANGE.lerp(RANGE, this.scale)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx1.destr()
+        this.fx2.destr()
+        this.hitGroup.destr()
+
+    function tick()
+        this.distanceLeft -= MISSILE_SPEED * ANIMATION_PERIOD
+
+        let radius = MIN_RADIUS.lerp(RADIUS, this.scale)
+
+        if not this.distanceLeft <= 0.
+            this.centroid = this.centroid + this.vel
+            this.fx1.setPos(this.centroid.polarOffset(this.fxAngle + 90..asAngleDegrees(), 0.5 * radius + 0.25 * radius * Sin(this.distanceLeft / 20.)))
+            this.fx2.setPos(this.centroid.polarOffset(this.fxAngle - 90..asAngleDegrees(), 0.5 * radius + 0.25 * radius * Sin(this.distanceLeft / 20.)))
+
+            let lvl = this.caster.getAbilityLevel(ID_GALAXY_BLAST)
+            let damage = DAMAGE_FUNCTION.run(lvl) * this.scale
+
+            forUnitsInRange(this.centroid, radius) uu ->
+                if uu.isEnemyOf(this.caster) and uu.isAlive() and not uu.isInvulnerable() and not uu.isType(UNIT_TYPE_STRUCTURE) and not this.hitGroup.has(uu)
+                    this.hitGroup.add(uu)
+                    HIT_SOUND.playOnPoint(uu.getPos3Real())
+
+                    this.caster.dealCodeDamage(uu, damage)
+
+                    InstantDummyCaster.castTarget(this.caster.getOwner(), ID_GALAXY_BLAST_SILENCE, lvl, OrderIds.soulburn, uu, uu.getPos())
+
+                    if uu.isType(UNIT_TYPE_HERO)
+                        createCriticalStrikeTextTag(uu, damage.toInt())
+
+        else
+            destroy this
+
+
+class GalaxyBlastChannel
+    use LinkedListModule
+
+    int order
+    vec2 target
+    unit caster
+    real duration
+    vec2 centroid
+    effect fx1
+    effect fx2
+    SoundInstance loopSound
+
+    construct(unit caster, vec2 target)
+        this.order = caster.getCurrentOrder()
+        this.caster = caster
+        this.target = target
+        this.duration = 0.
+        this.loopSound = LOOP_SOUND.playOnPoint(caster.getPos3Real())
+
+        let ang = caster.getPos().angleTo(target)
+        this.centroid = caster.getPos().polarOffset(ang, 64.)
+        this.fx1 = addEffect(Units.wisp1, caster.getPos().polarOffset(ang + 45..asAngleDegrees(), 64.))..setColorByPlayer(players[PLAYER_NEUTRAL_AGGRESSIVE])..setTimeScale(0.5)..setScale(0.5)
+        this.fx2 = addEffect(Units.wisp1, caster.getPos().polarOffset(ang - 45..asAngleDegrees(), 64.))..setColorByPlayer(players[PLAYER_NEUTRAL_AGGRESSIVE])..setTimeScale(0.5)..setScale(0.5)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.loopSound.snd.stop(false, false)
+        new GalaxyBlast(this.caster, this.centroid, this.fx1, this.fx2, this.target, this.duration)
+
+    function tick()
+        this.duration += ANIMATION_PERIOD
+
+        if not (this.order != this.caster.getCurrentOrder() or not this.caster.isAlive() or this.duration >= CHANNEL_DURATION)
+            this.fx1..setScale(0.5.lerp(1.1, this.duration / CHANNEL_DURATION))
+            this.fx2..setScale(0.5.lerp(1.1, this.duration / CHANNEL_DURATION))
+        else
+            destroy this
+
+
+init
+    EventListener.onCast(ID_GALAXY_BLAST) caster ->
+        new GalaxyBlastChannel(caster, EventData.getSpellTargetPos())
