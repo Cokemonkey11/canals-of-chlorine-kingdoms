@@ -19,6 +19,16 @@ constant WARNING_SOUND = new SoundDefinition(Sounds.warning)
 constant CANNON_TOWER_RANGE = 800. + 72. + 32.
 constant CANNON_TOWER_BASE_RANGE = 800.
 
+constant WARNING_SOUND_DEBOUNCE = new HashMap<player, instant>()
+
+
+function debounceWarningSoundForPlayer(player which)
+    if WARNING_SOUND_DEBOUNCE.has(which) and WARNING_SOUND_DEBOUNCE.get(which).isNewerThan(2..secondsAgo())
+        return
+
+    WARNING_SOUND_DEBOUNCE.put(which, instantNow())
+    WARNING_SOUND.playForPlayer(which)
+
 
 function unit.isAggressiveTower() returns bool
     return aggroLevels.get(this).durationSince().lessThan(duration(5.0))
@@ -32,7 +42,7 @@ function unit.tryToAcquireHeroTarget()
 
     if res.val != null
         this.issueTargetOrder("attack", res.val)
-        WARNING_SOUND.playForPlayer(res.val.getOwner())
+        debounceWarningSoundForPlayer(res.val.getOwner())
 
     destroy res
 

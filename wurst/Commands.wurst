@@ -8,11 +8,10 @@ import WurstCommand
 
 import Bind
 import Castles
-import CentaurWorldbender
-import ChooseHero
 import Events
 import Flash
 import GameBoard
+import GoblinBloodbomber
 import PowerLevelingChamber
 import Teams
 
@@ -49,10 +48,10 @@ init
             p.eventDump()
 
         addCommand("enemy") (p, _cmd, _args) ->
-            createUnit(players[1], UnitIds.paladin)
+            createUnit(players[1], UnitIds.priestessofthemoon)
 
-        addCommand("worldbender") (p, _cmd, _args) ->
-            createUnit(players[2], ID_CENTAUR_WORLDBENDER)
+        addCommand("goblin") (p, _cmd, _args) ->
+            createUnit(players[2], ID_GOBLIN_BLOODBOMBER)
 
         addCommand("generator") (p, _cmd, _args) ->
             enableGenerator()

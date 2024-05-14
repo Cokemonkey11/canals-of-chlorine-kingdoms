@@ -6,3 +6,5 @@ https://old.reddit.com/r/LoLChampConcepts/comments/1blklk/atlencius_the_divine_s
 https://old.reddit.com/r/LoLChampConcepts/comments/1ko8b9/augcc_tyro_the_grandfather_of_wrath/
 https://old.reddit.com/r/LoLChampConcepts/comments/1mbphb/vee55_the_postapocalyptic_nomad/
 https://personas.forumotion.com/t137-medea-the-tactician
+
+Frost Elemental - Slow Projectile Speed, In-Flight missiles have purge effect, siege tank barrage temporarily, super AS boost while stationary

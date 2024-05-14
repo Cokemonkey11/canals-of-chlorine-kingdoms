@@ -18,3 +18,7 @@
 - Black_Stan
 - The D3ath
 - Deolrin
+- Norinrad
+- CRAZYRUSSIAN
+- Marcos DAB
+- KelThuzad

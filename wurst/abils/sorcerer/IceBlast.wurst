@@ -85,5 +85,5 @@ init
         //      = 27% followed by 66% of the animation duration
         doAfter(DAMAGE_DELAY) ->
             forUnitsInRange(target, AOE) (unit u) ->
-                if u.isEnemyOf(caster) and u.isAlive() and not u.isInvulnerable()
+                if u.isEnemyOf(caster) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE)
                     caster.dealCodeDamage(u, damage)

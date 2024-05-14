@@ -1,8 +1,13 @@
 package Teams
 
+import HashMap
+
 
 public constant forceWest = CreateForce()
 public constant forceEast = CreateForce()
+
+public constant player_heroes = new HashMap<player, unit>()
+public constant all_heroes = CreateGroup()
 
 public int playerCount = 0
 

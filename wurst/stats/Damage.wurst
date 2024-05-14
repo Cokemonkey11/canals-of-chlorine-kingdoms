@@ -75,7 +75,7 @@ init
         let sourceOwner = source.getOwner()
 
         if targetIsHero or sourceOwner.getId() > 1
-            let damage = DamageEvent.getAmount()
+            let damage = min(DamageEvent.getAmount(), target.getHP())
             DAMAGE.put(sourceOwner, DAMAGE.get(sourceOwner) + damage)
 
             if targetIsHero

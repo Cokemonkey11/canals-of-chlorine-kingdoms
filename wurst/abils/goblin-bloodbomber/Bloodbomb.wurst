@@ -1,0 +1,214 @@
+package Bloodbomb
+
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import DamageEvent
+import DummyRecycler
+import HashMap
+import Knockback3
+import LinkedList
+import LinkedListModule
+import StandardTextTags
+import UI
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+import Collector
+import Flash
+
+
+public constant ID_BLOODBOMB = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure DAMAGE_FUNCTION_PCT = lvl -> 25 * lvl
+
+constant CHARGED_ATTACK_TIMEOUT = 6
+constant MISSILE_SPEED = 2000
+constant DAMAGE_RADIUS = 150
+constant CATCH_RADIUS = 100
+
+constant ATTACHED_BLOODBOMBS = new HashMap<unit, LinkedList<Bloodbomb>>()
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Charges up a bloodbomb. "
+        + "The next basic attack causes the bomb to be loosed at the target, dealing area damage on impact. "
+        + "The blood bomb is then thrown high into the air and can be caught to ready another bloodbomb."
+    )
+    new ChannelAbilityPreset(ID_BLOODBOMB, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..presetButtonPosNormal(0, 2)
+    ..presetButtonPosResearch(0, 0)
+    ..presetHotkey("Q")
+    ..presetIcon("ReplaceableTextures\\CommandButtons\\BTNBloodBomb.blp")
+
+    ..tooltipStartListen()
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetManaCost(_ -> 120)
+    ..setName("Bloodbomb")
+    ..presetCooldown(lvl -> 13. - (1. * lvl))
+    ..addTooltipProperty("Bonus Damage (%)", DAMAGE_FUNCTION_PCT)
+    ..addTooltipProperty("Damage Radius", lvl -> DAMAGE_RADIUS)
+    ..addTooltipProperty("Charged Attack Timeout", lvl -> CHARGED_ATTACK_TIMEOUT)
+    ..tooltipStopListen()
+
+
+class Bloodbomb
+    use LinkedListModule
+
+    static HashMap<unit, int> tempMap = new HashMap<unit, int>()
+
+    unit caster
+    real timeLeft
+    effect fx
+
+    construct(unit caster)
+        this.caster = caster
+        this.timeLeft = CHARGED_ATTACK_TIMEOUT.toReal()
+        this.fx = addEffect("CorpseBomb.mdl", this.caster.getPos3Real() + vec3(0., 0., 125.))..setTimeScale(0.2)..setScale(0.8)
+
+        if not ATTACHED_BLOODBOMBS.has(caster)
+            ATTACHED_BLOODBOMBS.put(caster, new LinkedList<Bloodbomb>())
+
+        ATTACHED_BLOODBOMBS.get(caster).push(this)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                Bloodbomb.tempMap.flush()
+                for inst from staticItr()
+                    if not Bloodbomb.tempMap.has(inst.caster)
+                        Bloodbomb.tempMap.put(inst.caster, 0)
+
+                    let curr = Bloodbomb.tempMap.get(inst.caster)
+                    Bloodbomb.tempMap.put(inst.caster, curr + 1)
+
+                    inst.tick(curr)
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx.destr()
+        ATTACHED_BLOODBOMBS.get(this.caster).remove(this)
+
+    function tick(int indexOfBloodbombCountOnCaster)
+        this.timeLeft -= ANIMATION_PERIOD
+
+        if this.timeLeft <= 0. or not this.caster.isAlive()
+            destroy this
+            return
+
+        this.fx.setPos(this.caster.getPos3Real() + vec3(0., 0., 125. + 50. * indexOfBloodbombCountOnCaster))
+
+
+class BloodbombMissile
+    use LinkedListModule
+
+    unit caster
+    unit target
+    real damage
+    effect fx
+    int disjointState
+
+    construct(unit caster, unit target, real attackDamage, real effectStartZ)
+        this.caster = caster
+        this.target = target
+        this.damage = DAMAGE_FUNCTION_PCT.run(caster.getAbilityLevel(ID_BLOODBOMB)).toReal() * 0.01 * attackDamage
+        this.fx = addEffect("CorpseBomb.mdl", this.caster.getPos().withZ(effectStartZ))..setScale(0.8)
+        this.disjointState = target.getDisjointState()
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        new BloodbombReset(this.caster, this.fx.getPos3())
+        this.fx.destr()
+
+    function tick()
+        if this.disjointState != this.target.getDisjointState() or not this.target.isAlive()
+            destroy this
+            return
+
+        let missileSpeedTick = MISSILE_SPEED * ANIMATION_PERIOD
+
+        let newPos = this.fx.getPos3().moveTowards(this.target.getPos3Real() + vec3(0., 0., 75.), missileSpeedTick)
+
+        this.fx.setPos(newPos)
+
+        if newPos.toVec2().distanceToSq(this.target.getPos()) < 4 * missileSpeedTick * missileSpeedTick
+            forUnitsInRange(this.target.getPos(), DAMAGE_RADIUS.toReal()) (unit uu) ->
+                if uu.isEnemyOf(this.caster) and uu.isAlive() and not uu.isInvulnerable() and not uu.isType(UNIT_TYPE_STRUCTURE)
+                    createCriticalStrikeTextTag(uu, this.damage.toInt())
+                    this.caster.dealCodeDamage(uu, this.damage)
+
+            destroy this
+
+
+class BloodbombReset
+    use LinkedListModule
+
+    unit caster
+    unit dummy
+    effect circleFx
+    effect fxOnDummy
+
+    construct(unit caster, vec3 startPos)
+        this.caster = caster
+        this.dummy = DummyRecycler.get(startPos.toVec2(), angle(0.))..setXYZReal(startPos)
+        this.circleFx = addEffect(UI.target, this.caster.getPos().polarOffset(this.caster.getFacingAngle(), 125.))..setScale(CATCH_RADIUS / 50)..setZ(this.caster.getPos().getTerrainZ() - 50.)..setTimeScale(0.1)
+        this.fxOnDummy = addEffect("CorpseBomb.mdl", this.dummy, "origin")..setScale(0.8)
+
+        Knockback3.add(this.dummy, this.circleFx.getPos(), this.dummy.getPos().distanceTo(this.circleFx.getPos()) * 4.)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.circleFx..setTimeScale(2.)..destr()
+        this.fxOnDummy.destr()
+        DummyRecycler.recycle(this.dummy)
+
+    function tick()
+        if not (Knockback3.getVel(this.dummy).z < 0. and this.dummy.getFlyHeight() < 50.)
+            return
+
+        var hit = false
+        if this.caster.getPos().distanceToSq(this.circleFx.getPos()) < CATCH_RADIUS * CATCH_RADIUS and this.caster.isAlive()
+            new Bloodbomb(this.caster)
+            hit = true
+            this.caster.tryAddCollectorMana(MANA_PER_CATCH)
+
+        if this.dummy.getFlyHeight() < 10. or hit
+            destroy this
+
+
+init
+    EventListener.onCast(ID_BLOODBOMB) caster ->
+        new Bloodbomb(caster)
+
+    DamageEvent.addListener(1) ->
+        let attacker = DamageEvent.getSource()
+        let target = DamageEvent.getTarget()
+        let event_t = DamageEvent.getType()
+
+        if ATTACHED_BLOODBOMBS.has(attacker) and event_t == DamageType.ATTACK
+            let bombs = ATTACHED_BLOODBOMBS.get(attacker)
+
+            if bombs.size() > 0
+                // Destroy the first-enqueued bomb as it has the lowest time left.
+                let bomb = bombs.dequeue()
+                let startZ = bomb.fx.getLocalZ()
+                destroy bomb
+                new BloodbombMissile(attacker, target, DamageEvent.getAmount(), startZ)

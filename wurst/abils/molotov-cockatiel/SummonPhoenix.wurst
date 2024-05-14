@@ -158,7 +158,8 @@ class Phoenix
             if candidate != null
                 new TempLightning(phoenixHeadPos, candidate.getPos3Real() + vec3(0., 0., 50.), 1., LIGHTNING_HEALING_WAWE_SEECONDARY)
                 candidate.addHP(this.healAmount)
-                HEAL_SOUND.playOnPoint(candidate.getPos3Real())
+                let pos = candidate.getPos()
+                bindSoundToPoint(HEAL_SOUND.play().snd, pos.x, pos.y, 50., 5000., 5000.)
                 this.lastHeal = instantNow()
 
         if this.timeBlasting > AOE_DURATION - 1.

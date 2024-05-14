@@ -2,9 +2,9 @@ package Leaver
 
 import ClosureEvents
 
-import ChooseHero
 import Events
 import GameBoard
+import Teams
 
 
 init

@@ -12,15 +12,17 @@ import UnitIds
 import Castles
 import ClosureTimers
 import Recall
-import Teams
 import WhenClose
 import WhenRevivable
+import Events
+import Teams
+import Flash
+import GameBoard
 
 import AbilityTooltipGenerator
 
-import Events
-import Flash
-import GameBoard
+import CentaurWorldbender
+import GoblinBloodbomber
 import Headbanger
 import MolotovCockatiel
 import Mongo
@@ -30,7 +32,6 @@ import SpaceCadet
 import SteelElemental
 import TaurenGladiator
 import VoidAnnihilator
-import CentaurWorldbender
 
 
 constant ID_STARTER_CIRCLET = compiletime(ITEM_ID_GEN.next())
@@ -61,9 +62,6 @@ constant ID_CIRCLE = compiletime(UNIT_ID_GEN.next())
     ..setPathingMap("")
 
 
-public constant player_heroes = new HashMap<player, unit>()
-public constant all_heroes = CreateGroup()
-
 public constant hero_sounds = new HashMap<int, SoundDefinition>()
 ..put(ID_SPACE_CADET, new SoundDefinition(Sounds.peasantPissed5))
 ..put(ID_STEEL_ELEMENTAL, new SoundDefinition(Sounds.rockGolemPissed2))
@@ -75,12 +73,14 @@ public constant hero_sounds = new HashMap<int, SoundDefinition>()
 ..put(ID_MOLOTOV_COCKATIEL, new SoundDefinition(Sounds.hippogryphWithRiderPissed4))
 ..put(ID_TAUREN_GLADIATOR, new SoundDefinition(Sounds.heroTaurenChieftainPissed6))
 ..put(ID_CENTAUR_WORLDBENDER, new SoundDefinition(Sounds.centaurArcherPissed2))
+..put(ID_GOBLIN_BLOODBOMBER, new SoundDefinition(Sounds.goblinSapperPissed7))
 
 
 constant CUSTOM_HERO_ID_MAP = new IterableMap<int, int>()
 ..put(ID_SPACE_CADET, 0)
 ..put(ID_NIGHT_HOWLER, 0)
 ..put(ID_HEADBANGER, 0)
+..put(ID_GOBLIN_BLOODBOMBER, 0)
 
 ..put(ID_STEEL_ELEMENTAL, 1)
 ..put(ID_TAUREN_GLADIATOR, 1)
@@ -97,6 +97,7 @@ constant HERO_INFO = new HashMap<int, string>()
 ..put(ID_SPACE_CADET, "Ranged carry, can cast divine shield. Abilities mostly augment basic attack.")
 ..put(ID_NIGHT_HOWLER, "Ranged carry, can instagib low-health targets.")
 ..put(ID_HEADBANGER, "Ranged carry, can throw long-ranged spears.")
+..put(ID_GOBLIN_BLOODBOMBER, "Ranged carry, can juggle blood bombs to sustain health.")
 
 ..put(ID_STEEL_ELEMENTAL, "Bursty tank, can dash and multi-stomp.")
 ..put(ID_TAUREN_GLADIATOR, "Bruiser tank, can leap and stun starting at level 1.")

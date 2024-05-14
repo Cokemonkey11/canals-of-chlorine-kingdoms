@@ -4,6 +4,7 @@ import Assets
 import ClosureEvents
 import ClosureTimers
 import LinkedListModule
+import Simulate3dSound
 import SoundUtils
 import TerrainUtils
 import UnitAnimations
@@ -124,7 +125,7 @@ class Wallbang
         nullTimer() ->
             caster..setAnimation(UnitAnimations.Headhunter.attackRange.idx)..setTimeScale(5.)..pause()
 
-        THROW_SOUND.playOnPoint(caster.getPos3Real())
+        bindSoundToUnit(THROW_SOUND.play().snd, caster, 50, 1500, 1600)
 
         if size == 1
             doPeriodically(ANIMATION_PERIOD) cb ->
@@ -179,7 +180,7 @@ class WallbangKnockback
             this.target.setPos(newPos)
         else
             this.target.stun(STUN_DURATION)
-            WALLBANG_SOUND.playOnPoint(this.target.getPos3Real())
+            bindSoundToUnit(WALLBANG_SOUND.play().snd, this.target, 50, 1500, 1600)
             destroy this
             return
 

@@ -231,4 +231,5 @@ init
     EventListener.add(EVENT_PLAYER_UNIT_DEATH) ->
         let dyingUnit = EventData.getDyingUnit()
         if dyingUnit.getTypeId() == UnitIds.arcanesanctum
+            dyingUnit.getOwner().eventSanctumDeath()
             castles[dyingUnit.getOwner().getId()].setInvulnerable(false)

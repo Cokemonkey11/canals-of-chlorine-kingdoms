@@ -1,0 +1,33 @@
+package GoblinBloodbomber
+
+import Assets
+
+import AbilityTooltipGenerator
+
+import Bloodbomb
+import Bloodlet
+import Collector
+import RhythmOfTheBloodSigil
+
+
+public constant ID_GOBLIN_BLOODBOMBER = compiletime(HERO_ID_GEN.next())
+
+
+@compiletime function gen()
+    new HeroDefinition(ID_GOBLIN_BLOODBOMBER, UnitIds.darkranger)
+    ..setName("Goblin Bloodbomber")
+    ..setProperNames(commaList("Call Me Bommy", "A Blast At Parties", "Pad Perforator"))
+    ..setProperNamesUsed(3)
+    ..setAttack1DamageBase(34)
+    ..setAttack1DamageNumberofDice(1)
+    ..setAttack1DamageSidesperDie(1)
+    ..setAttack1ProjectileArt(Abilities.batRiderMissile)
+    ..setAttack1ProjectileArc(0.1)
+    ..setAttack1ProjectileSpeed(900)
+    ..setModelFile("Bombardier.mdl")
+    ..setAttack1AnimationDamagePoint(.5)
+    ..setNormalAbilities(commaList(AbilityIds.inventory))
+    ..setUnitSoundSet(Soundsets.goblinSapper)
+    ..setHeroAbilities(commaList(ID_BLOODBOMB, ID_BLOODLET, ID_COLLECTOR, ID_RHYTHM_OF_THE_BLOOD_SIGIL))
+    ..setIconGameInterface(Icons.bTNGoblinSapper)
+    ..setScalingValue(1.2)

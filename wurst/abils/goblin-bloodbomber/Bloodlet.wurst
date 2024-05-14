@@ -1,0 +1,110 @@
+package Bloodlet
+
+import ClosureEvents
+import ClosureTimers
+import LinkedListModule
+import Simulate3dSound
+import SoundUtils
+
+import AbilityTooltipGenerator
+
+
+public constant ID_BLOODLET = compiletime(ABIL_ID_GEN.next())
+
+constant RealLevelClosure DURATION_FUNCTION = lvl -> 1 + 0.25 * lvl
+constant IntLevelClosure MS_FUNCTION = lvl -> 40 + 20 * lvl
+constant MAX_HEALTH_COST_PCT = 5
+
+constant SHRIEK_SOUND = new SoundDefinition(Sounds.bansheeYesAttack1)
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Provides a burst of movement speed to the caster at the cost of health. "
+        + "Can be multi-cast due to its short cooldown."
+    )
+    new AbilityDefinitionBerserk(ID_BLOODLET)
+    ..setHeroAbility(true)
+    ..registerTooltipGenerator(tgen)
+
+    ..tooltipStartListen()
+    ..setName("Bloodlet")
+    ..setLevels(3)
+    ..presetCooldown(lvl -> 2.)
+    ..presetManaCost((int lvl) -> 0)
+    ..addTooltipProperty("Boost Duration", DURATION_FUNCTION)
+    ..addTooltipProperty("Movespeed bonus (Initial)", MS_FUNCTION)
+    ..addTooltipProperty("Health Cost (% of Max Health)", lvl -> MAX_HEALTH_COST_PCT)
+    ..tooltipStopListen(true)
+
+    ..presetDamageTakenIncrease((int lvl) -> 0)
+    ..presetMovementSpeedIncrease((int lvl) -> 0)
+    ..presetButtonPosNormal(1, 2)
+    ..presetButtonPosResearch(1, 0)
+    ..presetHotkey("W")
+    ..presetIcon("ReplaceableTextures\\CommandButtons\\BTN_CR_Blood-Tap.blp")
+    ..presetAttackSpeedIncrease((int lvl) -> 0.)
+    ..presetDurationHero(lvl -> 0.1)
+    ..setLevelSkipRequirement(2)
+
+
+class Bloodlet
+    use LinkedListModule
+
+    unit boosted
+    real duration
+    real totalDuration
+    real ms
+    real totalMs
+
+    construct(unit boosted, real duration, real ms)
+        this.boosted = boosted
+        this.duration = duration
+        this.totalDuration = duration
+        this.ms = 0.
+        this.totalMs = ms
+
+        let fx = addEffect("CorpseBomb.mdl", boosted, "origin")
+
+        bindSoundToUnit(SHRIEK_SOUND.play().snd, boosted, 50, 1500, 1500)
+
+        let maxHealthRemoved = boosted.getHP() - 1.
+        let healthRemoved = boosted.getMaxHP() * MAX_HEALTH_COST_PCT * 0.01
+
+        boosted.subHP(min(maxHealthRemoved, healthRemoved))
+
+        doAfter(1.) ->
+            fx.destr()
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    function clearMovespeedBonus()
+        this.boosted.setMoveSpeed(this.boosted.getMoveSpeed() - this.ms)
+        this.ms = 0.
+
+    function setMovespeedBonus()
+        this.ms = 0..lerp(this.totalMs, this.duration / this.totalDuration)
+        this.boosted.setMoveSpeed(this.boosted.getMoveSpeed() + this.ms)
+
+    ondestroy
+        this.clearMovespeedBonus()
+
+    function tick()
+        this.duration -= ANIMATION_PERIOD
+
+        this.clearMovespeedBonus()
+        this.setMovespeedBonus()
+
+        if this.duration <= 0.
+            destroy this
+
+init
+    EventListener.onCast(ID_BLOODLET) caster ->
+        let lvl = caster.getAbilityLevel(ID_BLOODLET)
+        new Bloodlet(caster, DURATION_FUNCTION.run(lvl), MS_FUNCTION.run(lvl).toReal())

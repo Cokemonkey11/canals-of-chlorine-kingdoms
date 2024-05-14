@@ -1,0 +1,123 @@
+package Collector
+
+import Abilities
+import Buildings
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import Reference
+import UnitIds
+
+import AbilityTooltipGenerator
+
+import Teams
+
+
+public constant ID_COLLECTOR = compiletime(ABIL_ID_GEN.next())
+
+constant ID_COLLECTOR_BUILDING = compiletime(UNIT_ID_GEN.next())
+
+constant RANGE_FOR_COLLECT = 1500
+
+constant IntLevelClosure PASSIVE_HEALING_RANGE_FN = lvl -> 500 * lvl
+
+constant MANA_PER_DEATH = 1
+
+public constant MANA_PER_CATCH = 1
+
+constant IntLevelClosure HEALTH_PER_MANA_PCT_FN = lvl -> lvl
+
+
+@compiletime function gen()
+    new BuildingDefinition(ID_COLLECTOR_BUILDING, UnitIds.scouttower)
+    ..setName("Collector")
+    ..setModelFile(Buildings.ziggurat1)
+    ..setScalingValue(0.5)
+    ..setPathingMap("")
+    ..setPlacementRequires("")
+    ..setManaMaximum(200)
+    ..setManaInitialAmount(10)
+    ..setManaRegeneration(0.)
+    ..setIconGameInterface(Icons.bTNZiggurat)
+    ..setUpgradesTo("")
+    ..setUpgradesUsed("")
+    ..setNormalAbilities("")
+
+    let tgen = new AbilityTooltipGenerator(
+        Targettype.POINT,
+        "Creates a blood collector. "
+        + "Blood collectors are immobile and grant passive healing to the Bloodbomber. "
+        + "Blood collectors regain mana when the Bloodbomber kills enemies or catches Bloodbombs."
+    )
+    new AbilityDefinitionBuildTinyScoutTower(ID_COLLECTOR)
+    ..setHeroAbility(true)
+    ..setItemAbility(false)
+    ..registerTooltipGenerator(tgen)
+
+    ..tooltipStartListen()
+    ..setName("Collector")
+    ..setLevels(3)
+    ..presetCooldown(lvl -> 40.)
+    ..presetManaCost((int lvl) -> 50)
+    ..addTooltipProperty("Health Regen / Mana / Sec", HEALTH_PER_MANA_PCT_FN)
+    ..addTooltipProperty("Healing Range", PASSIVE_HEALING_RANGE_FN)
+    ..addTooltipProperty("Mana Regained (On Creep Kill)", lvl -> MANA_PER_DEATH)
+    ..addTooltipProperty("Mana Regained (On Bloodbomb Catch)", lvl -> MANA_PER_CATCH)
+    ..tooltipStopListen(true)
+
+    ..presetButtonPosNormal(2, 2)
+    ..presetButtonPosResearch(2, 0)
+    ..presetHotkey("E")
+    ..presetIcon("ReplaceableTextures\\CommandButtons\\BTNSpell_Shadow_BloodBoil.blp")
+    ..setLevelSkipRequirement(2)
+    ..presetUnitCreatedperplayerrace((int lvl) -> commaList(ID_COLLECTOR_BUILDING, ID_COLLECTOR_BUILDING, ID_COLLECTOR_BUILDING, ID_COLLECTOR_BUILDING))
+
+
+constant collectorPlayers = CreateForce()
+
+
+public function unit.tryAddCollectorMana(int manaAmount)
+    let foundUnit = new Reference<unit>(null)
+    let bestRange = new Reference<real>(RANGE_FOR_COLLECT.toReal())
+
+    let casterPos = this.getPos()
+
+    forUnitsOfPlayer(this.getOwner()) uu ->
+        if uu.getTypeId() == ID_COLLECTOR_BUILDING and uu.isAlive() and uu.getMana() < uu.getMaxMana()
+            let thisRange = casterPos.distanceTo(uu.getPos())
+            if thisRange < bestRange.val and thisRange <= RANGE_FOR_COLLECT
+                bestRange.val = thisRange
+                foundUnit.val = uu
+
+    let found = foundUnit.into()
+    if found != null
+        found.addMana(manaAmount.toReal())
+        flashEffect(Abilities.manaFlareTarget, found.getPos3Real() + vec3(0., 0., 120.))
+
+
+init
+    EventListener.onCast(ID_COLLECTOR) caster ->
+        collectorPlayers.addPlayer(caster.getOwner())
+
+    doPeriodically(1.) (CallbackPeriodic cb) ->
+        collectorPlayers.forEach() ->
+            let pl = GetEnumPlayer()
+            let playerHero = player_heroes.get(pl)
+
+            if playerHero.isAlive() and playerHero.getHPRatio() < 1.0
+                forUnitsOfPlayer(pl) uu ->
+                    if uu.getTypeId() == ID_COLLECTOR_BUILDING and uu.getMana() >= 1. and uu.isAlive()
+                        let lvl = playerHero.getAbilityLevel(ID_COLLECTOR)
+                        if playerHero.isInRange(uu.getPos(), PASSIVE_HEALING_RANGE_FN.run(lvl).toReal())
+                            uu.subMana(1.)
+                            playerHero.addHP(0.01 * HEALTH_PER_MANA_PCT_FN.run(lvl) * playerHero.getMaxHP())
+                            let fx = addEffect(Abilities.healTarget, playerHero, "origin")
+                            doAfter(1.) ->
+                                fx.destr()
+
+    EventListener.add(EVENT_PLAYER_UNIT_DEATH) ->
+        let ku = GetKillingUnit()
+        let du = GetTriggerUnit()
+
+        if not du.isType(UNIT_TYPE_STRUCTURE) and collectorPlayers.containsUnit(ku) and ku.hasAbility(ID_COLLECTOR)
+            ku.tryAddCollectorMana(MANA_PER_DEATH)

@@ -118,6 +118,7 @@ enum EventId
     StatSnapshot
     PlayerLeave
     GetItem
+    SanctumDeath
 
 
 constant GAME_NAME = "Chlorine/chlorine-stats-"
@@ -153,6 +154,10 @@ public function player.eventIdentify()
 
 public function player.eventTowerDeath()
     serializeEvent(EventId.TowerDeath, "p" + this.getId().toString())
+
+
+public function player.eventSanctumDeath()
+    serializeEvent(EventId.SanctumDeath, "p" + this.getId().toString())
 
 
 public function player.eventTeamWin()

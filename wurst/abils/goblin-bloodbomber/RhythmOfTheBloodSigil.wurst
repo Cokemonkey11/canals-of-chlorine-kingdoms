@@ -1,0 +1,236 @@
+package RhythmOfTheBloodSigil
+
+import Abilities
+import ClosureEvents
+import ClosureForGroups
+import ClosureTimers
+import DamageEvent
+import HashMap
+import LinkedListModule
+import Reference
+import Simulate3dSound
+import SoundUtils
+import TerrainUtils
+
+import AbilityTooltipGenerator
+
+import CodeDamage
+import Flash
+
+
+public constant ID_RHYTHM_OF_THE_BLOOD_SIGIL = compiletime(ABIL_ID_GEN.next())
+
+constant IntLevelClosure DURATION_FN = lvl -> 3 + 1 * lvl
+
+constant IntLevelClosure COOLDOWN_FN = lvl -> 150 - 30 * lvl
+
+constant IntLevelClosure MOVESPEED_FN = lvl -> 500 + 100 * lvl
+
+constant IntLevelClosure BONUS_DAMAGE_HEALTH_PCT_FN = lvl -> 1 + lvl
+
+constant IntLevelClosure MANA_COST_FN = lvl -> 100
+
+constant ATTACK_RATE = 3
+
+constant CLICK_SOUND = new SoundDefinition(Sounds.battleNetTick)
+
+constant ATTACK_SOUND = new SoundDefinition(Sounds.guardTowerMissileLaunch2)
+
+constant BIG_ATTACK_SOUND = new SoundDefinition(Sounds.catapultMissile4)
+
+constant MISSILE_SPEED = 1200
+
+
+@compiletime function gen()
+    let tgen = new AbilityTooltipGenerator(
+        "Invokes the sigil of blood, which grants a powerful, automatic attack for a time. "
+        + "During this period, the caster moves at a blinding speed and cannot cast abilities or use bloodbombs. "
+        + "Additionally, every third automatic attack deals bonus damage that scales with the target's maximum health."
+    )
+    new ChannelAbilityPreset(ID_RHYTHM_OF_THE_BLOOD_SIGIL, 3, true, tgen)
+    ..setHeroAbility(true)
+    ..registerTooltipGenerator(tgen)
+
+    ..tooltipStartListen()
+    ..setName("Rhythm of the Blood Sigil")
+    ..setLevels(3)
+    ..setRequiredLevel(6)
+    ..presetTargetTypes(Targettype.NONE)
+    ..presetCooldown(lvl -> COOLDOWN_FN.run(lvl).toReal())
+    ..presetManaCost(MANA_COST_FN)
+    ..addTooltipProperty("Duration", DURATION_FN)
+    ..addTooltipProperty("Movement Speed", MOVESPEED_FN)
+    ..addTooltipProperty("Bonus Damage (Every 3rd attack, % of Max Health)", BONUS_DAMAGE_HEALTH_PCT_FN)
+    ..addTooltipProperty("Automatic Attack Speed (per sec)", lvl -> ATTACK_RATE)
+    ..tooltipStopListen(true)
+
+    ..presetButtonPosNormal(3, 2)
+    ..presetButtonPosResearch(3, 0)
+    ..presetHotkey("R")
+    ..presetIcon("ReplaceableTextures\\CommandButtons\\BTNBloodSignet.blp")
+    ..presetDurationHero(lvl -> 0.1)
+    ..setLevelSkipRequirement(2)
+
+
+function teardropShape(angle theta) returns vec2
+    // Approximately centered on 0,0; approximately 2x2 in size
+    let a = 1
+    let b = 2.5
+    let x = a * (1 - theta.sin()) * theta.cos()
+    let y = b * theta.sin() - 1
+
+    return vec2(x, y + 3)
+
+
+class RhythmOfTheBloodSigil
+    use LinkedListModule
+
+    unit caster
+    unit currTarget
+    real timeSpent
+    real maxTime
+    int attacksUsed
+    real baseDamage
+    real bonusDamageMaxHealthRatio
+    vec2 lastSmart
+    real dashSpeed
+
+    static constant BASE_DAMAGE_MAP = new HashMap<unit, real>()
+
+    static function getBaseDamage(unit which) returns real
+        if not RhythmOfTheBloodSigil.BASE_DAMAGE_MAP.has(which)
+            return 100.
+
+        return RhythmOfTheBloodSigil.BASE_DAMAGE_MAP.get(which)
+
+    static function maybeUpdateBaseDamage(unit which, real amount)
+        var base_ = 0.
+
+        if RhythmOfTheBloodSigil.BASE_DAMAGE_MAP.has(which)
+            base_ = RhythmOfTheBloodSigil.BASE_DAMAGE_MAP.get(which)
+
+        if amount > base_
+            RhythmOfTheBloodSigil.BASE_DAMAGE_MAP.put(which, amount)
+
+    static function bestTargetFor(unit which) returns unit // Nullable
+        let bestTarget = new Reference<unit>(null)
+
+        forUnitsInRange(which.getPos(), 600.) uu ->
+            if uu.isEnemyOf(which) and uu.isAlive() and not uu.isType(UNIT_TYPE_STRUCTURE) and not uu.isInvulnerable()
+                if bestTarget.val == null
+                    bestTarget.val = uu
+                else
+                    if bestTarget.val.isType(UNIT_TYPE_HERO) and uu.isType(UNIT_TYPE_HERO) and uu.getHP() < bestTarget.val.getHP()
+                        bestTarget.val = uu
+                    else if not bestTarget.val.isType(UNIT_TYPE_HERO) and uu.isType(UNIT_TYPE_HERO)
+                        bestTarget.val = uu
+
+        return bestTarget.into()
+
+    construct(unit caster)
+        this.caster = caster
+        this.currTarget = null
+        this.timeSpent = 0.
+        this.maxTime = DURATION_FN.run(caster.getAbilityLevel(ID_RHYTHM_OF_THE_BLOOD_SIGIL)).toReal()
+        this.attacksUsed = 0
+        this.baseDamage = RhythmOfTheBloodSigil.getBaseDamage(caster)
+        this.bonusDamageMaxHealthRatio = BONUS_DAMAGE_HEALTH_PCT_FN.run(caster.getAbilityLevel(ID_RHYTHM_OF_THE_BLOOD_SIGIL)).toReal() * 0.01
+        this.lastSmart = caster.getLastSmart()
+        this.dashSpeed = MOVESPEED_FN.run(caster.getAbilityLevel(ID_RHYTHM_OF_THE_BLOOD_SIGIL)).toReal() * ANIMATION_PERIOD
+
+        caster..setAnimation("attack")..setVertexColor(color(255, 0, 0))..setMoveSpeed(0.)..setPropWindow(angle(0.))
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.caster..setVertexColor(COLOR_WHITE)..setMoveSpeed(this.caster.getDefaultMovespeed())..setPropWindow(this.caster.getDefaultPropWindow())
+
+    function tick()
+        this.timeSpent += ANIMATION_PERIOD
+
+        if this.currTarget != null
+            this.caster.setFacing(this.caster.getPos().angleTo(this.currTarget.getPos()))
+
+        this.lastSmart = this.caster.getLastSmart()
+
+        if this.caster.getPos().distanceToSq(this.lastSmart) > 50. * 50.
+            let newPos = this.caster.getPos().moveTowards(this.lastSmart, this.dashSpeed)
+            if newPos.isTerrainWalkable()
+                this.caster.setXY(newPos)
+
+        if not this.timeSpent >= this.maxTime
+            let timePerAttack = 1. / ATTACK_RATE
+            let expectedAttacks = this.timeSpent / timePerAttack
+            if expectedAttacks > this.attacksUsed
+                this.attacksUsed += 1
+                this.currTarget = RhythmOfTheBloodSigil.bestTargetFor(this.caster)
+                if this.currTarget == null
+                    bindSoundToUnit(CLICK_SOUND.play().snd..setPitch(1.05946), this.caster, 50, 1500, 1600)
+                else
+                    if this.attacksUsed % 3 == 0
+                        bindSoundToUnit(BIG_ATTACK_SOUND.play().snd, this.caster, 50, 1500, 1600)
+                        new Missile(this.caster, this.currTarget, this.baseDamage + this.bonusDamageMaxHealthRatio * this.currTarget.getMaxHP())
+                    else
+                        bindSoundToUnit(ATTACK_SOUND.play().snd, this.caster, 50, 1500, 1600)
+                        new Missile(this.caster, this.currTarget, this.baseDamage)
+            return
+
+        destroy this
+
+
+class Missile
+    use LinkedListModule
+
+    unit caster
+    unit target
+    real damage
+    effect fx
+
+    construct(unit caster, unit target, real damage)
+        this.caster = caster
+        this.target = target
+        this.damage = damage
+        this.fx = addEffect(Abilities.lavaSpawnMissile, caster.getPos3Real() + vec3(0., 0., 50.))..setTimeScale(2.)
+
+        if size == 1
+            doPeriodically(ANIMATION_PERIOD) cb ->
+                for inst from staticItr()
+                    inst.tick()
+
+                if size == 0
+                    destroy cb
+
+    ondestroy
+        this.fx..destr()
+
+    function tick()
+        if not this.target.isAlive() or this.target.isInvulnerable()
+            destroy this
+            return
+
+        this.fx.setPos(this.fx.getPos3().moveTowards(this.target.getPos3Real() + vec3(0., 0., 50.), MISSILE_SPEED * ANIMATION_PERIOD))
+
+        if this.fx.getPos().distanceToSq(this.target.getPos()) < 50 * 50
+            this.caster.dealCodeDamage(this.target, this.damage)
+            destroy this
+
+
+init
+    EventListener.onCast(ID_RHYTHM_OF_THE_BLOOD_SIGIL) caster ->
+        new RhythmOfTheBloodSigil(caster)
+
+        for ii = 0 to 10
+            let ang = 0..lerp(2. * PI, ii / 10)
+            flashEffect("CorpseBomb.mdl", caster.getPos() + teardropShape(angle(ang)) * 200.)
+
+    DamageEvent.addListener(2) ->
+        let source = DamageEvent.getSource()
+
+        if source.hasAbility(ID_RHYTHM_OF_THE_BLOOD_SIGIL) and DamageEvent.getType() == DamageType.ATTACK
+            RhythmOfTheBloodSigil.maybeUpdateBaseDamage(source, DamageEvent.getAmount())

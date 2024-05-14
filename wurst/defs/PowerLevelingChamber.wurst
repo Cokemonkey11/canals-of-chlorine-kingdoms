@@ -12,7 +12,7 @@ import UnitAnimations
 import UnitIds
 import UnitObjEditing
 
-import ChooseHero
+import Teams
 
 
 constant ID_GENERATOR = compiletime(UNIT_ID_GEN.next())

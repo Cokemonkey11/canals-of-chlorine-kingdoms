@@ -30,7 +30,8 @@ constant BRAIN_DRILL_ICON = "ReplaceableTextures\\CommandButtons\\BTNFireAxe.blp
 @compiletime function gen()
     let tgen = new AbilityTooltipGenerator(
         "Gouges an enemy hero straight through the eyeball, killing them. "
-        + "Fails if interrupted or cast on enemies that are not low on health."
+        + "Fails if channeling is interrupted. "
+        + "Also fails if cast on enemies that are not low enough on health."
     )
     new ChannelAbilityPreset(ID_BRAIN_DRILL, 3, true, tgen)
     ..setHeroAbility(true)

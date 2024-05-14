@@ -104,12 +104,12 @@ class Dunk
             addEffect(Abilities.warStompCaster, this.caster.getPos())..setAlpha(0)..destr()
 
             let frc = CreateForce()
-            let owner = this.caster.getOwner()..cameraSetTargetNoise(2., 0.25 * 2.)
+            let owner = this.caster.getOwner()..cameraSetTargetNoise(2., 0.25 * 3.)
 
             forUnitsInRange(this.caster.getPos(), DAMAGE_RADIUS) uu ->
                 if uu.isEnemyOf(this.caster) and uu.isAlive() and not uu.isType(UNIT_TYPE_STRUCTURE)
                     frc.addPlayer(uu.getOwner())
-                    uu.getOwner()..cameraSetTargetNoise(2., 0.25 * 6.)
+                    uu.getOwner()..cameraSetTargetNoise(2., 0.25 * 8.)
                     this.caster.dealCodeDamage(uu, this.damage)
                     uu.stun(this.stunDuration)
                     GUTS_SOUND.playOnPoint(uu.getPos3Real())
