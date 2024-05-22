@@ -1,0 +1,253 @@
+[CENTER]
+[TABLE][TR][TD]
+[CENTER]
+[H3][color=#60A600]Canals of Chlorine Kingdoms[/color][/H3]
+[color=#CCAA00][B]A map by Cokemonkey11[/B][/color]
+
+[BOX=Contents]* Introduction
+* Screenshots
+* Heroes
+* Version Control
+* Changelog
+* Credits
+* Contributing
+[/BOX]
+[/CENTER]
+
+[/TD][/TR][TR][TD][H3][color=#CCAA00]Introduction[/color][/H3][/TD][/TR][TR][TD]
+Canals of Chlorine Kingdoms is a MOBA designed from the ground up to reward the most
+skilled team, and to be played in 20-30 minutes -- even in a fair matchup.
+
+Join the battle-net community of playtesters!
+
+https://blizzard.com/invite/wWMvEyMCZnV
+
+[/TD][/TR][TR][TD][H3][color=#CCAA00]Screenshots[/color][/H3][/TD][/TR][TR][TD]
+
+
+[hidden=11 heroes to choose from]
+[img]https://i.imgur.com/wKZhaR5.png[/img]
+[/hidden]
+
+[hidden=Many classic AoS elements are present (creep blocking)]
+[img]https://i.imgur.com/duFVdmv.png[/img]
+[/hidden]
+
+[hidden=Many classic AoS elements are present (last-hitting)]
+[img]https://i.imgur.com/Kl9AzQV.png[/img]
+[/hidden]
+
+[hidden=Many classic AoS elements are present (denying)]
+[img]https://i.imgur.com/Wc4xw2l.png[/img]
+[/hidden]
+
+[hidden=Tower shots can be dodged!]
+[img]https://i.imgur.com/DlQWWfy.png[/img]
+[/hidden]
+
+[hidden=Many hero abilities can be dodged!]
+[img]https://i.imgur.com/YuH7Nmr.png[/img]
+[/hidden]
+
+[hidden=Get closer to the enemy to improve your chances of landing skill-shots]
+[img]https://i.imgur.com/JzXoJqd.png[/img]
+[/hidden]
+
+[hidden=All heroes can flash, as well as channel to recall back to base]
+[img]https://i.imgur.com/192Wqfo.png[/img]
+[/hidden]
+
+[hidden=Ganking provides a significant gold advantage with an extra 5 gold awarded to all assisting players upon kill]
+[img]https://i.imgur.com/kqENLY1.png[/img]
+[/hidden]
+
+[hidden=Rather than a neutral jungle, Chlorine features a power-leveling chamber that turns on at 9m0s]
+[img]https://i.imgur.com/jqQPQ0q.png[/img]
+[/hidden]
+
+[hidden=The Space Cadet features abilities that augment its basic attack]
+[img]https://i.imgur.com/9uI8pXH.png[/img]
+[/hidden]
+
+[hidden=In-depth stats are collected during the game (damage)]
+[img]https://i.imgur.com/j11IiT5.png[/img]
+[/hidden]
+
+[hidden=In-depth stats are collected during the game (gold)]
+[img]https://i.imgur.com/4mRDJ7A.png[/img]
+[/hidden]
+
+[hidden=In-depth stats are collected during the game (hero damage)]
+[img]https://i.imgur.com/DJSXqdQ.png[/img]
+[/hidden]
+
+[/TD][/TR][TR][TD][H3][color=#CCAA00]Heroes[/color][/H3][/TD][/TR][TR][TD]
+
+
+[TABLE]
+[TR]
+[TD][img]https://i.imgur.com/QFkaijW.png[/img][/TD]
+[TD]Space Cadet, Ranged carry, can cast divine shield. Abilities mostly augment basic attack.[/TD]
+[/TR]
+[TR]
+[TD][img]https://i.imgur.com/JccoDDT.png[/img][/TD]
+[TD]Night Howler, Ranged carry, can instagib low-health targets.[/TD]
+[/TR]
+[TR]
+[TD][img]https://i.imgur.com/ZbQGv7t.png[/img][/TD]
+[TD]Headbanger, Ranged carry, can throw long-ranged spears.[/TD]
+[/TR]
+[TR]
+[TD][img]https://i.imgur.com/6g0AWbZ.png[/img][/TD]
+[TD]Goblin Bloodbomber, Ranged carry, can juggle blood bombs to sustain health.[/TD]
+[/TR]
+[TR]
+[TD][img]https://i.imgur.com/weA2TUS.png[/img][/TD]
+[TD]Steel Elemental, Bursty tank, can dash and multi-stomp.[/TD]
+[/TR]
+[TR]
+[TD][img]https://i.imgur.com/hrQloIF.png[/img][/TD]
+[TD]Tauren Gladiator, Bruiser tank, can leap and stun starting at level 1.[/TD]
+[/TR]
+[TR]
+[TD][img]https://i.imgur.com/MSnxTLB.png[/img][/TD]
+[TD]Mongo, Supportive tank, can hook enemies.[/TD]
+[/TR]
+[TR]
+[TD][img]https://i.imgur.com/iY56lGe.png[/img][/TD]
+[TD]Sorcerer, Scaling caster, can multi-cast with abilities that deal scaling damage.[/TD]
+[/TR]
+[TR]
+[TD][img]https://i.imgur.com/iqUZP6v.png[/img][/TD]
+[TD]Molotov Cockatiel, Agile caster, can dash and retreat with some setup.[/TD]
+[/TR]
+[TR]
+[TD][img]https://i.imgur.com/tsrykUH.png[/img][/TD]
+[TD]Void Annihilator, Supportive caster, can teleport and lock down enemies with a skillshot.[/TD]
+[/TR]
+[TR]
+[TD][img]https://i.imgur.com/5QHXx2M.png[/img][/TD]
+[TD]Centaur Worldbender, Disurptive caster, can zone, silence, and levitate enemies.[/TD]
+[/TR]
+[/TABLE]
+
+[/TD][/TR][TR][TD][H3][color=#CCAA00]Version Control[/color][/H3][/TD][/TR][TR][TD]
+
+
+All iterations of this map are maintained in a public git repository at
+[url]https://github.com/Cokemonkey11/canals-of-chlorine-kingdoms/[/url]
+
+[/TD][/TR][TR][TD][H3][color=#CCAA00]Changelog[/color][/H3][/TD][/TR][TR][TD]
+
+
+[color=#ffcc00]0.4.1[/color] [color=#999999]14 May 2024[/color]:
+[list][*] Minor balancing changes
+[/list]
+
+[color=#ffcc00]0.4.0[/color] [color=#999999]14 May 2024[/color]:
+[list][*] New hero, Goblin Bloodbomber
+[*] Minor tweaks to the Centaur Worldbender
+[*] Increased the camera shake of Tauren Gladiator Dunk
+[*] Fixed some unintentionally global sound effects
+[*] Improved the description of Tauren Gladiator's ult, Brain Drill
+[*] Fixed a bug that enabled Ice Blast to hit towers and other structures
+[/list]
+
+[color=#ffcc00]0.3.0[/color] [color=#999999]8 May 2024[/color]:
+[list][*] New hero added - Centaur Worldbender
+[*] Improved the hero selection experience
+[*] Melee heroes are no longer selectable
+[/list]
+
+[color=#ffcc00]0.2.0[/color] [color=#999999]7 May 2024[/color]:
+[list][*] Assists and assist gold added
+[*] Added quests menu with game design information and tips
+[*] Fixed an issue where flash wouldn't disjoint space cadet stun
+[*] Fixed a stacktrace when using black binding
+[*] Adjusted void annihilator ult cooldown and adjusted tauren gladiator seppuku scaling
+[*] Adjusted black binding collision size
+[*] Wallbang can no longer target allied units
+[*] Changed some assets for clarity
+[*] Revive now respawns with 100% mana
+[*] Stats are now dumped to disk at the end of a game; it is possible to generate graphs
+of game stats
+[/list]
+
+[color=#ffcc00]0.1.2[/color] [color=#999999]1 May 2024[/color]:
+[list][*] Minor balancing changes
+[/list]
+
+[hidden=Older Changes][color=#ffcc00]0.1.0[/color] [color=#999999]30 Apr 2024[/color]:
+[list][*] Added a new hero -- Headbanger, carry
+[*] Fixed a number of known bug cases where sounds were played "globally" when they should
+be attached to a unit or point
+[/list]
+
+[color=#ffcc00]0.0.11[/color] [color=#999999]23 Apr 2024[/color]:
+[list][*] Replaced blood mage with arch mage to prevent abuse with phoenix
+[*] Replaced lich with sea witch to avoid the same issue with hover units that cockatiel
+had
+[*] Heroes are now invulnerable for a few seconds when respawning
+[*] Added warning messages when a non-shade tries to pick a hero
+[/list]
+
+[color=#ffcc00]0.0.10[/color] [color=#999999]23 Apr 2024[/color]:
+[list][*] Fixed a critical bug where knockback on a cockataiel would send you to the edge of the
+map
+[*] Reduced night howler attack range and attack buff duration
+[*] Swapped alchemist for pit lord
+[*] Made flash and recall "permanent" abilities to morphing heroes (avatar, etc)
+[*] Immolation can now be cast against invulnerable allied heroes
+[/list]
+
+[color=#ffcc00]0.0.8[/color] [color=#999999]23 Apr 2024[/color]:
+[list][*] Add new heroes - Molotov Cockatiel and Tauren Gladiator
+[*] New abilities for all existing heroes, completing their 4-ability rosters.
+[*] Exp sharing is now calculated when multiple allied heroes observe exp
+[*] Sharing items is no longer allowed
+[*] Leavers heroes are now removed from play rather than at the base
+[*] Added kill notifications when heroes are slain
+[*] Kills are now awarded to the last damaging hero rather than the kingdom, in the case
+that the kingdom takes the last-hit
+[*] Game timer added
+[*] Revive timers added
+[*] Balance changes (Raid Boss now grants +2500 HP, down from 5000; In-base healing
+increased to 4%, up from 2%; Castle HP doubled)
+[*] Bug fixes (Space Cadet's charged blast can no longer stun invulnerable units, Flash
+now disjoints Space Cadet's charged blast)
+[/list]
+
+[color=#ffcc00]0.0.4[/color] [color=#999999]17 Apr 2024[/color]:
+[list][*] Add purchaseable base items
+[*] Add Void Annihilator ability - "Regenerator"
+[*] Add Steel Elemental ability - "Clap"
+[*] Add Night Howler ability - "Finger"
+[*] Add Mongo ability - "Amnesia"
+[*] Add Sorcerer ability - "Ice Blast"
+[*] Fix Exasperation item
+[*] Add Space Cadet ability - "Charged Blast"
+[*] Add Space Cadet ability - "Volley"
+[*] All heroes can now Flash
+[*] Tranche of balance changes and nits
+[/list]
+
+[color=#ffcc00]0.0.3[/color] [color=#999999]Unknown[/color]:
+[list][*] Add Void Annihilator, Steel Elemental, Night Howler, Mongo, Sorcerer, and Space Cadet
+[*] Add expensive items
+[/list]
+
+[color=#ffcc00]0.0.0[/color] [color=#999999]11 Mar 2024[/color]:
+[list][*] Initial playtest using melee heroes.
+[/list]
+
+[/hidden][/TD][/TR][TR][TD][H3][color=#CCAA00]Credits[/color][/H3][/TD][/TR][TR][TD]
+peq, Frotty, Matro, lep, Petr, Overkane, DiscoOrc, Jaccouille, Footman16, Krakena,
+I1337h4x0RI, WaterKnight, looking_for_help, Blizzard Entertainment, hiveworkshop.com,
+Dionesiist, SGT Phill, Black_Stan, The D3ath, Deolrin, Norinrad, CRAZYRUSSIAN, Marcos DAB,
+KelThuzad
+
+[/TD][/TR][TR][TD][H3][color=#CCAA00]Contributing[/color][/H3][/TD][/TR][TR][TD]
+This map is fully open source, but I am not currently accepting pull requests.
+
+[/TD][/TR][/TABLE]
+[/CENTER]
