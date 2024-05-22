@@ -1,0 +1,14 @@
+function PreloadFiles takes nothing returns nothing
+
+	call PreloadStart()
+	call Preload( "")
+//v0PT02p2,Cokemonkey11#1442PT3S1p2,Space CadetPT3S8Starter CircletPT7S8Natural ForcePT7S8DecimatorPT8S8Holy TrinityPT8S8WindrunnerPT9S8ShoesPT10S8HatPT30S5p0,0,0p1,0,0p2,0,0p3,0,0p4,0,0p5,0,0p6,0,0p7,0" )
+	call Preload( "")
+//,0p8,0,0p9,0,0PT1M0S6p2,0,0,0,0PT1M0S5p0,0,0p1,0,0p2,0,0p3,0,0p4,0,0p5,0,0p6,0,0p7,0,0p8,0,0p9,0,0PT1M30S5p0,0,0p1,0,0p2,2525,0p3,0,0p4,0,0p5,0,0p6,0,0p7,0,0p8,0,0p9,0,0PT1M34S4p1PT1M49S4p1PT2M0S6p2,0" )
+	call Preload( "")
+//,0,0,12PT2M0S5p0,0,0p1,0,0p2,7213,0p3,0,0p4,0,0p5,0,0p6,0,0p7,0,0p8,0,0p9,0,0PT2M7S4p1PT2M30S5p0,0,0p1,0,0p2,15021,0p3,0,0p4,0,0p5,0,0p6,0,0p7,0,0p8,0,0p9,0,0PT2M34S3p0" )
+	call PreloadEnd( 0.0 )
+
+endfunction
+
+
