@@ -2,23 +2,48 @@ package Bind
 
 import Abilities
 import ClosureTimers
+import HashMap
 import HashSet
 
 
-constant BIND_MAP = new HashSet<unit>()
+constant BIND_MAP = new HashMap<unit, HashSet<int>>()
+
+constant BIND_KEY_UNKNOWN = 0
 
 
 /**
     TOOD: make multi-instanceable.
  */
+@Deprecated
 public function unit.bind(real duration)
+    this.bind(duration, BIND_KEY_UNKNOWN)
+
+
+public function unit.markBinded(int key)
+    if not BIND_MAP.has(this)
+        BIND_MAP.put(this, new HashSet<int>())
+    BIND_MAP.get(this).add(key)
+
+
+public function unit.markUnbinded(int key)
+    let set_ = BIND_MAP.get(this)
+    set_.remove(key)
+
+    if set_.isEmpty()
+        destroy set_
+        BIND_MAP.remove(this)
+
+
+public function unit.bind(real duration, int key)
     let fx = addEffect(Abilities.roots1, this, "origin")..setScale(0.8)..setTimeScale(3.)
     this..setMoveSpeed(0.)..setPropWindow(angle(0.))
-    BIND_MAP.add(this)
+    this.markBinded(key)
+
+    let uu = this
+
     doAfter(duration) ->
         fx.destr()
-        this..setMoveSpeed(this.getDefaultMovespeed())..setPropWindow(this.getDefaultPropWindow())
-        BIND_MAP.remove(this)
+        uu..setMoveSpeed(uu.getDefaultMovespeed())..setPropWindow(uu.getDefaultPropWindow())..markUnbinded(key)
 
 
 public function unit.isBinded() returns bool

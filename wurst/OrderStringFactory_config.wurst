@@ -1,0 +1,14 @@
+package OrderStringFactory_config
+
+
+@config function isOrderBanned(string _order) returns boolean
+    return (
+        _order == "berserk"
+        or _order == "windwalk"
+        or _order == "soulburn"
+        or _order == "breathoffire"
+        or _order == "firebolt"
+        or _order == "thunderclap"
+        or _order == "stomp"
+        or _order == "divineshield"
+    )

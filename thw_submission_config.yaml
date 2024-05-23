@@ -67,9 +67,20 @@ icon_table:
       uri: https://rimgo.pussthecat.org/5QHXx2M.png
 
 changelog:
+  - version: 0.4.2
+    date: 23 May 2024
+    changes:
+      - Improved the predictability of bloobomb catching
+      - Binded bloodbombers can no longer dash using rhythm of the blood sigil
+      - Fixed bugs where Rhythm of the Blood Sigil and Flash didn't respect Telekenesis
+      - Fixed a bug where some order IDs would unpredictably have a collision depending on the map version
+      - Fixed another instance of an unintentionally "global" sound effect
+      - Improved the visual clarity of Collector mana collection
+      - Improved the visual clarity of Telekenesis floating rocks
   - version: 0.4.1
     date: 14 May 2024
     changes:
+      - Map released on hiveworkshop!
       - Minor balancing changes
   - version: 0.4.0
     date: 14 May 2024

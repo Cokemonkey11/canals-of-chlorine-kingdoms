@@ -19,6 +19,7 @@ import Time
 
 import AbilityTooltipGenerator
 
+import Bind
 import CodeDamage
 // import RainOfEarth
 import VecExtensions
@@ -49,11 +50,13 @@ constant TELEKENETIC_UNITS = new HashSet<unit>()
 constant TELEKENESIS_TARGET_HEROS = new IterableMap<unit, TelekenesisUnit>()
 constant TELEKENESIS_TARGET_UNITS = new IterableMap<unit, TelekenesisUnit>()
 constant TELEKENESIS_TARGET_ROCKS = new IterableMap<unit, TelekenesisProjectile>()
-// TODO: make it use rain of fire too
+// TODO: make it use rain of earth too
 
 constant DAMAGE_RADIUS = 125.
 
 constant LEVITATING_FLY_HEIGHT = 300.
+
+constant BIND_KEY_TELEKENESIS = 'btel'
 
 
 @compiletime function gen()
@@ -112,7 +115,7 @@ class TelekenesisUnit
 
         (caster.isType(UNIT_TYPE_HERO) ? TELEKENESIS_TARGET_HEROS : TELEKENESIS_TARGET_UNITS).put(target, this)
 
-        target..setPropWindow(0..asAngleDegrees())..setMoveSpeed(0.)
+        target..setPropWindow(0..asAngleDegrees())..setMoveSpeed(0.)..markBinded(BIND_KEY_TELEKENESIS)
 
         if target.addAbility(HEIGHT_ENABLER)
             target.removeAbility(HEIGHT_ENABLER)
@@ -127,6 +130,7 @@ class TelekenesisUnit
 
     ondestroy
         this.fx.destr()
+        this.target.markUnbinded(BIND_KEY_TELEKENESIS)
         TELEKENESIS_TARGET_HEROS.remove(this.target)
         TELEKENESIS_TARGET_UNITS.remove(this.target)
         if not this.thrown
@@ -151,6 +155,7 @@ class TelekenesisProjectile
     real timeSpent
     bool thrown
     effect fx
+    effect fx2
 
     construct(unit caster)
         this.dummy = DummyRecycler.get(caster.getPos().polarOffset(GetRandomReal(0., 360.).asAngleDegrees(), GetRandomReal(100., 450.)), 0..asAngleDegrees())..setFlyHeight(0., 0.)
@@ -158,6 +163,7 @@ class TelekenesisProjectile
         this.timeSpent = 0.
         this.thrown = false
         this.fx = addEffect(Doodads.outland_FloatingChunks0, this.dummy, "origin")..setTimeScale(0.1)..setScale(0.25)
+        this.fx2 = addEffect("GeneralHeroGlow.mdl", this.dummy, "origin")..setColorByPlayer(caster.getOwner())
 
         TELEKENESIS_TARGET_ROCKS.put(this.dummy, this)
 
@@ -175,9 +181,11 @@ class TelekenesisProjectile
             Knockback3.setVel(this.dummy, 0., 0..asAngleDegrees(), 0..asAngleDegrees())
             let dummy = this.dummy
             let fx = this.fx
+            let fx2 = this.fx2
             doAfter(1.) ->
                 DummyRecycler.recycle(dummy)
                 fx.destr()
+                fx2.destr()
 
 
     function tick()

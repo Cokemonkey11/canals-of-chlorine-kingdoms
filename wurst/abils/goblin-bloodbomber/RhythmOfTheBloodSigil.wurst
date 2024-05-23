@@ -1,6 +1,7 @@
 package RhythmOfTheBloodSigil
 
 import Abilities
+import Bind
 import ClosureEvents
 import ClosureForGroups
 import ClosureTimers
@@ -161,7 +162,7 @@ class RhythmOfTheBloodSigil
 
         if this.caster.getPos().distanceToSq(this.lastSmart) > 50. * 50.
             let newPos = this.caster.getPos().moveTowards(this.lastSmart, this.dashSpeed)
-            if newPos.isTerrainWalkable()
+            if newPos.isTerrainWalkable() and not this.caster.isBinded()
                 this.caster.setXY(newPos)
 
         if not this.timeSpent >= this.maxTime

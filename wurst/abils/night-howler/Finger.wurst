@@ -4,6 +4,7 @@ import ClosureEvents
 import ClosureTimers
 import DamageEvent
 import Objects
+import Simulate3dSound
 import SoundUtils
 import StandardTextTags
 
@@ -61,7 +62,7 @@ init
                 if not dying_unit.isType(UNIT_TYPE_HERO) and not dying_unit.isType(UNIT_TYPE_STRUCTURE)
                     dying_unit.setExploded(true)
 
-                BLAST_SOUND.playOnPoint(dying_unit.getPos3Real()).snd.setVolume(127)
+                bindSoundToPoint(BLAST_SOUND.play().snd..setVolume(127), dying_unit.getX(), dying_unit.getY(), 50, 1500, 1600)
 
                 let ang = angle(GetRandomReal(0., 2. * PI))
                 addEffect(Objects.humanLargeDeathExplode, dying_unit.getPos())..setYaw(ang)..setRoll(angle(PI / 8.))..destr()

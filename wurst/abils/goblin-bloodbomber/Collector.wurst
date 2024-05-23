@@ -76,7 +76,7 @@ constant IntLevelClosure HEALTH_PER_MANA_PCT_FN = lvl -> lvl
 constant collectorPlayers = CreateForce()
 
 
-public function unit.tryAddCollectorMana(int manaAmount)
+public function unit.tryAddCollectorMana(int manaAmount, vec2 deathPos)
     let foundUnit = new Reference<unit>(null)
     let bestRange = new Reference<real>(RANGE_FOR_COLLECT.toReal())
 
@@ -91,8 +91,14 @@ public function unit.tryAddCollectorMana(int manaAmount)
 
     let found = foundUnit.into()
     if found != null
+        let fx = addEffect(Abilities.zigguratMissile, deathPos.withTerrainZ(100.))..setScale(0.6)
         found.addMana(manaAmount.toReal())
         flashEffect(Abilities.manaFlareTarget, found.getPos3Real() + vec3(0., 0., 120.))
+
+        nullTimer() ->
+            fx.setPos(found.getPos3Real() + vec3(0., 0., 30.))
+            nullTimer() ->
+                fx.destr()
 
 
 init
@@ -120,4 +126,4 @@ init
         let du = GetTriggerUnit()
 
         if not du.isType(UNIT_TYPE_STRUCTURE) and collectorPlayers.containsUnit(ku) and ku.hasAbility(ID_COLLECTOR)
-            ku.tryAddCollectorMana(MANA_PER_DEATH)
+            ku.tryAddCollectorMana(MANA_PER_DEATH, du.getPos())
