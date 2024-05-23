@@ -11,60 +11,60 @@ introduction: |+
   https://blizzard.com/invite/wWMvEyMCZnV
 screenshots:
   - caption: 11 heroes to choose from
-    uri: https://i.imgur.com/wKZhaR5.png
+    uri: https://rimgo.pussthecat.org/wKZhaR5.png
   - caption: Many classic AoS elements are present (creep blocking)
-    uri: https://i.imgur.com/duFVdmv.png
+    uri: https://rimgo.pussthecat.org/duFVdmv.png
   - caption: Many classic AoS elements are present (last-hitting)
-    uri: https://i.imgur.com/Kl9AzQV.png
+    uri: https://rimgo.pussthecat.org/Kl9AzQV.png
   - caption: Many classic AoS elements are present (denying)
-    uri: https://i.imgur.com/Wc4xw2l.png
+    uri: https://rimgo.pussthecat.org/Wc4xw2l.png
   - caption: Tower shots can be dodged!
-    uri: https://i.imgur.com/DlQWWfy.png
+    uri: https://rimgo.pussthecat.org/DlQWWfy.png
   - caption: Many hero abilities can be dodged!
-    uri: https://i.imgur.com/YuH7Nmr.png
+    uri: https://rimgo.pussthecat.org/YuH7Nmr.png
   - caption: Get closer to the enemy to improve your chances of landing skill-shots
-    uri: https://i.imgur.com/JzXoJqd.png
+    uri: https://rimgo.pussthecat.org/JzXoJqd.png
   - caption: All heroes can flash, as well as channel to recall back to base
-    uri: https://i.imgur.com/192Wqfo.png
+    uri: https://rimgo.pussthecat.org/192Wqfo.png
   - caption: Ganking provides a significant gold advantage with an extra 5 gold awarded to all assisting players upon kill
-    uri: https://i.imgur.com/kqENLY1.png
+    uri: https://rimgo.pussthecat.org/kqENLY1.png
   - caption: Rather than a neutral jungle, Chlorine features a power-leveling chamber that turns on at 9m0s
-    uri: https://i.imgur.com/jqQPQ0q.png
+    uri: https://rimgo.pussthecat.org/jqQPQ0q.png
   - caption: The Space Cadet features abilities that augment its basic attack
-    uri: https://i.imgur.com/9uI8pXH.png
+    uri: https://rimgo.pussthecat.org/9uI8pXH.png
   - caption: In-depth stats are collected during the game (damage)
-    uri: https://i.imgur.com/j11IiT5.png
+    uri: https://rimgo.pussthecat.org/j11IiT5.png
   - caption: In-depth stats are collected during the game (gold)
-    uri: https://i.imgur.com/4mRDJ7A.png
+    uri: https://rimgo.pussthecat.org/4mRDJ7A.png
   - caption: In-depth stats are collected during the game (hero damage)
-    uri: https://i.imgur.com/DJSXqdQ.png
+    uri: https://rimgo.pussthecat.org/DJSXqdQ.png
 icon_table:
   title: "Heroes"
   contents:
     - caption: Space Cadet, Ranged carry, can cast divine shield. Abilities mostly augment basic attack.
-      uri: https://i.imgur.com/QFkaijW.png
+      uri: https://rimgo.pussthecat.org/QFkaijW.png
     - caption: Night Howler, Ranged carry, can instagib low-health targets.
-      uri: https://i.imgur.com/JccoDDT.png
+      uri: https://rimgo.pussthecat.org/JccoDDT.png
     - caption: Headbanger, Ranged carry, can throw long-ranged spears.
-      uri: https://i.imgur.com/ZbQGv7t.png
+      uri: https://rimgo.pussthecat.org/ZbQGv7t.png
     - caption: Goblin Bloodbomber, Ranged carry, can juggle blood bombs to sustain health.
-      uri: https://i.imgur.com/6g0AWbZ.png
+      uri: https://rimgo.pussthecat.org/6g0AWbZ.png
 
     - caption: Steel Elemental, Bursty tank, can dash and multi-stomp.
-      uri: https://i.imgur.com/weA2TUS.png
+      uri: https://rimgo.pussthecat.org/weA2TUS.png
     - caption: Tauren Gladiator, Bruiser tank, can leap and stun starting at level 1.
-      uri: https://i.imgur.com/hrQloIF.png
+      uri: https://rimgo.pussthecat.org/hrQloIF.png
     - caption: Mongo, Supportive tank, can hook enemies.
-      uri: https://i.imgur.com/MSnxTLB.png
+      uri: https://rimgo.pussthecat.org/MSnxTLB.png
 
     - caption: Sorcerer, Scaling caster, can multi-cast with abilities that deal scaling damage.
-      uri: https://i.imgur.com/iY56lGe.png
+      uri: https://rimgo.pussthecat.org/iY56lGe.png
     - caption: Molotov Cockatiel, Agile caster, can dash and retreat with some setup.
-      uri: https://i.imgur.com/iqUZP6v.png
+      uri: https://rimgo.pussthecat.org/iqUZP6v.png
     - caption: Void Annihilator, Supportive caster, can teleport and lock down enemies with a skillshot.
-      uri: https://i.imgur.com/tsrykUH.png
+      uri: https://rimgo.pussthecat.org/tsrykUH.png
     - caption: Centaur Worldbender, Disurptive caster, can zone, silence, and levitate enemies.
-      uri: https://i.imgur.com/5QHXx2M.png
+      uri: https://rimgo.pussthecat.org/5QHXx2M.png
 
 changelog:
   - version: 0.4.1
