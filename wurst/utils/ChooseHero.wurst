@@ -122,7 +122,7 @@ function unit.printInfoForPlayer(player forWhom)
 public function onSelectionStatic(unit chooser, unit source)
     let where = forceWest.containsPlayer(chooser.getOwner()) ? players[0].getStartLocation() : players[1].getStartLocation()
     chooser.setPos(where)
-    chooser.getOwner().panCameraToTimed(where, 0.)
+    chooser.getOwner()..panCameraToTimed(where, 0.)
     chooser.getOwner().updateBoardIcon(source.getIcon())
 
     if localPlayer == chooser.getOwner()
@@ -143,6 +143,8 @@ public function onSelectionStatic(unit chooser, unit source)
                 owner.panCameraToTimed(where, 0.)
                 doAfter(3.) ->
                     which.setInvulnerable(false)
+
+    hero.getOwner()..selectSingle(hero)
 
     player_heroes.put(hero.getOwner(), hero)
     hero.setProperName(hero.getOwner().getName(true))

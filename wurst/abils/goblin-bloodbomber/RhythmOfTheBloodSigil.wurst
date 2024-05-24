@@ -7,6 +7,7 @@ import ClosureForGroups
 import ClosureTimers
 import DamageEvent
 import HashMap
+import LinkedList
 import LinkedListModule
 import Reference
 import Simulate3dSound
@@ -226,9 +227,21 @@ init
     EventListener.onCast(ID_RHYTHM_OF_THE_BLOOD_SIGIL) caster ->
         new RhythmOfTheBloodSigil(caster)
 
-        for ii = 0 to 10
-            let ang = 0..lerp(2. * PI, ii / 10)
-            flashEffect("CorpseBomb.mdl", caster.getPos() + teardropShape(angle(ang)) * 200.)
+        let effects = new LinkedList<effect>()
+
+        for ii = 0 to 20
+            let ang = 0..lerp(2. * PI, ii / 20)
+            effects.add(addEffect("CorpseBomb.mdl", caster.getPos() + teardropShape(angle(ang)) * 200.)..setAlpha(127))
+
+        doPeriodicallyTimed(ANIMATION_PERIOD, 2.) (CallbackCounted cb) ->
+            let speed = 400.
+            effects.forEach() fx ->
+                fx.setHeight(fx.getLocalZ())
+                fx.setZ(fx.getLocalZ() + speed * ANIMATION_PERIOD)
+
+            if cb.isLast()
+                effects.forEach(fx -> fx.destr())
+                destroy effects
 
     DamageEvent.addListener(2) ->
         let source = DamageEvent.getSource()

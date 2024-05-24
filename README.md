@@ -4,8 +4,6 @@
 
 102. [ ] 4th set of custom heroes
   - [ ] Breast Master - Summon Breast (11-item spellbook), TLC grants bonus armor and regeneration, Growth grants permanent bonus damage to a friendly unit, Permanence makes a creep permanent
-127. [x] void annihilator ult is too strong, maybe the cooldown is just too low
-135. [x] tauren seppuku sike is overpowered at level 3
 139. [x] sanctum-kill event for stats
 140. [ ] ? NPE when lep used dunk on me
 142. [x] damage stats are messed up by one-hit-KO abils
@@ -13,7 +11,6 @@
 144. [x] increase dunk camera shake
 145. [x] healing wave sound in phoenix is global
 146. [x] check: description on tauren gladiator ult
-148. [x] add a graphical effect to rhythm of blood sigil
 149. [x] blood sigil dashes still work when lifted up by kinesis
 150. [x] can flash while under the effect of kinesis
 151. [x] more effect on Collector mana collection
@@ -21,10 +18,11 @@
 153. [x] bloodbomb circle appears underground when used not on water
 154. [x] color-code the red floating rocks
 155. [x] pain finger and turbo gills seem to have the same order ID
-157. [ ] sike sound is global
-158. [ ] night howler W is global sound
-159. [ ] water shield can't be cast on invuln allies
-
+157. [x] sike sound is global
+158. [x] night howler W is global sound
+159. [x] water shield can't be cast on invuln allies
+160. [x] tauren dunk casting on current location causes permanent stuck
+161. [x] automatically select the hero for the player on camera pan
 
 ## Road to GA (1.0)
 
@@ -33,6 +31,7 @@
 120. [ ] mongo seems weak with W cast animation
 137. [ ] 5th, 6th, 7th, and 8th set of custom heroes
 138. [ ] Evidence-based balance
+162. [ ] Add more detail to hero descriptions
 
 ## Backlog
 

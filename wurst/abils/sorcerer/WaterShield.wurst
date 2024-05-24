@@ -58,7 +58,7 @@ function unit.addShield(real amount, duration until)
     ..presetButtonPosResearch(1, 0)
     ..presetHotkey("W")
     ..presetIcon(Icons.bTNCrushingWave)
-    ..presetTargetsAllowed(lvl -> "friend,ground,vulnerable,self")
+    ..presetTargetsAllowed(lvl -> "friend,ground,self,hero,vulnerable,invulnerable")
     ..presetDisableOtherAbilities((int lvl) -> true)
 
 

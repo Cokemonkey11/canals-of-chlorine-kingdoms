@@ -5,6 +5,7 @@ import BuffIds
 import BuffObjEditing
 import ClosureEvents
 import ClosureTimers
+import Simulate3dSound
 import SoundUtils
 
 import AbilityTooltipGenerator
@@ -71,7 +72,8 @@ init
         BlzSetUnitWeaponRealField(u, UNIT_WEAPON_RF_ATTACK_PROJECTILE_ARC, 1, 0.3)
         addEffect(Abilities.thornsAura, u, "origin").destr()
         let fx = addEffect(Abilities.generalAuraTarget, u, "origin")
-        SHRIEK_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
+
+        bindSoundToUnit(SHRIEK_SOUND.play().snd..setVolume(127), u, 50., 1500., 1600.)
 
         doAfter(DURATION_FUNCTION.run(lvl)) ->
             fx.destr()

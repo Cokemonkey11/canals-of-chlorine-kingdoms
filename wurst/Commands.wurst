@@ -26,10 +26,11 @@ init
         p.print("You can't.".color(COLOR_GOLD))
 
     if isSinglePlayer()
-        addCommand("level") (p, _cmd, _args) ->
+        addCommand("level") (p, _cmd, args) ->
             forUnitsOfPlayer(p) (unit u) ->
                 if u.isType(UNIT_TYPE_HERO)
-                    u.setLevel(u.getLevel() + 1, true)
+                    let amt = args.size() > 0 and args.get(0).toInt() > 0 ? args.get(0).toInt() : u.getLevel() + 1
+                    u.setLevel(amt, true)
 
         addCommand("flash") (p, _cmd, _args) ->
             forUnitsOfPlayer(p) (unit u) ->

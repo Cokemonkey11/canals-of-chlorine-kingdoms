@@ -91,13 +91,13 @@ public function unit.tryAddCollectorMana(int manaAmount, vec2 deathPos)
 
     let found = foundUnit.into()
     if found != null
-        let fx = addEffect(Abilities.zigguratMissile, deathPos.withTerrainZ(100.))..setScale(0.6)
+        let fx = addEffect(Abilities.zigguratMissile, deathPos.withTerrainZ(100.))..setScale(0.6)..setTimeScale(10.)
         found.addMana(manaAmount.toReal())
         flashEffect(Abilities.manaFlareTarget, found.getPos3Real() + vec3(0., 0., 120.))
 
-        nullTimer() ->
+        doAfter(ANIMATION_PERIOD) ->
             fx.setPos(found.getPos3Real() + vec3(0., 0., 30.))
-            nullTimer() ->
+            doAfter(ANIMATION_PERIOD) ->
                 fx.destr()
 
 

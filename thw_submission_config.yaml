@@ -67,6 +67,16 @@ icon_table:
       uri: https://rimgo.pussthecat.org/5QHXx2M.png
 
 changelog:
+  - version: 0.4.3
+    date: 24 May 2024
+    changes:
+      - Fixed a bug where casting Dunk on self would result in being permanently stuck
+      - Improved the predictability of bloobomb catching
+      - Water Shield can now be cast on invulnerable allies
+      - Fixed two more instances of an unintentionally globally-played sound effects
+      - Improved the visual clarity of Collector mana collection
+      - Improved the visual clarity of Rhythm of the Blood Sigil
+      - Addressed a nitpick - after selecting your hero, the spawned hero becomes selected automatically
   - version: 0.4.2
     date: 23 May 2024
     changes:
@@ -196,3 +206,4 @@ credits:
   - CRAZYRUSSIAN
   - Marcos DAB
   - KelThuzad
+  - Remixer

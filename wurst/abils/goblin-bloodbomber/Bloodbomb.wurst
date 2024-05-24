@@ -166,7 +166,7 @@ class BloodbombReset
         this.circleFx = addEffect(UI.target, circlePos)..setScale(CATCH_RADIUS / 50)..setZ(circlePos.getTerrainZ() - 50.)..setTimeScale(0.1)
         this.fxOnDummy = addEffect("CorpseBomb.mdl", this.dummy, "origin")..setScale(0.8)
 
-        Knockback3.add(this.dummy, this.circleFx.getPos(), 1400.)
+        Knockback3.add(this.dummy, this.circleFx.getPos(), 1700.)
 
         if size == 1
             doPeriodically(ANIMATION_PERIOD) cb ->

@@ -4,6 +4,7 @@ import Abilities
 import ClosureEvents
 import ClosureTimers
 import LinkedListModule
+import Simulate3dSound
 import SoundUtils
 import StandardTextTags
 import UnitAnimations
@@ -90,7 +91,9 @@ class SeppukuSike
         if this.durationLeft < 0.
             if this.durationLeft < -REVIVE_DURATION
                 this.caster..setHP(this.lifeToRestore)..setAnimation(UnitAnimations.HeroTaurenChieftain.stand1.idx)
-                SIKE_SOUND.playOnPoint(this.caster.getPos3Real())
+
+                bindSoundToUnit(SIKE_SOUND.play().snd, this.caster, 50., 1500., 1600.)
+
                 flashEffect(Abilities.reincarnationTarget, this.caster.getPos())
                 destroy this
                 return

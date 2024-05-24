@@ -140,8 +140,31 @@ All iterations of this map are maintained in a public git repository at
 [/TD][/TR][TR][TD][H3][color=#CCAA00]Changelog[/color][/H3][/TD][/TR][TR][TD]
 
 
+[color=#ffcc00]0.4.3[/color] [color=#999999]24 May 2024[/color]:
+[list][*] Fixed a bug where casting Dunk on self would result in being permanently stuck
+[*] Improved the predictability of bloobomb catching
+[*] Water Shield can now be cast on invulnerable allies
+[*] Fixed two more instances of an unintentionally globally-played sound effects
+[*] Improved the visual clarity of Collector mana collection
+[*] Improved the visual clarity of Rhythm of the Blood Sigil
+[*] Addressed a nitpick - after selecting your hero, the spawned hero becomes selected
+automatically
+[/list]
+
+[color=#ffcc00]0.4.2[/color] [color=#999999]23 May 2024[/color]:
+[list][*] Improved the predictability of bloobomb catching
+[*] Binded bloodbombers can no longer dash using rhythm of the blood sigil
+[*] Fixed bugs where Rhythm of the Blood Sigil and Flash didn't respect Telekenesis
+[*] Fixed a bug where some order IDs would unpredictably have a collision depending on the
+map version
+[*] Fixed another instance of an unintentionally "global" sound effect
+[*] Improved the visual clarity of Collector mana collection
+[*] Improved the visual clarity of Telekenesis floating rocks
+[/list]
+
 [color=#ffcc00]0.4.1[/color] [color=#999999]14 May 2024[/color]:
-[list][*] Minor balancing changes
+[list][*] Map released on hiveworkshop!
+[*] Minor balancing changes
 [/list]
 
 [color=#ffcc00]0.4.0[/color] [color=#999999]14 May 2024[/color]:
@@ -159,7 +182,7 @@ All iterations of this map are maintained in a public git repository at
 [*] Melee heroes are no longer selectable
 [/list]
 
-[color=#ffcc00]0.2.0[/color] [color=#999999]7 May 2024[/color]:
+[hidden=Older Changes][color=#ffcc00]0.2.0[/color] [color=#999999]7 May 2024[/color]:
 [list][*] Assists and assist gold added
 [*] Added quests menu with game design information and tips
 [*] Fixed an issue where flash wouldn't disjoint space cadet stun
@@ -177,7 +200,7 @@ of game stats
 [list][*] Minor balancing changes
 [/list]
 
-[hidden=Older Changes][color=#ffcc00]0.1.0[/color] [color=#999999]30 Apr 2024[/color]:
+[color=#ffcc00]0.1.0[/color] [color=#999999]30 Apr 2024[/color]:
 [list][*] Added a new hero -- Headbanger, carry
 [*] Fixed a number of known bug cases where sounds were played "globally" when they should
 be attached to a unit or point
@@ -244,7 +267,7 @@ now disjoints Space Cadet's charged blast)
 peq, Frotty, Matro, lep, Petr, Overkane, DiscoOrc, Jaccouille, Footman16, Krakena,
 I1337h4x0RI, WaterKnight, looking_for_help, Blizzard Entertainment, hiveworkshop.com,
 Dionesiist, SGT Phill, Black_Stan, The D3ath, Deolrin, Norinrad, CRAZYRUSSIAN, Marcos DAB,
-KelThuzad
+KelThuzad, Remixer
 
 [/TD][/TR][TR][TD][H3][color=#CCAA00]Contributing[/color][/H3][/TD][/TR][TR][TD]
 This map is fully open source, but I am not currently accepting pull requests.
