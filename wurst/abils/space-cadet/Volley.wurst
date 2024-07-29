@@ -4,6 +4,7 @@ import BuffIds
 import BuffObjEditing
 import ClosureEvents
 import ClosureTimers
+import Simulate3dSound
 import SoundUtils
 import Units
 
@@ -52,8 +53,10 @@ constant MIRROR_SOUND = new SoundDefinition(Sounds.mirrorImage)
 init
     EventListener.onCast(ID_VOLLEY) u ->
         let fx = addEffect(Units.marine, u.getPos())..setAlpha(64)..setYaw(u.getFacingAngle())..playAnimation(ANIM_TYPE_ATTACK, 1.5)..setColorByPlayer(u.getOwner())
-        FRENZY_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
-        MIRROR_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
+
+        bindSoundToUnit(FRENZY_SOUND.play().snd..setVolume(127), u, 50, 1500, 1500)
+        bindSoundToUnit(MIRROR_SOUND.play().snd..setVolume(127), u, 50, 1500, 1500)
+
         let lvl = u.getAbilityLevel(ID_VOLLEY)
 
         doPeriodicallyCounted(ANIMATION_PERIOD, (DURATION.run(lvl) / ANIMATION_PERIOD).toInt()) cb ->
