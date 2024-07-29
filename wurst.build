@@ -6,8 +6,8 @@ dependencies:
 - https://github.com/Cokemonkey11/WurstCommand
 - https://github.com/Cokemonkey11/WurstTempLightning
 buildMapData:
-  name: Canals of Chlorine Kingdoms 0.4.3
-  fileName: (8)canals.of.chlorine.kingdoms.0.4.3
+  name: Canals of Chlorine Kingdoms 0.4.4
+  fileName: (8)canals.chlorine.kingdoms.0.4.4
   author: Cokemonkey11
   scenarioData:
     description: |

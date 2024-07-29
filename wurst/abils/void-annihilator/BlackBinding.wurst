@@ -6,6 +6,7 @@ import ClosureForGroups
 import ClosureTimers
 import LinkedListModule
 import Reference
+import Simulate3dSound
 import SoundUtils
 
 import VoidAnnihilator
@@ -54,8 +55,8 @@ class BlackBinding
                     this.caster.dealCodeDamage(u, damageFn(this.caster.getAbilityLevel(ID_BLACK_BINDING)))
 
                     // Playing a sound twice seems to make it louder.
-                    HIT_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
-                    HIT_SOUND.playOnPoint(u.getPos3Real()).snd.setVolume(127)
+                    bindSoundToUnit(HIT_SOUND.play().snd..setVolume(127), u, 50, 1500, 1500)
+                    bindSoundToUnit(HIT_SOUND.play().snd..setVolume(127), u, 50, 1500, 1500)
 
                     u..bind(4.)
 

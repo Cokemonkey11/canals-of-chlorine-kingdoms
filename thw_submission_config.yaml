@@ -67,6 +67,11 @@ icon_table:
       uri: https://rimgo.pussthecat.org/5QHXx2M.png
 
 changelog:
+  - version: 0.4.4
+    date: 29 July 2024
+    changes:
+      - Fixed a bug where assists would be awarded for not assisting and not awarded for assisting
+      - Fixed two more instances of unintentionally global sound effects
   - version: 0.4.3
     date: 24 May 2024
     changes:

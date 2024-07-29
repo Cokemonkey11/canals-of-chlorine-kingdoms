@@ -48,7 +48,7 @@ public interface Supplier<T>
 
 public function player.forEachAssist(player killer, duration threshold, Supplier<player> closure)
     this.forEachPotentialAssist() (player key, instant value) ->
-        if key != killer and key.isEnemyOf(this) and value.isOlderThan(threshold.ago())
+        if key != killer and key.isEnemyOf(this) and value.isNewerThan(threshold.ago())
             closure.run(key)
 
     destroy closure
