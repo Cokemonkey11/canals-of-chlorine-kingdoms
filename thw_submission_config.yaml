@@ -67,6 +67,24 @@ icon_table:
       uri: https://rimgo.pussthecat.org/5QHXx2M.png
 
 changelog:
+  - version: 0.4.7
+    date: ~
+    changes:
+      - Increased revive timer from (2 + heroLevel) to (1 + 1.5 * heroLevel)
+      - Fixed a bug where exasperation's spell shield would proc but not go on cooldown
+  - version: 0.4.6
+    date: 5 August 2024
+    changes:
+      - Fixed a bug where telekensis would break the world
+      - Re-worked stuns to be multi-instanceable/accurately stackable
+      - Re-worked movement speed modifiers to be multi-instanceable/accurately stackable
+      - Space Cadet Charged Blast is now easier to dodge with flash
+      - Fixed a bug where players could sometimes pick up items owned by other players
+      - Slightly increased the cooldown of Space Cadet's Charged Blast from (8, 7, 6) to (10, 8, 6)
+  - version: 0.4.5
+    date: 1 August 2024
+    changes:
+      - Reworked Telekenesis to be a skillshot with simpler mechanics
   - version: 0.4.4
     date: 29 July 2024
     changes:

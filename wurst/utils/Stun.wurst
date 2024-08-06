@@ -2,23 +2,53 @@ package Stun
 
 import Abilities
 import ClosureTimers
-import HashSet
+import HashMap
+import Reference
+
+import RefCount
 
 
-constant STUN_MAP = new HashSet<unit>()
+constant STUN_MAP = new HashMap<unit, SafeStun>()
 
 
-/**
-    TOOD: make multi-instanceable.
- */
-public function unit.stun(real duration)
-    let fx = addEffect(Abilities.stasisTotemTarget, this, "overhead")
-    this.pause()
-    STUN_MAP.add(this)
-    doAfter(duration) ->
+class SafeStun implements RefCountable<SafeStun>
+    effect fx
+    unit subject
+    Reference<int> ref_
+
+    construct(unit which)
+        assertTrue(not STUN_MAP.has(which))
+
+        which.pause()
+
+        this.subject = which
+        this.fx = addEffect(Abilities.stasisTotemTarget, which, "overhead")
+        this.ref_ = new Reference<int>(0)
+
+        STUN_MAP.put(which, this)
+
+    override function destr()
+        destroy this
+
+    override function get_counter() returns Reference<int>
+        return this.ref_
+
+    override function get_handle() returns RefCountHandle<SafeStun>
+        return new RefCountHandle(this)
+
+    ondestroy
         fx.destr()
-        this.unpause()
-        STUN_MAP.remove(this)
+        this.subject.unpause()
+        STUN_MAP.remove(this.subject)
+
+
+public function unit.stun(real duration)
+    let handle_ = STUN_MAP.has(this)
+        ? STUN_MAP.get(this).get_handle()
+        : new SafeStun(this).get_handle()
+
+    doAfter(duration) ->
+        destroy handle_
 
 
 public function unit.isStunned() returns bool

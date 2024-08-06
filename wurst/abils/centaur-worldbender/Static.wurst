@@ -1,12 +1,12 @@
 package Static
 
-import Abilities
 import ClosureEvents
 import ClosureForGroups
-import ClosureTimers
-import LinkedListModule
+import Time
 
 import AbilityTooltipGenerator
+
+import MoveSpeed
 
 
 public constant ID_STATIC = compiletime(ABIL_ID_GEN.next())
@@ -45,58 +45,9 @@ constant IntLevelClosure MS_FUNCTION = lvl -> 40 + 20 * lvl
     ..setLevelSkipRequirement(2)
 
 
-class Static
-    use LinkedListModule
-
-    unit boosted
-    real duration
-    real totalDuration
-    real ms
-    real totalMs
-
-    construct(unit boosted, real duration, real ms)
-        this.boosted = boosted
-        this.duration = duration
-        this.totalDuration = duration
-        this.ms = 0.
-        this.totalMs = ms
-
-        let fx = addEffect(Abilities.purgeBuffTarget, boosted.getPos3Real() + vec3(0., 0., 100.))..setPitch(180..asAngleDegrees())
-
-        doAfter(1.) ->
-            fx.destr()
-
-        if size == 1
-            doPeriodically(ANIMATION_PERIOD) cb ->
-                for inst from staticItr()
-                    inst.tick()
-
-                if size == 0
-                    destroy cb
-
-    function clearMovespeedBonus()
-        this.boosted.setMoveSpeed(this.boosted.getMoveSpeed() - this.ms)
-        this.ms = 0.
-
-    function setMovespeedBonus()
-        this.ms = 0..lerp(this.totalMs, this.duration / this.totalDuration)
-        this.boosted.setMoveSpeed(this.boosted.getMoveSpeed() + this.ms)
-
-    ondestroy
-        this.clearMovespeedBonus()
-
-    function tick()
-        this.duration -= ANIMATION_PERIOD
-
-        this.clearMovespeedBonus()
-        this.setMovespeedBonus()
-
-        if this.duration <= 0.
-            destroy this
-
 init
     EventListener.onCast(ID_STATIC) caster ->
         let lvl = caster.getAbilityLevel(ID_STATIC)
         forUnitsInRange(caster.getPos(), AOE_FUNCTION.run(lvl).toReal()) uu ->
             if uu.isAllyOf(caster) and uu.isType(UNIT_TYPE_HERO) and uu.isAlive()
-                new Static(uu, DURATION_FUNCTION.run(lvl), MS_FUNCTION.run(lvl).toReal())
+                uu.addMoveSpeedModifierWithLinearDecay(MS_FUNCTION.run(lvl).toReal(), 0., DURATION_FUNCTION.run(lvl).seconds())

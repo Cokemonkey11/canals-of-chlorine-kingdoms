@@ -25,4 +25,4 @@ init
             DamageEvent.setAmount(0.)
             SHIELD_SOUND.playOnPoint(target.getPos3Real()).snd.setVolume(127)
             flashEffect(Abilities.spellShieldCaster, target.getPos())
-            target.setAbilityCooldown(ID_EXASPERATION_SPELL_SHIELD, 1, EXASPERATION_SPELL_SHIELD_COOLDOWN)
+            target.startAbilityCooldown(ID_EXASPERATION_SPELL_SHIELD, EXASPERATION_SPELL_SHIELD_COOLDOWN)

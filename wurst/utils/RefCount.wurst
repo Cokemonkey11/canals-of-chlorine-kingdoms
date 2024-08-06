@@ -1,0 +1,103 @@
+package RefCount
+
+import Reference
+
+
+public interface RefCountable<T>
+    function destr()
+    function get_counter() returns Reference<int>
+    function get_handle() returns RefCountHandle<T>
+
+
+public class RefCountHandle<T>
+    private RefCountable<T> _t
+
+    construct(RefCountable<T> t)
+        this._t = t
+        this._t.get_counter().val += 1
+
+    private construct()
+        skip
+
+    function clone() returns RefCountHandle
+        let handle_ = new RefCountHandle<T>(this._t)
+        handle_._t = this._t
+
+        return handle_
+
+    function get() returns T
+        return this._t castTo int castTo T
+
+    ondestroy
+        this._t.get_counter().val -= 1
+
+        if this._t.get_counter().val == 0
+            this._t.destr()
+
+
+class Test implements RefCountable<Test>
+    private Reference<int> destroyCount
+    private Reference<int> _refCount
+    int nonce
+
+    construct(Reference<int> destroyCount)
+        this.destroyCount = destroyCount
+        this.nonce = GetRandomInt(1, 10000)
+        this._refCount = new Reference(0)
+
+    ondestroy
+        this.destroyCount.val += 1
+        destroy this._refCount
+
+    override function destr()
+        destroy this
+
+    override function get_counter() returns Reference<int>
+        return this._refCount
+
+    override function get_handle() returns RefCountHandle<Test>
+        return new RefCountHandle<Test>(this)
+
+
+@test function multiply_cloned_handles_destroy_source_just_once_when_all_deleted()
+    let destroyCount = new Reference<int>(0)
+
+    let sut = new Test(destroyCount)
+
+    let handle1 = new RefCountHandle<Test>(sut)
+
+    let handle2 = handle1.clone()
+
+    let handle3 = handle2.clone()
+
+    assertTrue(handle3.get().nonce == handle1.get().nonce and handle2.get().nonce == sut.nonce)
+
+    destroy handle1
+    destroy handle2
+
+    assertTrue(destroyCount.val == 0)
+
+    destroy handle3
+
+    assertTrue(destroyCount.val == 1)
+
+
+@test function multiply_referenced_countables_destroy_source_just_once_when_all_deleted()
+    let destroyCount = new Reference<int>(0)
+
+    let sut = new Test(destroyCount)
+
+    let handle1 = sut.get_handle()
+    let handle2 = sut.get_handle()
+    let handle3 = sut.get_handle()
+
+    assertTrue(handle3.get().nonce == handle1.get().nonce and handle2.get().nonce == sut.nonce)
+
+    destroy handle1
+    destroy handle2
+
+    assertTrue(destroyCount.val == 0)
+
+    destroy handle3
+
+    assertTrue(destroyCount.val == 1)

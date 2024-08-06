@@ -10,10 +10,10 @@ import Knockback3
 import LinkedList
 import LinkedListModule
 import StandardTextTags
-import UI
 
 import AbilityTooltipGenerator
 
+import CircleFx
 import CodeDamage
 import Collector
 import Flash
@@ -26,7 +26,7 @@ constant IntLevelClosure DAMAGE_FUNCTION_PCT = lvl -> 25 * lvl
 constant CHARGED_ATTACK_TIMEOUT = 6
 constant MISSILE_SPEED = 2000
 constant DAMAGE_RADIUS = 150
-constant CATCH_RADIUS = 100
+constant CATCH_RADIUS = 100.
 
 constant ATTACHED_BLOODBOMBS = new HashMap<unit, LinkedList<Bloodbomb>>()
 
@@ -163,7 +163,7 @@ class BloodbombReset
         this.caster = caster
         this.dummy = DummyRecycler.get(startPos.toVec2(), angle(0.))..setXYZReal(startPos)
         let circlePos = this.caster.getPos().polarOffset(this.caster.getFacingAngle(), 125.)
-        this.circleFx = addEffect(UI.target, circlePos)..setScale(CATCH_RADIUS / 50)..setZ(circlePos.getTerrainZ() - 50.)..setTimeScale(0.1)
+        this.circleFx = addEffectCircle(circlePos, CATCH_RADIUS)
         this.fxOnDummy = addEffect("CorpseBomb.mdl", this.dummy, "origin")..setScale(0.8)
 
         Knockback3.add(this.dummy, this.circleFx.getPos(), 1700.)

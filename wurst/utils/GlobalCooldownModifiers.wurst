@@ -1,0 +1,33 @@
+package GlobalCooldownModifiers
+
+import ClosureEvents
+import ClosureTimers
+import HashMap
+
+
+var globalCooldownModifier = 1.
+
+
+public function setGlobalCooldownModifier(real ratio)
+    globalCooldownModifier = ratio
+
+
+constant originalCooldowns = new HashMap<string, real>() // "unitId::abilId::level" -> original cooldown
+
+
+init
+    EventListener.add(EVENT_PLAYER_UNIT_SPELL_FINISH) ->
+        if globalCooldownModifier < 0.99
+            let caster = EventData.getTriggerUnit()
+            let abilId = EventData.getSpellAbilityId()
+            let level = caster.getAbilityLevel(abilId)
+
+            let key = caster.getTypeId().toString() + abilId.toString() + level.toString()
+
+            if not originalCooldowns.has(key)
+                originalCooldowns.put(key, BlzGetUnitAbilityCooldown(caster, abilId - 1, level))
+
+            doAfter(2 * ANIMATION_PERIOD) ->
+                // Don't reset the cooldown if it's already been reset e.g. due to caster SimError.
+                if BlzGetUnitAbilityCooldownRemaining(caster, abilId) > 0.1
+                    caster.startAbilityCooldown(abilId, originalCooldowns.get(key) * globalCooldownModifier)
