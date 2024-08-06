@@ -45,7 +45,7 @@ constant CHARGED_BLASTS = new HashMap<unit, ChargedBlast>()
     ..presetTargetTypes(Targettype.NONE)
     ..presetManaCost(_ -> 75)
     ..setName("Charged Blast")
-    ..presetCooldown(lvl -> 9. - (1. * lvl))
+    ..presetCooldown(lvl -> 12. - (2. * lvl))
     ..addTooltipProperty("Damage", DAMAGE_FUNCTION)
     ..addTooltipProperty("Stability Window", lvl -> STABILITY_WINDOW)
     ..addTooltipProperty("Charged Attack Timeout", lvl -> CHARGED_ATTACK_TIMEOUT)
@@ -77,6 +77,7 @@ class ChargedBlast
     bool stable
     maybe_unit_or_point target
     int disjointState
+    vec2 initialTargetPos
 
     construct(unit caster)
         this.caster = caster
@@ -86,6 +87,7 @@ class ChargedBlast
         this.stable = true
         this.target = maybe_unit_or_point(null, ZERO2, true, false)
         this.disjointState = -1
+        this.initialTargetPos = ZERO2
 
         CHARGED_BLASTS.put(caster, this)
 
@@ -124,7 +126,7 @@ class ChargedBlast
             return
 
         if this.target.isUnit and (not this.target.u.isAlive() or this.target.u.getDisjointState() != this.disjointState)
-            this.target = maybe_unit_or_point(null, this.target.u.getPos(), false, true)
+            this.target = maybe_unit_or_point(null, this.initialTargetPos, false, true)
 
         if this.stable and this.timeSpent >= STABILITY_WINDOW
             this.stable = false
@@ -151,3 +153,4 @@ init
                 blast.loosed = true
                 blast.target = maybe_unit_or_point(target, ZERO2, true, true)
                 blast.disjointState = target.getDisjointState()
+                blast.initialTargetPos = target.getPos()

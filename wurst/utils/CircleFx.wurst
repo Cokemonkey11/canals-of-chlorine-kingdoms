@@ -1,0 +1,29 @@
+package CircleFx
+
+import ClosureTimers
+import Time
+import UI
+
+
+/** Creates a circle effect that is automatically destroyed after duration. */
+public function addEffectCircle(vec2 where, real radius, duration duration_) returns effect
+    let fx = addEffectCircle(
+        where,
+        radius
+    )
+
+    doAfter(duration_.seconds) ->
+        fx..setTimeScale(5.)
+        ..destr()
+
+    return fx
+
+
+/** Creates a circle effect. */
+public function addEffectCircle(vec2 where, real radius) returns effect
+    return addEffect(
+        UI.target,
+        where.withTerrainZ(-50.)
+    )
+    ..setScale(radius / 50)
+    ..setTimeScale(0.1)

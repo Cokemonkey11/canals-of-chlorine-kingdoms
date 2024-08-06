@@ -1,0 +1,97 @@
+package MoveSpeed
+
+import Abilities
+import ClosureTimers
+import HashMap
+import HashSet
+import Reference
+import Time
+
+import RefCount
+
+
+constant MOVE_SPEED_MAP = new HashMap<unit, HashSet<SafeMoveSpeed>>()
+constant BASE_MOVEMENT_SPEEDS = new HashMap<int, real>()
+
+
+function unit.recalculateMoveSpeed()
+    let baseMoveSpeed = BASE_MOVEMENT_SPEEDS.get(this.getTypeId())
+    let multiplier = new Reference(0.0)
+    let flatBonus = new Reference(0.0)
+
+    MOVE_SPEED_MAP.get(this).forEach() (SafeMoveSpeed t) ->
+        multiplier.val += t.multiplier
+        flatBonus.val += t.flatBonus
+
+    this.setMoveSpeed(max(0., (baseMoveSpeed + flatBonus.into()) * (1. + multiplier.into())))
+
+
+class SafeMoveSpeed implements RefCountable<SafeMoveSpeed>
+    effect fx
+    unit subject
+    Reference<int> ref_
+    real flatBonus
+    real multiplier
+
+    construct(unit which, string fxPath, string attachmentPoint, real flatBonus, real multiplier)
+        this.subject = which
+        this.fx = addEffect(fxPath, which, attachmentPoint)
+        this.ref_ = new Reference<int>(0)
+        this.flatBonus = flatBonus
+        this.multiplier = multiplier
+
+        if not MOVE_SPEED_MAP.has(which)
+            // Store the highest seen base movespeed for this unit type, to (1) give some support to movespeed from hero
+            // growth and (2) bias towards moving too fast rather than too slow in case of collision with wc3 abilities.
+            if not BASE_MOVEMENT_SPEEDS.has(which.getTypeId())
+                BASE_MOVEMENT_SPEEDS.put(which.getTypeId(), which.getMoveSpeed()) // Assume that all movespeed modifiers use SafeMoveSpeed.
+            else
+                let curr = BASE_MOVEMENT_SPEEDS.get(which.getTypeId())
+                BASE_MOVEMENT_SPEEDS.put(which.getTypeId(), max(curr, which.getMoveSpeed()))
+
+            MOVE_SPEED_MAP.put(which, new HashSet<SafeMoveSpeed>())
+
+        MOVE_SPEED_MAP.get(which).add(this)
+
+        this.subject.recalculateMoveSpeed()
+
+    override function destr()
+        destroy this
+
+    override function get_counter() returns Reference<int>
+        return this.ref_
+
+    override function get_handle() returns RefCountHandle<SafeMoveSpeed>
+        return new RefCountHandle(this)
+
+    ondestroy
+        fx.destr()
+        MOVE_SPEED_MAP.get(this.subject).remove(this)
+        this.subject.recalculateMoveSpeed()
+
+
+public function unit.addMoveSpeedModifier(real flatBonus, real multiplier) returns RefCountHandle<SafeMoveSpeed>
+    return new SafeMoveSpeed(this, Abilities.unholyFrenzyTarget, "overhead", flatBonus, multiplier).get_handle()
+
+
+public function unit.addMoveSpeedModifier(real flatBonus, real multiplier, real duration)
+    let handle_ = this.addMoveSpeedModifier(flatBonus, multiplier)
+
+    doAfter(duration) ->
+        destroy handle_
+
+
+public function unit.addMoveSpeedModifierWithLinearDecay(real flatBonus, real multiplier, duration duration_)
+    let modifier = new SafeMoveSpeed(this, Abilities.unholyFrenzyTarget, "overhead", flatBonus, multiplier)
+    let handle_ = modifier.get_handle()
+    let t0 = instantNow()
+    let subject = this
+
+    doPeriodicallyTimed(ANIMATION_PERIOD, duration_.seconds) (CallbackCounted cb) ->
+        let alpha = 1 - t0.durationSince().seconds / duration_.seconds
+        modifier.flatBonus = 0..lerp(flatBonus, alpha)
+        modifier.multiplier = 0..lerp(multiplier, alpha)
+        subject.recalculateMoveSpeed()
+
+        if cb.isLast()
+            destroy handle_

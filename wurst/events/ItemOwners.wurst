@@ -1,21 +1,28 @@
 package ItemOwners
 
 import ClosureEvents
+import ClosureTimers
 import HashMap
+import SoundUtils
 
 import Events
 
 
 constant ITEM_MAP = new HashMap<item, player>()
 
+constant ERROR_SOUND = new SoundDefinition(Sounds.error)
+
 
 init
     EventListener.add(EVENT_PLAYER_UNIT_PICKUP_ITEM) ->
         let item_ = EventData.getManipulatedItem()
         let uu = EventData.getManipulatingUnit()
+        let itemPos = item_.getPos()
 
         if ITEM_MAP.has(item_) and ITEM_MAP.get(item_) != uu.getOwner()
-            uu.dropItemPoint(item_, item_.getPos())
+            ERROR_SOUND.playForPlayer(uu.getOwner())
+            doAfter(ANIMATION_PERIOD) ->
+                uu.dropItemPoint(item_, itemPos)
         else
             ITEM_MAP.put(item_, uu.getOwner())
             uu.getOwner().eventItem(item_)

@@ -6,6 +6,7 @@ import AbilityTooltipGenerator
 public constant ID_WAR_STOMP = compiletime(ABIL_ID_GEN.next())
 
 
+// TODO: use SafeMoveSpeed
 @compiletime function gen()
     let tgen = new AbilityTooltipGenerator(Targettype.NONE, "Slams the ground, damaging nearby enemies and stunning them.")
     new AbilityDefinitionTaurenChieftainWarStomp(ID_WAR_STOMP)

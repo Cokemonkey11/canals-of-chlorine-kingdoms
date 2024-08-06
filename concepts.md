@@ -8,3 +8,7 @@ https://old.reddit.com/r/LoLChampConcepts/comments/1mbphb/vee55_the_postapocalyp
 https://personas.forumotion.com/t137-medea-the-tactician
 
 Frost Elemental - Slow Projectile Speed, In-Flight missiles have purge effect, siege tank barrage temporarily, super AS boost while stationary
+
+Archer like quincy - mega volley thing
+
+Dragonball Z type character with different sorts of blasts

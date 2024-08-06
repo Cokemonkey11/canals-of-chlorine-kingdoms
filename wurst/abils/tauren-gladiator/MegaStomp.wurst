@@ -1,13 +1,13 @@
 package MegaStomp
 
 import Abilities
+import CircleFx
 import ClosureEvents
 import ClosureForGroups
 import ClosureTimers
 import Knockback3
 import LinkedListModule
 import UnitAnimations
-import UI
 
 import AbilityTooltipGenerator
 
@@ -65,8 +65,8 @@ class MegaStomp
         this.caster = caster
         this.duration = 0.
         this.orderId = caster.getCurrentOrder()
-        this.innerCircle = addEffect(UI.target, this.caster.getPos3Real())..setScale(MIN_KNOCKBACK_RADIUS / 50)..setTimeScale(0.5)..setZ(this.caster.getPos().getTerrainZ() - 50.)
-        this.outerCircle = addEffect(UI.target, this.caster.getPos3Real())..setScale(MAX_KNOCKBACK_RADIUS / 50)..setTimeScale(0.5)..setZ(this.caster.getPos().getTerrainZ() - 50.)
+        this.innerCircle = addEffectCircle(this.caster.getPos(), MIN_KNOCKBACK_RADIUS)
+        this.outerCircle = addEffectCircle(this.caster.getPos(), MAX_KNOCKBACK_RADIUS)
         this.totalDuration = CHANNEL_DURATION_FUNCTION.run(lvl)
         this.damage = DAMAGE_FUNCTION.run(lvl).toReal()
         this.caster..setAnimation(UnitAnimations.HeroTaurenChieftain.spellSlam.idx)..setTimeScale(0.25)
