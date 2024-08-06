@@ -12,7 +12,8 @@ constant BIND_KEY_UNKNOWN = 0
 
 
 /**
-    TOOD: make multi-instanceable.
+    TODO: Re-write to use RefCount, eliminate bind keys.
+    TODO: Make movement speed modifiers safe.
  */
 @Deprecated
 public function unit.bind(real duration)

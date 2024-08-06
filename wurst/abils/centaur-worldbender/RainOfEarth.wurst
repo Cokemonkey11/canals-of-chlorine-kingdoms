@@ -36,7 +36,7 @@ constant MISSILE_START_HEIGHT = 1000.
 
 constant MISSILE_FALL_DURATION = 0.8
 
-// TODO: use reference-counting to be MUI
+// TODO: Use an instance-level `group` and `instant` and remove this map as it's not MUI.
 constant LAST_HIT_BY_EARTH = new HashMap<unit, instant>()
 
 constant UNIT_TARGETS = new HashMap<unit, tile>()

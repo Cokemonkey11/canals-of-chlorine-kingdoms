@@ -1,7 +1,9 @@
 package Commands
 
+import AbilityIds
 import ClosureForGroups
 import LinkedList
+import OrderIds
 import UnitIds
 
 import WurstCommand
@@ -12,8 +14,10 @@ import CentaurWorldbender
 import Events
 import Flash
 import GameBoard
+import GlobalCooldownModifiers
 import GoblinBloodbomber
 import PowerLevelingChamber
+import Stun
 import Teams
 
 
@@ -32,6 +36,21 @@ init
                 if u.isType(UNIT_TYPE_HERO)
                     let amt = args.size() > 0 and args.get(0).toInt() > 0 ? args.get(0).toInt() : u.getLevel() + 1
                     u.setLevel(amt, true)
+
+        addCommand("stun") (p, _cmd, args) ->
+            forUnitsOfPlayer(p) (unit u) ->
+                if u.isType(UNIT_TYPE_HERO)
+                    let amt = args.size() > 0 and args.get(0).toInt() > 0 ? args.get(0).toInt() : 10
+                    u.stun(amt.toReal())
+
+        addCommand("stormbolt") (p, _cmd, args) ->
+            forUnitsOfPlayer(p) (unit u) ->
+                if u.isType(UNIT_TYPE_HERO)
+                    createUnit(players[1], UnitIds.mountainking, u.getPos().moveTowards(ZERO2, 500.))
+                        ..removeAbility(AbilityIds.attack)
+                        ..addAbility(AbilityIds.stormBolt)
+                        ..setAbilityLevel(AbilityIds.stormBolt, 2)
+                        ..issueTargetOrder("thunderbolt", u)
 
         addCommand("flash") (p, _cmd, _args) ->
             forUnitsOfPlayer(p) (unit u) ->
@@ -60,3 +79,6 @@ init
 
         addCommand("generator") (p, _cmd, _args) ->
             enableGenerator()
+
+        addCommand("cooldown") (p, _cmd, _args) ->
+            setGlobalCooldownModifier(0.01)
