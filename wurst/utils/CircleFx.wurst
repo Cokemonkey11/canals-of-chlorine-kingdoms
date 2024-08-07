@@ -23,7 +23,7 @@ public function addEffectCircle(vec2 where, real radius, duration duration_) ret
 public function addEffectCircle(vec2 where, real radius) returns effect
     return addEffect(
         UI.target,
-        where.withTerrainZ(-50.)
+        where.withTerrainZ()
     )
     ..setScale(radius / 50)
     ..setTimeScale(0.1)

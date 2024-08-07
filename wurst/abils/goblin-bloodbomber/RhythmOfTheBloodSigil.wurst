@@ -22,7 +22,7 @@ import Flash
 
 public constant ID_RHYTHM_OF_THE_BLOOD_SIGIL = compiletime(ABIL_ID_GEN.next())
 
-constant IntLevelClosure DURATION_FN = lvl -> 3 + 1 * lvl
+constant IntLevelClosure DURATION_FN = lvl -> 4
 
 constant IntLevelClosure COOLDOWN_FN = lvl -> 150 - 30 * lvl
 
@@ -166,7 +166,7 @@ class RhythmOfTheBloodSigil
             if newPos.isTerrainWalkable() and not this.caster.isBinded()
                 this.caster.setXY(newPos)
 
-        if not this.timeSpent >= this.maxTime
+        if this.timeSpent < this.maxTime and this.caster.isAlive()
             let timePerAttack = 1. / ATTACK_RATE
             let expectedAttacks = this.timeSpent / timePerAttack
             if expectedAttacks > this.attacksUsed

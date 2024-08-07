@@ -15,7 +15,7 @@ import CodeDamage
 public constant ID_FINALES_FUNKELN = compiletime(ABIL_ID_GEN.next())
 
 constant RADIUS =  250. / 2.
-constant RANGE  = 1300.
+constant RANGE  = 1500.
 constant IntLevelClosure DAMAGE_FUNCTION = (int lvl) -> 200 + lvl * 50
 constant CHANNEL_DURATION = 1.
 
@@ -28,7 +28,7 @@ constant snd2 = new SoundDefinition(Sounds.zigguratMissileHit3, false, true)
 
 @compiletime function gen()
     let tgen = new AbilityTooltipGenerator(
-        "Channels briefly before loosing a powerful energy beam in the target direction. If the channel is interrupted, the cooldown of Finales Funkeln is reset."
+        "Channels briefly before loosing a powerful energy beam in the target direction. If the channel is interrupted, the cooldown is reset."
     )
     new ChannelAbilityPreset(ID_FINALES_FUNKELN, 3, true, tgen)
     ..setHeroAbility(true)

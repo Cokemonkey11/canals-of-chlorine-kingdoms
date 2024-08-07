@@ -67,8 +67,29 @@ icon_table:
       uri: https://rimgo.pussthecat.org/5QHXx2M.png
 
 changelog:
-  - version: 0.4.7
+  - version: 0.4.9
     date: ~
+    changes:
+      - Fixed a bug where Rhythm of the Blood Sigil would continue dealing damage after the caster was dead
+      - Fixed a bug where Bloodbomb catch circle was not visible when not in water
+      - Fixed a bug where Clap could cause permanent incorrectness in a unit's movement-speed
+      - Reduced the sight radius of Collector
+      - Reduced the duration of Rhythm of the Blood Sigil from (4,5,6) to (4)
+      - Improved the visual feedback of Collector
+      - Reduced the initial and maximum mana of collector (10, 200) -> (5, 100)
+      - Increased the mana-per-kill and mana-per-catch for collector (1, 1) -> (2, 2)
+      - Presense of Mind now starts its cooldown after dashing, rather than depending on the time elapsed since its setup
+      - Fixed a visual bug where some dummy effects would have inaccurate/odd hero glow
+  - version: 0.4.8
+    date: 6 August 2024
+    changes:
+      - Increased Decimator health-based damage bonus from 2% to 3%
+      - Increased the max range of Finales Funkeln from 1300 to 1500
+      - Reduced Raid Boss hp bonus from 2500 to 2400
+      - Increased Blood Bomb damage bonus (25,50,75 -> 50,75,100), timeout (6 -> 7), damage radius (150 -> 175), and catch radius (100 -> 125)
+      - Fixed a rare bug where dying would grant two kills/two sets of assists/two deaths/etc
+  - version: 0.4.7
+    date: 6 August 2024
     changes:
       - Increased revive timer from (2 + heroLevel) to (1 + 1.5 * heroLevel)
       - Fixed a bug where exasperation's spell shield would proc but not go on cooldown

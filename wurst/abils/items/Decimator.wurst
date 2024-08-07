@@ -16,7 +16,7 @@ init
         let target = DamageEvent.getTarget()
 
         if attacker.hasItemById(ID_DECIMATOR) and damage > 0. and damage_t == DamageType.ATTACK and not target.isType(UNIT_TYPE_STRUCTURE)
-            let bonus = target.getMaxHP() * .02
+            let bonus = target.getMaxHP() * .03
             DamageEvent.addAmount(bonus)
             let fx = addEffect(Abilities.healTarget, attacker, "origin")
             doAfter(UnitAnimations.HealTarget.birth.duration) ->

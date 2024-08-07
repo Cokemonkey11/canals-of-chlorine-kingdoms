@@ -179,15 +179,19 @@ class TelekenesisProjectile
 
     ondestroy
         TELEKENESIS_TARGET_ROCKS.remove(this.dummy)
+
+        // TODO: this should ideally be owned by the TelekenesisPoint and part of the same condition below
+        let fx2 = this.fx2
+        doAfter(1.) ->
+            fx2.destr()
+
         if not this.thrown
             Knockback3.setVel(this.dummy, 0., 0..asAngleDegrees(), 0..asAngleDegrees())
             let dummy = this.dummy
             let fx = this.fx
-            let fx2 = this.fx2
             doAfter(1.) ->
                 DummyRecycler.recycle(dummy)
                 fx.destr()
-                fx2.destr()
 
 
     function tick()

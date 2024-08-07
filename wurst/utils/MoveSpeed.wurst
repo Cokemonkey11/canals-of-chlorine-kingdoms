@@ -74,10 +74,10 @@ public function unit.addMoveSpeedModifier(real flatBonus, real multiplier) retur
     return new SafeMoveSpeed(this, Abilities.unholyFrenzyTarget, "overhead", flatBonus, multiplier).get_handle()
 
 
-public function unit.addMoveSpeedModifier(real flatBonus, real multiplier, real duration)
+public function unit.addMoveSpeedModifier(real flatBonus, real multiplier, duration duration_)
     let handle_ = this.addMoveSpeedModifier(flatBonus, multiplier)
 
-    doAfter(duration) ->
+    doAfter(duration_.seconds) ->
         destroy handle_
 
 

@@ -3,10 +3,12 @@ package Clap
 import ClosureEvents
 import ClosureForGroups
 import StandardTextTags
+import Time
 
 import AbilityTooltipGenerator
 
 import CodeDamage
+import MoveSpeed
 
 
 public constant ID_CLAP = compiletime(ABIL_ID_GEN.next())
@@ -16,6 +18,7 @@ constant IntLevelClosure DAMAGE_ARMOR_FUNCTION = lvl -> Pow(2, lvl.toReal()).toI
 
 constant DURATION = 3
 constant AOE = 250.
+constant SLOW_FACTOR_PCT = 50
 
 
 @compiletime function gen()
@@ -31,6 +34,7 @@ constant AOE = 250.
     ..addTooltipProperty("Damage", DAMAGE_FUNCTION)
     ..addTooltipProperty("Damage (armor)", DAMAGE_ARMOR_FUNCTION)
     ..addTooltipProperty("Slow Duration", lvl -> DURATION)
+    ..addTooltipProperty("Slow Factor (%)", (int lvl) -> SLOW_FACTOR_PCT)
     ..presetCooldown(lvl -> 16. - 2 * lvl)
     ..presetAreaofEffect((int lvl) -> AOE)
     ..presetManaCost((int lvl) -> 70)
@@ -44,6 +48,7 @@ constant AOE = 250.
     ..presetButtonPosResearch(0, 0)
     ..presetHotkey("Q")
     ..presetIcon(Icons.bTNThunderClap)
+    ..presetMovementSpeedReduction((int lvl) -> 0.)
 
 
 init
@@ -56,3 +61,4 @@ init
         forUnitsInRange(caster.getPos(), AOE) u ->
             if u.isEnemyOf(caster) and u.isAlive() and not u.isInvulnerable() and not u.isType(UNIT_TYPE_STRUCTURE)
                 caster.dealCodeDamage(u, damage)
+                u.addMoveSpeedModifier(0., SLOW_FACTOR_PCT / -100., DURATION.seconds())

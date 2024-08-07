@@ -21,12 +21,12 @@ import Flash
 
 public constant ID_BLOODBOMB = compiletime(ABIL_ID_GEN.next())
 
-constant IntLevelClosure DAMAGE_FUNCTION_PCT = lvl -> 25 * lvl
+constant IntLevelClosure DAMAGE_FUNCTION_PCT = lvl -> 25 + 25 * lvl
 
-constant CHARGED_ATTACK_TIMEOUT = 6
+constant CHARGED_ATTACK_TIMEOUT = 7
 constant MISSILE_SPEED = 2000
-constant DAMAGE_RADIUS = 150
-constant CATCH_RADIUS = 100.
+constant DAMAGE_RADIUS = 175
+constant CATCH_RADIUS = 125.
 
 constant ATTACHED_BLOODBOMBS = new HashMap<unit, LinkedList<Bloodbomb>>()
 

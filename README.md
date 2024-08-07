@@ -7,26 +7,26 @@
 139. [x] sanctum-kill event for stats
 140. [ ] ? NPE when lep used dunk on me
 142. [x] damage stats are messed up by one-hit-KO abils
-143. [ ] stats are messed up and seem to indicate victory happening before tower deaths and last damage verices
+143. [ ] stats are messed up and seem to indicate victory happening before tower deaths and last damage axes
 144. [x] increase dunk camera shake
-145. [x] healing wave sound in phoenix is global
 149. [x] blood sigil dashes still work when lifted up by kinesis
 150. [x] can flash while under the effect of kinesis
-151. [ ] more effect on Collector mana collection
-153. [ ] bloodbomb circle appears underground when used not on water
 157. [x] sike sound is global
-158. [x] night howler W is global sound
 159. [x] water shield can't be cast on invuln allies
-162. [x] replace centaur ult with a skillshot that picks up and throws everyone in an area
-163. [x] dark binding hit sound is global sound
 166. [x] item ownership system does not work, you can spam click and pick them up
 167. [ ] increase stat growth rate
-168. [x] I got stuck after I used Static while Clapped
-169. [x] flash should disjoint space cadet's projectiles not just the stun
-170. [x] new telekenesis seems to throw to the *origin* -- math is wrong
-171. [x] spell shield doesnt seem to go on cooldown
+168. [ ] ! There are many instances of unsafe slows: Knockback3, Bind, Bloodlet, Rhythm of the Blood Sigil, Berzerk and Winch
+     [x] Clap
 172. [x] revive timer too short at level 12
-173. [ ]
+173. [x] it appears that I died twice, opponent got two kills from one ability
+176. [x] sorcerer r longer range and maybe prevent cancel
+177. [x] Decimator seems underpowered
+178. [x] Raid Boss seems overpowered
+179. [x] Presense of Mind feels unfair, maybe dash full speed all the time, reduce creation duration, and go on cooldown after dashing every time
+180. [x] bloodbomber ult kept dealing damage after he was dead
+181. [x] Collector gives too much free vision
+182. [x] yellow bloodbomber has teal team-colored hero glow on Q catchable missile
+184. [ ]
 
 
 ## Road to GA (1.0)
@@ -38,6 +38,9 @@
 138. [ ] Evidence-based balance
 162. [ ] Add more detail to hero descriptions
 163. [ ] Use SafeMoveSpeed with Knockback3
+174. [ ] water shield command card disappearing is not nice experience
+175. [ ] consider giving constant dash speed to presence of mind
+183. [ ] consider: what if night never came back after the first night?
 
 ## Backlog
 

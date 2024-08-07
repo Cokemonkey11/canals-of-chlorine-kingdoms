@@ -103,4 +103,5 @@ init
 
             if cb.isLast()
                 presenceOfMind.caster..removeAbility(ID_PRESENSE_OF_MIND_DASH)..hideAbility(ID_PRESENSE_OF_MIND, false)
+                ..startAbilityCooldown(ID_PRESENSE_OF_MIND, COOLDOWN_FUNCTION.run(presenceOfMind.caster.getAbilityLevel(ID_PRESENSE_OF_MIND)))
                 destroy presenceOfMind

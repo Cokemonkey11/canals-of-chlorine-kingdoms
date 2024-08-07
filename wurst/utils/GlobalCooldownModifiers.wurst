@@ -12,11 +12,12 @@ public function setGlobalCooldownModifier(real ratio)
     globalCooldownModifier = ratio
 
 
-constant originalCooldowns = new HashMap<string, real>() // "unitId::abilId::level" -> original cooldown
+constant originalCooldowns = new HashMap<string, real>() // "unitId" :: "abilId" :: "level" -> original cooldown
 
 
 init
-    EventListener.add(EVENT_PLAYER_UNIT_SPELL_FINISH) ->
+    EventListener.add(EVENT_PLAYER_UNIT_SPELL_ENDCAST) ->
+        Log.debug(globalCooldownModifier.toString())
         if globalCooldownModifier < 0.99
             let caster = EventData.getTriggerUnit()
             let abilId = EventData.getSpellAbilityId()
@@ -28,6 +29,8 @@ init
                 originalCooldowns.put(key, BlzGetUnitAbilityCooldown(caster, abilId - 1, level))
 
             doAfter(2 * ANIMATION_PERIOD) ->
-                // Don't reset the cooldown if it's already been reset e.g. due to caster SimError.
+                // Don't reset the cooldown if it's already been reset e.g. due to caster triggering a SimError.
+                Log.debug(BlzGetUnitAbilityCooldownRemaining(caster, abilId).toString())
                 if BlzGetUnitAbilityCooldownRemaining(caster, abilId) > 0.1
-                    caster.startAbilityCooldown(abilId, originalCooldowns.get(key) * globalCooldownModifier)
+                    Log.debug(max(originalCooldowns.get(key) * globalCooldownModifier).toString())
+                    caster.startAbilityCooldown(abilId, max(ANIMATION_PERIOD, originalCooldowns.get(key) * globalCooldownModifier))

@@ -21,9 +21,9 @@ constant RANGE_FOR_COLLECT = 1500
 
 constant IntLevelClosure PASSIVE_HEALING_RANGE_FN = lvl -> 500 * lvl
 
-constant MANA_PER_DEATH = 1
+constant MANA_PER_DEATH = 2
 
-public constant MANA_PER_CATCH = 1
+public constant MANA_PER_CATCH = 2
 
 constant IntLevelClosure HEALTH_PER_MANA_PCT_FN = lvl -> lvl
 
@@ -35,13 +35,15 @@ constant IntLevelClosure HEALTH_PER_MANA_PCT_FN = lvl -> lvl
     ..setScalingValue(0.5)
     ..setPathingMap("")
     ..setPlacementRequires("")
-    ..setManaMaximum(200)
-    ..setManaInitialAmount(10)
+    ..setManaMaximum(100)
+    ..setManaInitialAmount(5)
     ..setManaRegeneration(0.)
     ..setIconGameInterface(Icons.bTNZiggurat)
     ..setUpgradesTo("")
     ..setUpgradesUsed("")
     ..setNormalAbilities("")
+    ..setSightRadiusDay(200)
+    ..setSightRadiusNight(200)
 
     let tgen = new AbilityTooltipGenerator(
         Targettype.POINT,
@@ -91,13 +93,18 @@ public function unit.tryAddCollectorMana(int manaAmount, vec2 deathPos)
 
     let found = foundUnit.into()
     if found != null
-        let fx = addEffect(Abilities.zigguratMissile, deathPos.withTerrainZ(100.))..setScale(0.6)..setTimeScale(10.)
+        let fxStartPos = deathPos.withTerrainZ(100.)
+        let fxEndPos = found.getPos3Real() + vec3(0., 0., 30.)
+        let fxDelta = fxStartPos.normalizedPointerTo(fxEndPos) * (fxStartPos.distanceTo(fxEndPos) / 50.)
+
+        let fx = addEffect(Abilities.zigguratMissile, fxStartPos)..setScale(0.6)..setTimeScale(10.)
         found.addMana(manaAmount.toReal())
         flashEffect(Abilities.manaFlareTarget, found.getPos3Real() + vec3(0., 0., 120.))
 
-        doAfter(ANIMATION_PERIOD) ->
-            fx.setPos(found.getPos3Real() + vec3(0., 0., 30.))
-            doAfter(ANIMATION_PERIOD) ->
+        doPeriodicallyCounted(ANIMATION_PERIOD, 50) (CallbackCounted cb) ->
+            fx.setPos(fx.getPos3() + fxDelta)
+
+            if cb.isLast()
                 fx.destr()
 
 

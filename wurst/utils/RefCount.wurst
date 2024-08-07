@@ -3,6 +3,7 @@ package RefCount
 import Reference
 
 
+/// TODO: extract to public package
 public interface RefCountable<T>
     function destr()
     function get_counter() returns Reference<int>
