@@ -68,7 +68,7 @@ icon_table:
 
 changelog:
   - version: 0.4.9
-    date: ~
+    date: 7 August 2024
     changes:
       - Fixed a bug where Rhythm of the Blood Sigil would continue dealing damage after the caster was dead
       - Fixed a bug where Bloodbomb catch circle was not visible when not in water

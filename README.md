@@ -4,10 +4,8 @@
 
 102. [ ] 4th set of custom heroes
   - [ ] Breast Master - Summon Breast (11-item spellbook), TLC grants bonus armor and regeneration, Growth grants permanent bonus damage to a friendly unit, Permanence makes a creep permanent, toss tosses a unit which can be a summon or a creep
-139. [x] sanctum-kill event for stats
 140. [ ] ? NPE when lep used dunk on me
 142. [x] damage stats are messed up by one-hit-KO abils
-143. [ ] stats are messed up and seem to indicate victory happening before tower deaths and last damage axes
 144. [x] increase dunk camera shake
 149. [x] blood sigil dashes still work when lifted up by kinesis
 150. [x] can flash while under the effect of kinesis
@@ -16,17 +14,18 @@
 166. [x] item ownership system does not work, you can spam click and pick them up
 167. [ ] increase stat growth rate
 168. [ ] ! There are many instances of unsafe slows: Knockback3, Bind, Bloodlet, Rhythm of the Blood Sigil, Berzerk and Winch
-     [x] Clap
-172. [x] revive timer too short at level 12
-173. [x] it appears that I died twice, opponent got two kills from one ability
-176. [x] sorcerer r longer range and maybe prevent cancel
+     [ ] Bind
 177. [x] Decimator seems underpowered
 178. [x] Raid Boss seems overpowered
 179. [x] Presense of Mind feels unfair, maybe dash full speed all the time, reduce creation duration, and go on cooldown after dashing every time
 180. [x] bloodbomber ult kept dealing damage after he was dead
-181. [x] Collector gives too much free vision
 182. [x] yellow bloodbomber has teal team-colored hero glow on Q catchable missile
-184. [ ]
+184. [ ] The multiboard doesn't have enough space to show 2 digits on revive timer
+185. [ ] It's not very clear how long until revive on the multiboard
+186. [ ] cannon tower splash hurts friendlies ?
+187. [ ] speed reduction from steel golem shows frenzy model overhead
+188. [ ] Rhythm of the blood sigil seems way too strong
+189. [ ]
 
 
 ## Road to GA (1.0)
